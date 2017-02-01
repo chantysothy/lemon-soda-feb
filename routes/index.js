@@ -1,0 +1,1139 @@
+var express = require('express');
+
+var nodeMailer = require('nodemailer');
+var router = express.Router();
+var config = require('../config/config');
+var http = require('http');
+var request = require('request');
+var fbCallback;
+var Twitter = require('node-twitter-api');
+var fbGraph = require('fbgraph');
+var passport = require('passport');
+var FacebookStrategy = require('passport-facebook').Strategy;
+var TwitterStrategy = require('passport-twitter').Strategy;
+
+var fbCode, twitterToken1, twitterToken2, twitterEmail;
+var redirectOptions = {
+    successRedirect: '/auth/facebook/callback',
+    failureRedirect: '/auth/facebook/callback'
+};/* GET home page. */
+var userModel = require('../models/user');
+var invitationModel = require('../models/invitation');
+var transporter = nodeMailer.createTransport('smtps://connect@localhost:1337:email123@smtp.zoho.com');
+var enc_secret = new Buffer(config.twitter.consumer_key + ':' + config.twitter.consumer_secret).toString('base64');
+var oauthOptions = {
+    url: 'https://api.twitter.com/oauth2/token', //https://api.twitter.com/oauth/access_token
+    //url: 'https://api.twitter.com/oauth/access_token',
+    headers: { 'Authorization': 'Basic ' + enc_secret, 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+    body: 'grant_type=client_credentials'
+};
+router.get('/auth/instagram/callback', function (req, res) {
+    console.log("Instagram callback : " + JSON.stringify(req.query['#access_token']));
+});
+router.get('/get/booster-profiles', function (req, res) {
+    var callback = getCallback(req);
+    if (callback) {
+        var userDetails = JSON.parse(req.query.userDetails);
+        getBoostingProfileInfo(userDetails, function (data) {
+
+        });//getBoostingProfileInfo(userDetails, function (data) {
+    }//if (callback) {
+}); //router.get('/get/booster-profiles', function (req, res) {
+
+router.get('/get/html', function (req, res) {
+    var callback= getCallback(req);
+    if (callback) {
+        var url = req.query.urlPath;
+        var urlInfo;
+        try {
+            urlInfo = JSON.parse(url);
+        }
+        catch (error) {
+            var serverMessage = { status: 'ERROR', message: error.message }
+            sendMessageToServer(serverMessage, callback, res);
+
+            console.log(error);
+            return;
+        }//try {
+        if (url) {
+            var request = require("request");
+            request({
+                url: urlInfo.uri
+                ,json: true
+            }, function (error, response, body) {
+
+                if (!error && response.statusCode === 200) {
+                    // console.log(body) // Print the json response
+                    var serverMessage = { status: 'SUCCESS', message: "URL read successfully", data: body }
+                    //res.write(data.toString());
+                    //res.end();
+                    sendMessageToServer(serverMessage, callback, res);
+                } else if (error) {
+                    var serverMessage = { status: 'ERROR', message: error.message}
+                    sendMessageToServer(serverMessage, callback, res);
+
+                }//if (!error && response.statusCode === 200) {
+            });
+            //url = JSON.parse(url);
+            //var options = {
+            //    host: urlInfo.host
+            //    , path: urlInfo.path
+            //}
+
+            //var req = http.request(options, function (response) {
+            //    var str = ''
+            //    response.on('data', function (chunk) {
+            //        str += chunk;
+            //    });
+            //    response.on('error', function (error) {
+            //        var serverMessage = { status: 'ERROR', message: error.message }
+            //        sendMessageToServer(serverMessage, callback, res);
+            //    });
+            //    response.on('end', function () {
+            //        var serverMessage = { status: 'SUCCESS', message: 'url successfully read.', data: str.toString() }
+            //        sendMessageToServer(serverMessage, callback, res);
+            //    });
+            //}); //var req = http.request(options, function (response) {
+
+        }//if (url) {
+    }//if (callback) {
+});//router.get('get/html', function (req,res) {
+
+router.get('/signup/invitation', function (req, res) {
+    // get query params
+    var encryptor = require('../utils/encryptor');
+    
+    var callback = getCallback(req);
+    if (callback) { 
+    //validate params
+        var invitation_details = JSON.parse(req.query.invitation_details);
+        var invitationCode = invitation_details.invitation_code;
+        var invitationSchema = new invitationModel();
+        invitationModel.findOne({ '_id': invitationCode }, function (err, data) {
+            if (!err) {
+                // send verified_code param
+                if (data) {
+                    var invitationUsed = data.invitation_used;
+                    var invitedEmail = data.email;
+                    if (invitationUsed) {
+                        message = { status : 'ERROR', message : 'This invitation is invalid.' }
+                        sendMessageToServer(message, callback, res);
+                        return;
+                    } else {
+                        data.invitationUsed = true;
+                        data.save(function (err) {
+                            if (!err) {
+                                var key = invitationCode;// encrypted
+                                message = { status : 'SUCCESS', message : 'This invitation is successfully validated.', 'key' : key }
+                                sendMessageToServer(message, callback, res);
+                                return;
+
+                            } else {
+                                message = { status : 'ERROR', message : 'Unable to update license information.'}
+                                sendMessageToServer(message, callback, res);
+                                return;
+
+                            }//if (!err) { 
+                        });//data.save(function (err) {
+                        //
+
+//                            var key = encryptor.prototype.encrypt(invitationCode);
+                        
+                        // update invitation (data)
+
+                    } //if (invitationUsed) { 
+
+                }//if (data) {
+            } else {
+                message = { status : 'ERROR', message : err.message }
+                sendMessageToServer(message, callback, res);
+                return;
+            } // if (err)
+        }); //var isValid = invitationModel
+
+
+    } 
+
+});
+
+router.get('/signup/invitation/validate', function (req, res) {
+    var callback = getCallback(req);
+    if (callback) {
+        var creds = req.query.creds;
+        if (creds) {
+            var invitation_code = JSON.parse(creds).invitation_code;
+            invitationModel.findById(invitation_code.trim() , function (err, data) {
+                if (err) {
+                    var returnValue = JSON.stringify({ status: 'ERROR', message: "Unable to process your request." });
+                    sendMessageToServer(JSON.parse(returnValue), callback, res);
+                    return;
+                }
+                if (data) {
+                    if (data.verified_code == 'verified') {
+                        var returnValue = { 'status': 'ERROR', message: 'You have provided a used invitation code.'}
+                        sendMessageToServer(returnValue, callback, res);
+                        return;
+
+                    } else {
+                        data.verified_code = 'verified';
+                        data.save(function (err, doc, numRows) {
+                            var newUser = new userModel();
+                            newUser.local.email = data.email;
+                            newUser.local.password = 'nectorr';
+                            newUser.save(function (err, userInfo, numRows) {
+                                var emailText = "Hi there, "
+                                emailText += "\n\n" + "You were successfully registered at localhost:1337"
+                                emailText += "\n\n ";
+                                emailText += 'Your username is - ' + userInfo.local.email + ' .'
+                                emailText += '\n\n';
+                                emailText += 'Your password has been set to - nectorr';
+                                emailText += '\n\n';
+                                emailText += 'You may now login and change your password and profile information. Go, make an impact for your brand on social media for free.'
+                                emailText += '\n\n';
+                                emailText += 'Best Regards,';
+                                emailText += '\n';
+                                emailText += 'Jennifer McClain';
+                                var error = sendEmail(data.email, data.email, emailText);
+                                // return success message 
+
+                                if (error) {
+                                    message = { status: 'ERROR', message: 'Invitation updated to our database, however, we are unable to send email to ' + invitation_details.friendsName }
+                                    sendMessageToServer(message, callback, res);
+                                    return;
+                                }
+
+                                var returnValue = { 'status': 'SUCCESS', message: 'Your invitation was successfully verified. Check your email for login credentials.', data: + JSON.stringify(data) }
+                                sendMessageToServer(returnValue, callback, res);
+                                return;
+                            });
+                        });//data.save(function (err, doc, numRows) {
+                    } //if (data.verified_code == 'verified') { 
+                } else {
+                    var returnValue = JSON.stringify({ status: 'ERROR', message:"invalid invitation." }) ;
+                    sendMessageToServer(JSON.parse(returnValue), callback, res);
+                    return;
+                }//if (data) { 
+            });//invitationModel.findOne({}, function (err, data) {
+        }//if (creds) {
+    } //if (callback) {
+});//router.get('/signup/invitation/validate', function (req, res) { 
+router.get('/login/details', function (req, res) {
+    // get query params
+    var callback = getCallback(req);
+    if (callback) {
+        var loginDetails = req.query.login_details;
+        if (loginDetails) {
+            loginDetails = JSON.parse(loginDetails);
+            var email = loginDetails.user_name;
+            var login = new userModel();
+            if (email) {
+                userModel.findOne({ 'local.email': email }, function (err, data) {
+                    if (data) {
+                        var message = { status: 'SUCCESS', message: 'user details located successfully.', data: JSON.stringify(data) }
+                        sendMessageToServer(message, callback, res);
+                        return;
+
+                    } else {
+                        var message = { status: 'ERROR', message: 'user details not available.', }
+                        sendMessageToServer(message, callback, res);
+                        return;
+                    }
+                    //if (data)
+                }); //userModel.findOne
+            } //else {
+            //    var message = { status : 'ERROR', message : 'Invalid email id recieved by localhost:1337 server.' }
+            //    sendMessageToServer(message, callback, res);
+            //    return;
+            //}// if (email)
+
+        } else {
+            var message = { status: 'ERROR', message: 'Invalid login details recieved.' }
+            sendMessageToServer(message, callback, res);
+            return;
+        } //if (loginDetails) {
+    } //if (callback) {
+    //validate params
+
+});
+router.get('/signup/login', function (req, res) { 
+    // get query params
+    var callback = getCallback(req);
+    if (callback) {
+        var loginDetails = req.query.login_details;
+        if (loginDetails) {
+            loginDetails = JSON.parse(loginDetails);
+            var email = loginDetails.user_name;
+            var password = loginDetails.password;
+            var login = new userModel();
+            if (email) {
+                userModel.findOne({ 'local.email': email }, function (err, data) {
+                    if (data) {
+                        if (data.local.password == password) {
+                            var message = { status : 'SUCCESS', message : 'emali and password validated successfully.' , data: data}
+                            sendMessageToServer(message, callback, res);
+                            return;
+
+                        }
+                        else {
+                            var message = { status : 'ERROR', message : 'Invalid password.' }
+                            sendMessageToServer(message, callback, res);
+                            return;
+                        } //if (data.password == password) { 
+                    } else {
+                        var invitation = new invitationModel();
+                        var condition = { 'email': email };
+                        //invitationModel.findOne(JSON.stringifcondition, function (err, foundInvitation) {
+//                        invitationModel.findOne(JSON.stringify(condition), function (err, foundInvitation) {
+                        invitationModel.findOne(condition, function (err, foundInvitation) {
+                            if (foundInvitation) {
+                                var newUser = new userModel();
+                                newUser.local.email = email;
+                                newUser.local.password = 'nectorr';
+                                newUser.save(function (err) {
+                                    if (err) {
+                                        var message = { status : 'ERROR', message : err.message }
+                                        sendMessageToServer(message, callback, res);
+                                        return;
+                                    } else {
+                                        var message = { status : 'SUCCESS', message : 'Credentials validated successfully' }
+                                        sendMessageToServer(message, callback, res); 
+                                        return;
+
+                                    }//if (err) { 
+                                });
+                            } else {
+                                var message = { status : 'ERROR', message : 'This email is not registered with us' }
+                                sendMessageToServer(message, callback, res);
+                                return;
+                            } //if (foundInvitation) { 
+                        });
+
+                    }//if (data)
+                }); //userModel.findOne
+            } //else {
+            //    var message = { status : 'ERROR', message : 'Invalid email id recieved by localhost:1337 server.' }
+            //    sendMessageToServer(message, callback, res);
+            //    return;
+            //}// if (email)
+
+        } else {
+            var message = { status : 'ERROR', message : 'Invalid login details recieved.' }
+            sendMessageToServer(message, callback, res);
+            return;
+        } //if (loginDetails) {
+    } //if (callback) {
+    //validate params
+
+});
+router.get('/perms/get', function (req, res) {
+    var callback = req.query.callback;
+    if (callback) {
+        var perms_for = req.query.getPermsFor;
+        if (perms_for) {
+            perms_for = JSON.parse(perms_for);
+            email = perms_for.email
+            userModel.findOne({ 'local.email': perms_for.email }, function (err, permsData) {
+                
+                if (err) {
+                    var message = { status : 'ERROR', message : er.message }
+                    sendMessageToServer(message, callback, res);
+                    return;
+                } //if (err) { 
+                
+                if (permsData) {
+                    var permissionData = { perm_email: email, facebook: permsData.facebook._doc.facebook, twitter: permsData.twitter._doc.twitter, linkedIn: permsData.linkedin._doc.linkedIn };//googlePlusUser: permsData.googlePlusUser._doc.googlePlusUser, 
+                    var message = { status: 'SUCCESS', message: 'requested data was found.', 'data': JSON.stringify(permissionData) }
+                    sendMessageToServer(message, callback, res);
+                    return;
+
+                } //if (data) { 
+            });//userModel.findOne({ 'local.email': email }, function (err, data) {
+        } // if (perms_for
+    }//if (callback){
+});//router.get('/perms/get', function (req, res) {
+router.get('/perms/set', function (req, res) {
+    var callback = getCallback(req);
+    if (callback) {
+        var perms_for = JSON.parse(req.query.setPermsFor);
+        if (perms_for) {
+            var email = perms_for.userId;
+            if (email) {
+                userModel.findOne({ 'local.email': email }, function (err, permsData) {
+                    if (err) {
+                        var message = { status : 'ERROR', message : er.message }
+                        sendMessageToServer(message, callback, res);
+                        return;
+                    } //if (err) { 
+                    if (permsData) { 
+                        setPermissions(perms_for, permsData, function (data) {
+                            sendMessageToServer(data, callback, res);
+                        });
+                    } //if (data) {
+                }); //userModel.findOne({ 'local.email': perms_for.email }, function (err, permsData) {    
+            
+            }//if (email)
+        }//if (perms_for)
+    }//if (callback) { 
+});//router.get('/perms/get', function (req, res) 
+
+router.get('/signup/invitation/manage', function (req, res) {
+    var callback = getCallback(req);
+    if (callback) {
+        var invitation_details = JSON.parse(req.query.invitation_details);
+        if (invitation_details) {
+            var invitation = new invitationModel();
+            invitation.firstName = invitation_details.friendsName;
+            invitation.email = invitation_details.email;
+            invitation.invitation_used = false;
+            invitation.invited_by = "System"; 
+            invitation.invitationType = 'Individual';//: String //individual, corporate
+            invitation.verified_code = "not verified";// : String 
+            invitation.invitation_used = false;//: Boolean
+
+            var condition = {"email":  invitation_details.email  };
+            invitationModel.findOne(condition, function (err, data) {
+                // return user exist message
+                if (data) {
+                    var message = { status : 'ERROR', message : 'This email id is already registered with us.' }
+                    sendMessageToServer(message, callback, res);
+                    return;
+                } else {
+                    invitation.save(function (err, data) {
+                        var datas = err;
+                        var invitation_code = data._id.toString();
+                        // send email
+                        var emailText = "Hi there, "
+                        emailText+= "\n\n"+"You have been registered on localhost:1337"
+                        emailText += "\n\n ";
+                        emailText += 'Your invitation code is - ' + invitation_code + ' .'
+                        emailText += '\n\n';
+                        emailText += 'You should register it by clicking the link below.';
+                        emailText += '\n\n';
+                        emailText += 'http://localhost:1337/signup?inv_code=' + invitation_code;
+                        emailText += '\n\n';
+                        emailText += 'Wishing you the best of social media.'
+                        emailText += '\n\n';
+                        emailText += 'Best Regards,';
+                        emailText += '\n';
+                        emailText += 'Jennifer McClain';
+                        var error = sendEmail(invitation_details.friendsName, invitation_details.email, emailText);
+                        // return success message 
+
+                        if (!error) {
+                            message = { status : 'SUCCESS', message : 'An email has been sent to ' + invitation_details.friendsName }
+                            sendMessageToServer(message, callback, res);
+                        } else {
+                            message = { status : 'ERROR', message : 'Invitation updated to our database, however, we are unable to send email to ' + invitation_details.friendsName }
+                            sendMessageToServer(message, callback, res);
+                        }
+                    });
+                }
+            });
+        }
+        else { 
+            // raise invalid request response
+        }
+    } else { 
+        // raise 401
+
+    }//if (callback) 
+
+});
+
+router.get('/auth/facebook',
+    passport.authenticate('facebook', {
+     scope: ['public_profile', 'user_posts', 'manage_pages', 'user_managed_groups', 'user_location'] 
+    , successRedirect : '/auth/facebook/callback/'
+    //successRedirect : '/auth/facebook/readstream,',
+    ,failureRedirect : 'auth/facebook/callback'
+}));
+
+router.get('auth/facebook/callback', function (req, res) {
+    var temp = req.query;
+
+});//router.get('auth / facebook / callback', function (req, res) {
+
+router.get('/profile/save', function (req, res) { 
+    var callback = req.query.callback;
+if (callback) {
+        var smProfileData = req.query.smProfile;
+        
+        if (smProfileData) {
+            var profileData = JSON.parse(smProfileData);//.fbLoginInfo;
+            
+            var fbId = profileData.loginInfo.id;
+            var userName = profileData.loginInfo.name;
+            var smName = profileData.sm_name;
+            var login = new userModel();
+            userModel.findOne({ 'local.email': profileData.registeredEmail }, function (err, data) {
+                if (err) {
+                    var message = { status : 'ERROR', message : err.Message }
+                    sendMessageToServer(message, callback, res);
+                    return;
+
+                }//if (err) {
+                if (data) {
+                    //update profile
+                    switch (smName) {
+                        case 'facebook':
+                            setfbProfile(data, profileData, function (data) {
+                                sendMessageToServer(data, callback, res);
+                            });
+                            break;
+                        case 'twitter':
+                            setTwitterProfileData(data, profileData, function(data) {
+                            });
+                            break;
+                        case 'linkedIn':
+                            setLinkedInProfileData(data, profileData, function (message) {
+                                sendMessageToServer(message, callback, res);
+
+                            });
+                            break;
+                        case 'instagram':
+                            break;
+                    }
+                    
+                } else {
+                    var message = { status : 'ERROR', message : 'Unable to locate your nectorr id.' };
+                    sendMessageToServer(message, callback, res);
+                }//if (data)
+            }); //userModel.findOne({ 'local.email': email }, function (err, data) { 
+        }//if (profileData) { 
+    } //if (callback) { 
+});//router.get('', function (req, res) { 
+
+
+router.get('/facebook/save/user', function (req, res) {
+    var fbUser = require('../models/user').facebook;
+    varfbUserModel = require('../models/facebook').facebookUser;
+    var rtVal = '{"error":';
+    if (!req.query.callback) {
+        res.send(rtVal + "Protocol not supported.");
+        res.end();
+        return;
+    }
+    else {
+        var callback = req.query.callback;
+        var returnValue = saveUser('facebook', req.query.profile);
+        res.send(callback + '(' + returnValue + ')');
+        res.end();
+    }
+});
+
+router.get('/facebook/read/posts', function (req, res) {
+    var rtVal = '{"error":';
+    if (!req.query.callback) {
+        res.send(rtVal+"Protocol not supported.");
+        res.end();
+        return;
+    }
+
+    if (req.query.error) {
+       rtVal += JSON.stringify(req.query.error) + '}';
+        res.send(rtVal);
+        res.end();
+        return;
+    }
+    var callback = req.query.callback
+    var access_code = req.query.code;
+    if (access_code) {
+        var returnValue, clientFeed, userData, fbError;
+        var fbOptions = config.facebookAuth;
+        var scope = { 'scope' : ['email','public_profile', 'user_posts', 'manage_pages', 'user_managed_groups', 'user_location'] }
+        fbGraph.authorize(
+            {
+                'client_id' : fbOptions.client_id
+                , 'client_secret': fbOptions.client_secret
+                , 'redirect_uri' : fbOptions.redirect_uri
+                , 'code': access_code
+            }
+            , function (err, data) {
+                console.log("FB graph ERROR : " + JSON.stringify(err));
+                console.log("FB graph data : " + JSON.stringify(data));
+                //fbAccessCode = data.access_token;
+                fbGraph.setAccessToken(access_code);
+                fbGraph.batch([
+                    {
+                        method: "GET",
+                        relative_url: "me" // Get the current user's profile information 
+                    },
+                    {
+                        method: "GET",
+                        relative_url: "me/feed?limit=20" // Get the first 20 feeds
+                    }
+                ], function (err, batchData) {
+                    if (err) {
+                        res.send(rtVal += JSON.stringify(err));
+                        res.end();
+                        console.log(rtVal + JSON.stringify(err));
+                        rtVal = "";
+                        return
+                    }
+                    
+                    console.log("BATCH DATA: " + batchData);
+                    var data = '{"user_data" :' + batchData[0].body + ',"user_posts":' + batchData[1].body + '}';
+
+                    res.send(callback+"("+data+")");
+                    res.end();
+                    //save data
+
+                    //res.send(batchData);
+                    //res.end();
+                });
+                //fbGraph.get('/me', function (err, data) {
+                //    //fbGraph.get('/feed')
+                //    if (!err) {
+                //        userData = data;
+                //        fbGraph.get('/me/home', {}, function (err, data) {
+                //            if (!err) {
+                //                clientFeed = data.data;
+                //                returnValue = '{"userData":' + JSON.stringify(userData) + '},';
+                //                returnValue += '"userFeed":' + JSON.stringify(clientFeed) + '}'
+                //                res.send(returnValue);
+                //                res.end();
+                //            }
+                //            else {
+                //                console.log("fb/me/home: error" + JSON.stringify(err));
+                //                fbError = err;
+                //            }
+                //        });
+                //    }
+                //    else {
+                //        console.log("fb/me: error" + JSON.stringify(err));
+                //        fbError = err;
+                //    }
+                //});
+                //res.redirect('/auth/facebook/feed?access_token=' + fbAccessCode + "&cid=" + fbOptions.clientID);
+            });
+        if (fbError) {
+            returnValue = getJSON('error', fbError);
+        }
+
+    }
+    else {
+        res.send('{"source":"facebook",' 
+        + '"error": "no access code returned from facebook"' 
+        + '} ');
+        res.end();
+    }
+
+    //res.render('index', { title: 'Angular, Node and Twitter API' });
+});
+
+router.get('/auth/twitter', function (req, res) {
+    var callback = req.query.callback;
+    if (callback) {
+        var twitterAPI = new Twitter({
+            consumerKey: config.twitter.consumer_key
+            , consumerSecret: config.twitter.consumer_secret
+            , callback: config.twitter.redirect_url
+        });//var twitterAPI = new Twitter(
+        twitterAPI.getRequestToken(function (error, requestToken, requestTokenSecret, results) {
+            if (error) {
+                console.log("Error getting OAuth request token : " + error);
+            } else {
+                twitterToken1 = requestToken;
+                twitterToken2 = requestTokenSecret;
+                twitterEmail = req.query.email;
+                var twitterAuthURL = twitterAPI.getAuthUrl(requestToken);
+                var message = { status: "SUCCESS", message: "Get a child window with params in data.", data: twitterAuthURL }
+                var returnValue = callback + '(' + JSON.stringify(message) + ')';
+                res.send(returnValue);
+                res.end();
+            }
+        });//twitterAPIgetRequestToken(function (error, requestToken, requestTokenSecret, results) {
+    }//if (callback){
+}); //router.get('/auth/twitter',
+
+router.get('/auth/twitter/callback', function (req, res) {
+    var a = 1;// for debugger breakpoint. TBR
+    var callback = req.query.callback;
+    var twitterStream = [];
+
+
+    var twitterAPI = new Twitter({
+        consumerKey: config.twitter.consumer_key
+        , consumerSecret: config.twitter.consumer_secret
+        , callback: config.twitter.redirect_url
+    });//var twitterAPI = new Twitter(
+    twitterAPI.getAccessToken(twitterToken1, twitterToken2, req.query.oauth_verifier, function (error, accessToken, accessTokenSecret, results) {
+        if (error) {
+            var message = { status: 'ERROR', message: 'Twitter login error : ' + JSON.stringify(error) };
+            sendMessageToServer(message, callback, res);
+            //console.log(error);
+        } else {
+            //store accessToken and accessTokenSecret somewhere (associated to the user) 
+            var params = { include_entities: false, skip_status: false, include_email : true}
+            twitterAPI.verifyCredentials(accessToken, accessTokenSecret, params, function (error, data, response) {
+                if (error) {
+                    //something was wrong with either accessToken or accessTokenSecret 
+                    var message = { status: 'ERROR', message: 'Twitter verify login error : ' + JSON.stringify(error) };
+                    sendMessageToServer(message, callback, res);
+                    //start over with Step 1 
+                } else {
+                    //accessToken and accessTokenSecret can now be used to make api-calls (not yet implemented) 
+                    //data contains the user-data described in the official Twitter-API-docs 
+                    //you could e.g. display his screen_name 
+                    var condition = { 'local.email': twitterEmail };
+                    userModel.findOne(condition, function (err, foundUser) {
+                        if (err) {
+                            var msg = { status: 'ERROR', message: 'There was an error in locating your twitter information. Please try later.'}
+                            sendMessageToServer(msg, callback, res);
+
+                        } else {
+                            foundUser.twitter.profileInfo = data;
+                            foundUser.save(function (err, user, numRows) {
+                                if (err) {
+                                    var message = { status: 'ERROR', message: 'Twitter login save error : ' + JSON.stringify(error) };
+                                    sendMessageToServer(message, callback, res);
+                                } else {
+                                    console.log(data["screen_name"]);
+                                    var message = { status: 'SUCCESS', message: 'All good at twitter. Proceed to setup. ' };
+                                    sendMessageToServer(message, callback, res);
+                                    return;
+                                }//if (!err) {
+                            }); // foundUser.save
+                                var email = req.query.email;
+                                //getTwitterStream(twitterAPI,email, function (data) {
+                                //    if (!data.status) {
+                                //        twitterStream.push(data);
+                                //    } else {
+                                //        var status = data.status;
+                                //        var length = status.length;
+                                //        if (status.substr(length - 4, length - 1) == 'ALL') {
+                                //            var OEMBED_URL = 'statuses/oembed';
+                                //            for (counter = 0; counter < data.length; counter++) {
+                                //                var params = {
+                                //                    "id": twitterStream[counter].id_str,
+                                //                    "maxwidth": 350,
+                                //                    "hide_thread": true,
+                                //                    "omit_script": true
+                                //                };
+                                //                // request data 
+                                //                twitterAPI.get(OEMBED_URL, params, function (err, data, resp) {
+                                //                    var dataToSend = callback + '(' + data + ')';
+                                //                    res.send(dataToSend);
+                                //                    setTimeout(null, 200);
+
+                                //                });
+
+                                //            }//for (counter = 0; counter < data.length; counter++) {
+                                //            res.end();
+                                //        } else if (data.status == 'ERROR') {
+                                //            var dataToSend = callback + '(' + JSON.stringify(data) + ')';
+                                //            res.send(dataToSend);
+                                //            res.end();
+                                //        }//if (status.substr(length - 4, length - 1) == 'ALL') {
+                                //    }// if (!data.status
+                                //}); //getTwitterStream(email, function (data) {
+                            //} //if (callback) {
+
+                        }//if (err) {
+                    });
+                    res.send("/")
+                    res.end()
+                }
+            });
+        }
+    });
+
+});//router.get('auth/twitter/callback', function (req, res) {
+
+
+router.get('/facebook/post', function (req, res) {
+    res.send({ message: "rendering" });
+    res.end();
+});
+
+function getUserCondition(userType) {
+    var returnValue = null;
+    switch (userType) {
+        case 'facebook':
+            returnValue = 'facebook.id';
+            break;
+        case 'twitter':
+            returnValue = 'twitter.id';
+            break;
+        case 'google':
+            returnValue = 'google.id';
+            break;
+        case 'linkedin':
+            returnValue = 'linkedin.id';
+            break;
+        case 'instagram':
+            returnValue = 'instagram.id';
+            break;
+        default:
+            returnValue = 'local.id';
+    }
+    return returnValue;
+}
+
+function saveUser(userType, userInfo) {
+    var resMsg = {
+        status : "ERROR"
+        , details: ""
+    };
+    var userCondition = getUserCondition(userType);
+    var userProfile = userInfo;
+    if (!(userType) || !(userInfo)) {
+    //throw new Error('Parameters missing for saving user info');
+        resMsg.status = "ERROR";
+        resMsg.details = 'Parameters missing for saving user info';
+        return resMsg;
+    }
+    else {
+        userModel.findOne({ userCondition : userProfile.id }, function (err, user) {
+            if (err) { 
+                return;
+            }
+            if (!user) {
+                userModel.save();
+
+            }
+        });
+    }
+}
+
+function readFBPosts(request, response, code) {
+    var returnValue, clientFeed, userData, fbError;
+    var fbOptions = config.facebookAuth;
+    var scope = { 'scope' : ['public_profile', 'user_posts', 'manage_pages', 'user_managed_groups', 'user_location'] }
+    fbGraph.authorize(
+        {
+            'client_id' : fbOptions.clientID
+            , 'client_secret': fbOptions.clientSecret
+            , 'redirect_uri' : fbOptions.redirect_uri
+            , 'code': code
+        }
+            , function (err, data) {
+            console.log("FB graph ERROR : " + JSON.stringify(err));
+            console.log("FB graph data : " + JSON.stringify(data));
+            fbAccessCode = data.access_token;
+            fbGraph.setAccessToken(fbAccessCode);
+            fbGraph.get('/me', function (err, data) {
+                //fbGraph.get('/feed')
+                if (!err) {
+                    userData = data;
+                    fbGraph.get('/me/home', {}, function (err, data) {
+                        if (!err) {
+                            clientFeed = data.data;
+                            returnValue = '{"userData":' + JSON.stringify(userData) + '},';
+                            returnValue += '"userFeed":' + JSON.stringify(clientFeed) + '}'
+                            res.send(returnValue);
+                            res.end();
+                        }
+                        else {
+                            console.log("fb/me/home: error" + JSON.stringify(err));
+                            fbError = err;
+                        }
+                    });
+                }
+                else {
+                    console.log("fb/me: error" + JSON.stringify(err));
+                    fbError = err;
+                }
+            });
+                //res.redirect('/auth/facebook/feed?access_token=' + fbAccessCode + "&cid=" + fbOptions.clientID);
+        });
+    if (fbError) {
+        returnValue = getJSON('error', fbError);
+    }
+    else {
+        returnValue = '{ "source" : "facebook"' + '"userData" : ' + JSON.Parse(JSON.stringify(userData) + ', "userFeed" : ' + JSON.stringify(clientFeed)) + '}';
+    }
+
+    //return returnValue;
+}
+
+var getCallback = function (req) {
+        return req.query.callback
+}//var getCallback = function (req) { 
+
+var generateVerfiedCode = function(code) {
+    if (code) {
+        var encryptor = require('../utils.encryptor');
+        return encryptor.encrypt(code);
+    }
+}//var generateVerfiedCode = funtion(code){ 
+
+var sendEmail = function (recieverName,recieverEmail, emailText) {
+    var mailOptions = {
+        from: '"Jennifer McClain ??" <connect@localhost:1337>' // sender address 
+        , to: recieverName+','+ recieverEmail // list of receivers 
+        , subject: 'Manage social media  effectively ?' // Subject line 
+        , text: emailText //plaintext body 
+        , html: '' // html body 
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            return error;
+        }
+        console.log('Message sent: ' + info.response);
+    });
+}//var sendEmail = function (senderName, recieverName,recieverEmail, text) {
+
+var sendMessageToServer = function(msg, callback, res) {
+    // msg has to be a valid json object
+    var payload = JSON.stringify(msg);
+    payload = payload.replace(/\\n/g, "\\n")
+        .replace(/\\'/g, "\\'")
+        .replace(/\\"/g, '\\"')
+        .replace(/\\&/g, "\\&")
+        .replace(/\\r/g, "\\r")
+        .replace(/\\t/g, "\\t")
+        .replace(/\\b/g, "\\b")
+        .replace(/\\f/g, "\\f");
+    // remove non-printable and other non-valid JSON chars
+    payload = payload.replace(/[\u0000-\u0019]+/g, "");
+    var response = JSON.stringify(msg);
+    //res.writeHead(200, { 'Content-Type': 'text/plain', 'Content-Length': +response.length + '' });
+
+    var returnValue = callback + '(' + response+ ')';
+    //res.header('content-type', 'application / json' );
+    //res.header('content-length', payload.length);
+    res.send(returnValue);
+    res.end();
+}
+
+var getPermissionData = function (userData,email) {
+    var permsDoc = userData._doc;
+    var returnValue = {'email': email};
+    for (var key in permsDoc) {
+        var type = typeof key;
+        if (key != 'local') { 
+            returnValue[key] = permsDoc[key].perms;
+        }//if (type == 'object') {
+    }//for (var key in userData) {
+    return returnValue;
+}//var getPermissionData = function (userData) { 
+
+var setPermissions = function (perms, dbData, callback) {
+    var sm_name, dataType;
+    if (perms && dbData) {
+        
+        sm_name = perms.sm_name;
+        switch (sm_name) {
+            case 'facebook':
+                setFbLoginData(perms.data, dbData, callback);
+                break;
+            case 'twitter':
+                setTwitterData(perms.data, dbData);
+                break;
+            case 'googlePlusUser':
+                break;
+            case 'linkedin':
+                setLinkedInData(perms.data, dbData);
+                break;
+        } //switch (sm_name) {
+    } //if (perms && data) { 
+}//var setPermissions = function (perms, dbData) { 
+var setLinkedInData = function (permData, dbData) {
+    dbData.linkedin = permData;
+    dbData.save(function (res) {
+    });
+}//var setLinkedInData = function (permData, dbData) {
+var setTwitterData = function (permData, dbData) {
+    if (permData && dbData) {
+        var dataType = permData.type;
+        switch (dataType) {
+            case 'lists_data':
+                dbData.twitter.lists = permData.data;
+                dbData.save(function (res) {
+                });
+                break;
+        }//switch (dataType) {
+    }//if (permData && dbData) {
+}//var setTwitterData = function(permData, dbData){
+
+var setFbLoginData = function (permData, dbData, callback) {
+    if (permData && dbData) {
+        var dataType = permData.type;
+        switch (dataType) {
+            case 'page_data':
+                var pageData = permData.data;
+                setFbPageData(pageData, dbData, function (data) {
+                    var message;
+                    if (data) {
+                        message =
+                            { status: 'ERROR', message: data.message }; 
+                    } else {
+                        message = {
+                            status: 'SUCCESS', message: 'Facebook pages info successfully updated on nectorr.'
+                        }
+                    }
+                    callback(message);
+                });
+                break;
+            case 'perms_data':
+                var permsData = permData.data;
+                setFbAccessPermission(permData, dbData);
+                break;
+            case 'groups_data':
+                dbData.facebook.groupsData = permData;
+                dbData.save(function (res) {
+                    var message;
+                    if (res) {
+                        message = { status: 'ERROR', message: res.error }
+                        //sendMessageToServer(message, callback, res);
+
+                    } else {
+                        message = { status: 'SUCCESS', message: 'Facebook groups info successfully updated on nectorr.'}
+                    }//if (res.error) { 
+                    if (callback) {
+                        callback(message)
+                    }
+                });//dbData.save(function (res) {
+                break; 
+        } //switch (dataType) {
+    } //if (permData && dbData) {
+    
+}//var setFbLoginData = function (permData, dbData) { 
+
+var setFbAccessPermission = function (accessPerm, dbData) {
+    if (!accessPerm || !dbData) return;
+    // split permmission strings from user and db
+    var permsArray = accessPerm.data.split(',');
+    var dbPerms = dbData.facebook.permsData;
+    for (var counter = 0; counter < permsArray.length; counter++) {
+        if (dbPerms) {
+            var index = dbPerms.indexOf(permsArray[counter]);
+            if (index < 0) {
+                dbPerms = dbPerms += ', ' + permsArray[counter];
+            } //if (index < 0) {
+        } else { 
+            // for first time
+            dbData.facebook.permsData = accessPerm.data;
+            break;
+        }//if (dbPerms) { 
+
+    } //for (var counter = 0; counter < permsArray.length; counter++) {
+    dbData.save(function (err, d) {
+        var error = err;
+        var returnValue = d;
+
+    }); //dbData.save(function (d) {
+}//var setFbAccessPermission = function (accessPerm, dbData) { 
+
+var setFbPageData = function (pageData, dbData, callback) {
+    if (!pageData || !dbData) return;
+        dbData.facebook.pageData = pageData;
+        dbData.save(function (data) {
+            var message 
+            if (data) {
+                message = { status: 'ERROR', message: data }
+
+            } else {
+                message = { status: 'SUCCESS', message: 'Facebook pages info successfully updated on nectorr.' }
+            }
+            // return Success message
+            callback(message);
+        });
+
+}//var setFbPageData = function (pageData, dbData) {
+ 
+var setLinkedInProfileData = function (data, profileData, callback) {
+    data.linkedin.profileInfo = profileData;
+    data.save(function (err) {
+        var message 
+        if (err) {
+            message = { status: 'SUCCESS', message: 'Linkedin profile details updated on nectorr.' }
+
+            //sendMessageToServer(message, callback, res);
+            
+        } else {
+            message = { status: 'ERROR', message: 'Unable to update your linkedIn profile info on nectorr.' };
+            //sendMessageToServer(message, callback, res);
+        }
+        if (callback) {
+            callback(message);
+        }
+    });//data.save(function (err) {
+} //var setLinkedInProfileData = function (data, profileData) {
+var setTwitterProfileData = function (data, profileData) {
+    data.twitter.profileInfo = profileData;
+    data.save(function (err) {
+        if (!err) {
+            var message = { status: 'SUCCESS', message: 'Twitter profile details updated in nectorr.' }
+            sendMessageToServer(message, callback, res);
+            return;
+
+        } else {
+
+            var message = { status: 'ERROR', message: 'There was an error in getting your twitter profile information.' };
+            sendMessageToServer(message, callback, res);
+
+        }
+    });
+}//var setTwitterProfileData = function (data, profileData) {
+
+var setfbProfile = function (data, profileData, callback) {
+    if (data.facebook.id != profileData.loginInfo.id) {
+        data.facebook.name = profileData.loginInfo.name;
+        data.facebook.id = profileData.loginInfo.id;
+        data.save(function (err) {
+            if (!err) {
+                var message = { status: 'SUCCESS', message: 'Facebook profile details updated in nectorr.' }
+                callback(message);
+                return;
+            } else {
+
+                var message = { status: 'ERROR', message: 'Unable to update your facebook profile info.' };
+                callback(message);
+                console.log(err);
+                return;
+
+            } //if (!err) {
+
+        }); //data.save(function (err) {
+    } else {
+        var message = { status: 'SUCCESS', message: 'All good on facebook. Proceed to setup.' }
+        callback(message)
+        return;
+
+    }//if (data.facebook.id != profileData.fbLoginInfo.id) {
+
+}
+
+var saveLinkedInProfile = function (data, profileData) {
+    var linkedInProfile = data.linkedin;
+//    if (!linkedInProfile) {
+        data.linkedin = profileData;
+        data.save(function (err) {
+            if (!err) {
+                var message = { status: 'SUCCESS', message: 'linkedIn profile details updated on nectorr.' }
+                sendMessageToServer(message, callback, res);
+                return;
+            } else {
+                var message = { status: 'ERROR', message: 'Unable to update your linkedIn profile info.on nectorr.' };
+                sendMessageToServer(message, callback, res);
+                console.log(err);
+                return;
+            } //if (!err) {
+
+        }); //data.save(function (err) {
+//    } else {
+
+//    }//if (!linkedInProfile) {
+} //var saveLinkedInProfile= function(data, profileData){
+
+var getBearer= function(callback) {
+    var returnValue
+    request.post(oauthOptions, function (e, r, body) {
+        if (callback) {
+            callback(r);
+        } else {
+            console.log("ERROR :" + e);
+            console.log("R :" + r)
+
+
+            console.log("BODY :" + body)
+
+        }//        if (callback) {
+        returnValue = body;
+    });
+    return returnValue;
+}
+
+module.exports = router;

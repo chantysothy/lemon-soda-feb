@@ -1,0 +1,31 @@
+﻿@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,600,600italic,700,700italic,800,800italic);
+@import url(http://fonts.googleapis.com/css?family=Lato:400,100,100italic,300,300italic,400italic,700,700italic,900,900italic);
+@import url(bucket-ico-fonts.css);
+@import url(../../css/fonts.css);
+body {
+    background-color : #333333;
+    color : #ffffff;
+}
+.dark {
+    background-color : #333333;
+    color : #ffffff;
+}
+.panel-body-style{
+    background-color: rgba(242, 236, 186, 0.92);
+    font-family:GothamRoundedLight;
+    font-size : 12px;
+    border:1px;
+    border-color:#ff6a00;
+}
+/*#636262;*/
+.panel-heading-style{
+    border-color:#b3bdfb;
+    background-color: #b3bdfb;
+    font-family:GothamRounded-Medium;
+    font-size: 14px;
+    color: #ffffff;
+    
+
+
+}
+

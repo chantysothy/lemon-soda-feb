@@ -1,0 +1,80 @@
+var express = require('express');
+var path = require('path');
+var expressSession = require('express-session');
+var router = require('./routes/index');
+var tweets = require('./routes/tweets');
+var google = require('./routes/google');
+var streamer = require('./routes/streamer.js');
+var mongodb = require('mongodb');
+var mongoose = require('mongoose');
+var passport = require('passport');
+var localPassport = require('./config/passport')(passport,app);
+var configDB = require('./config/database.js');
+var userConfig = require('./routes/user-config');
+// configuration ===============================================================
+mongoose.connect(configDB.url); // connect to our database
+//require('./config/passport')(passport); // pass passport for configuration
+
+var app = express();
+var server = require('http').createServer(app);
+
+//app.route(router);
+// serve static assets from the public directory
+//app.configure(function);
+app.use(function (req, res, next) {
+    res.header('X-XSS-Protection', 0);
+    res.header('X-App-Name', 'nectorr');
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Credentials', true);
+    //res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    //res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+    res.header("Access-Control-Max-Age", "86400"); // 24 hours
+   // res.header("Content-Length", res.body.length); 
+    // intercept OPTIONS method
+    if ('OPTIONS' == req.method) {
+        res.send(200);
+    }
+    else {
+        next();
+    }});
+app.use(expressSession(
+    {
+        secret: 'vidurkohli',
+        resave: false,
+        saveUninitialized: true,
+        cookie: { secure: true }
+    }
+));
+app.use(passport.initialize());
+app.use(passport.session()); // persistent login sessions
+
+app.use(express.static(path.join(__dirname, 'public')));
+//app.use(express.cookieParser()); // read cookies (needed for auth)
+//app.use(express.bodyParser()); // get information from html forms
+
+
+// look for view html in the views directory
+app.set('views', path.join(__dirname, 'views'));
+
+// use ejs to render 
+app.set('view engine', 'ejs');
+
+// setup routes
+app.use('/', router);
+app.use(google);
+app.use(tweets);
+app.use(userConfig);
+app.use(streamer);
+//app.use('/tweets', tweets);
+
+app.set('port', port);
+module.exports = app;
+
+var port = 1337;//process.env.PORT || 5000;
+app.listen(port, function() {
+  console.log('localhost:1337 is listening on ' + port);
+});
+//server.listen(80, '192.169.178.96', function () {
+//  console.log('localhost:1337 is listening on ' + port);
+//});

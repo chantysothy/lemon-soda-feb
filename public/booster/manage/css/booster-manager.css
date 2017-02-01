@@ -1,0 +1,22 @@
+﻿#add-vignette {
+    margin-left: 10px;
+    padding-left:10px
+}
+#select-options {
+padding-top: 20px;
+padding-bottom : 20px;
+border-color : #0094ff;
+border-style :dashed;
+border-width: 1px
+}
+    #select-options p {
+        margin-left: 5px;
+    }
+#booster-options-list {
+padding-bottom : 20px;
+border-color : #ff6a00;
+border-style :dashed;
+border-width: 1px
+}
+select#type-send-to option[value="group"]   { background-image:url(../images/icon-group.png);   }
+select#type-send-to option[value="page"] { background-image:url(../images/icon-page.png); }

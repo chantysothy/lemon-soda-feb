@@ -1,0 +1,7 @@
+ErrorDocument 401 /handler/
+ErrorDocument 403 /handler/
+ErrorDocument 404 /handler/
+ErrorDocument 500 /handler/
+
+Redirect /mail http://mail.zoho.com
+Redirect /intranet https://sfindia.bitrix24.com/

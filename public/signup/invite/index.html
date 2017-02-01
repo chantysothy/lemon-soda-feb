@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<!--[if lt IE 7 ]> <html lang="en" class="no-js ie6 lt8"> <![endif]-->
+<!--[if IE 7 ]>    <html lang="en" class="no-js ie7 lt8"> <![endif]-->
+<!--[if IE 8 ]>    <html lang="en" class="no-js ie8 lt8"> <![endif]-->
+<!--[if IE 9 ]>    <html lang="en" class="no-js ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html lang="en" class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="UTF-8" />
+        <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">  -->
+        <title>INVITE FRIENDS</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+        <meta name="description" content="login to localhost:1337" />
+        <meta name="keywords" content="invite, friends, free, social, media, management" />
+        <meta name="author" content="localhost:1337" />
+        <link rel="shortcut icon" href="../../favicon.png"> 
+        <link rel="stylesheet" type="text/css" href="css/demo.css" />
+        <link rel="stylesheet" type="text/css" href="css/style.css" />
+		<link rel="stylesheet" type="text/css" href="css/animate-custom.css" />
+    </head>
+    <body>
+        <div class="container">
+            <!-- nectorr top bar -->
+            <header>
+                <img src="../../images/logo.png" style="align-self:center;padding-top : 10px; padding-bottom: 20px" />
+                <h1>Make social media easier for people who matter to you.</h1>
+            </header>
+            <section>				
+                <div id="container_demo" >
+                    <div id="wrapper">
+                        <div id="login" class="animate form">
+                            <div autocomplete="on" id="validateInvitation">
+                                <h1> INVITE FRIENDS </h1>
+                                <p>
+                                    <label for="friendsName" class="uname" >Enter your friend's name</label>
+                                    <input id="friendsName" name="friendsName" required="required" type="text" placeholder="e.g. Sample Joe" />
+                                </p>
+                                <p>
+                                    <label for="email" class="youmail" > Your friend's email</label>
+                                    <input id="email" name="email" required="required" type="email" placeholder="e.g. mysuperfriend@mail.com" />
+                                </p>
+                                <p>
+                                    <label for="nickName" class="youmail" > Your nick name</label>
+                                    <input id="nickName" name="nickname" required="required" type="text" placeholder="e.g. Tim The Rock" />
+                                </p>
+                                <p id="serverResponse"></p>
+                                <p class="signin button">
+                                    <input id="signThemUp" value="Sign em up" />
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>  
+            </section>
+        </div>
+        <script src="../../app/js/cookie.js"></script>
+        <script type="text/javascript" src="../../js/jquery-1.11.3.min.js"></script>
+        <script type="text/javascript" src="js/invite.js"></script>
+
+    </body>
+</html>
