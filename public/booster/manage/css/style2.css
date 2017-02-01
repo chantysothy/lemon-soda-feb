@@ -1,4 +1,6 @@
 /* remove nectorr styles and reset the whole thing */
+
+@import url('../../../css/fonts.css');
 #container_demo{
 	 text-align: left;
 	 margin: 0;

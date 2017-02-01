@@ -141,6 +141,7 @@
     <Compile Include="public\booster\manage\js\booster-manager.js" />
     <Compile Include="public\booster\manage\js\bootstrap-tagsinput.js" />
     <Compile Include="public\booster\manage\js\jquery.dd.min.js" />
+    <Compile Include="public\booster\manage\js\tokens.min.js" />
     <Compile Include="public\configure\js\configure.js" />
     <Compile Include="public\js\bootstrap.js" />
     <Compile Include="public\js\classie.js" />
@@ -871,6 +872,7 @@
     <Content Include="public\booster\manage\images\icon-group.png" />
     <Content Include="public\booster\manage\images\icon-page.png" />
     <Content Include="public\booster\manage\index.html" />
+    <Content Include="public\booster\manage\css\tokens.css" />
     <Content Include="public\configure\index.html" />
     <Content Include="public\app\template.html" />
     <Content Include="public\css\animate.css" />

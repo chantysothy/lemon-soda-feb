@@ -1,5 +1,14 @@
 ﻿$.ajaxSetup({ dataType: "jsonp" });
 $(document).ready(function () {
+    $nectorrFacebookLogin("publish_actions, user_managed_groups, manage_pages, publish_pages, pages_show_list", null, function (data) {
+
+    });//$nectorrFacebookLogin("user_posts", null, function (data) {
+
+    $('#options-add-to-list').click(function (e) {
+        // get the existing text in the box;
+        //add this new text
+    });//$('#options-add-to-list').click(function (e) {
+
     $('#btnSaveListenTo').click(function (e) {
         var params = getParams();
         submitConfiguration(params, function (data) {
@@ -329,4 +338,137 @@ $(document).ready(function () {
     }//var getFeed = function(callback){
 }); // page_load
 
+var SocialMediaGroupsAndPages = {
+    "facebook": {
+        userId: "",
+        access_token: "",
+        getPostableLocs: function ( callback) {
+            var returnValue = []; // calling function needs to look at returnValue.length>0 to proceed. This method shall run asynchronously.
+            // get relevant scopes and login
+            $nectorrFacebookLogin("user_managed_groups", function (data) {
+                var user_id = "";
+                FB.api("/" + user_id+"/groups",
+                    function (response) {
+                        if (response && !response.error) {
+                            /* get pages*/
+                            $nectorrFacebookLogin("manage_pages, publish_pages, pages_show_list", function (data) {
+                                if (!data.error) {
+                                    FB.api("/" + user_id + "/manage/accounts", function (data) {
+                                        if (data && !data.error) {
+                                            var pageValue = prepareArrayForPostableLocs("page", data);
+                                            pushIntoArray(returnValue, pageValue);// correct data to come in
+                                            if (callback) { callback(returnValue) } else return returnValue;
+                                        } //if (data && !data.error) {
+                                    }); //FB.api("/" + user_id + "/manage/accounts", function (data) {
+                                }//if (!data.error) {
+                            });//$nectorrFacebookLogin("user_managed_groups", function (data) {
+                            pushIntoArrayArray(returnValue, response);
+                        }//if (response && !response.error) {
+                    } //function (response) {
+                ); //FB.api("/" + user_id+"/groups",
+            });//$nectorrFacebookLogin("", function (data) {
+            
+        }//getPostableLocs: function (userInfo) { 
+    },//"facebook": {}
+    "twitter": {
+        screenName: "",
+        getPostableLocs: function (callback) {
+            var returnValue = [];// The calling function needs to check returnValue.length>0 to proceed.
+            var codeBird = new Codebird;
+            codeBird.setConsumerKey(twitterDefaults.consumer_key, twitterDefaults.consumer_secret);
+            authenticateUsingCodebird(codeBird, function (response) {
+                // get twitter List for the user
+                if (response.status != "ERROR") {
+                    codeBird.___call("", {}, function (reply, rate, err) {
+                        if (err) {
+                            manageServerResponse({ status: "ERROR", message: "ERROR : " + err.error });
+                            return;
+                        }//if (err) {
+                        if (reply) {
+                        }//if (err) {
+                    });
+                } else {
+                    if (callback) { callback(response) } else return response;
+                    //manageServerResponse(response);
+                }//if (response.status != "ERROR") {
+                // save response against the user
+                var userId = $getClientEmail();
 
+            });//authenticateUsingCodebird(codeBird, function (response) {
+        } //getPostableLocs: function () {
+    },//"twitter": {}
+    "google": {
+        userId: "",
+        access_token: "",
+        getPostableLocs: function () {
+        },
+        getFeaturedCollections: function () { }
+    },//"google": {}
+    "instagram": {
+        user_id: "",
+        access_token: "",
+        getPostableLocs: function () {
+        }
+    }, //"instagram": {}
+    "pinterest": {
+        user_id: "",
+        access_token: "",
+        getPostableLocs: function () {
+
+        }//getPostableLocs: function () {
+    }, //pinterest
+    "linkedin": {
+        userId: "",
+        access_token: "",
+        getPostableLocs: function () {
+        }//        getPostableLocs: function () {
+    } //linkedIn
+
+} //var SocialMediaGroupsAndPages = {
+
+var pushIntoArray = function (toArray, fromArray) {
+    for (var fromArrayCounter = 0; fromArrayCounter < fromArray.length; fromArrayCounter++){
+        if (fromArray[fromArrayCounter]) {
+            toArray.push(fromArray[fromArrayCounter]);
+        }//if (fromArray[fromArrayCounter]) {
+    } //for (var fromArrayCounter = 0; fromArrayCounter < fromArray.length, fromArrayCounter++){
+    return toArray;
+}//var pushIntoArray = function (toArray, fromArray) {
+
+var prepareArrayForPostableLocs = function (type,result) {
+    // sample record- { type: "page", pageInfo: data }
+    var returnValue = [];
+    for (var counter = 0; counter < result.length; counter++) {
+        var record = { 'type': type, 'data' : result[counter] }
+        returnValue.push(record);
+    }//for (var counter = 0; counter < result.length; counter++) {
+    return returnValue;
+} //var prepareArrayForPostableLocs = function (result) {
+var authenticateUsingCodebird = function (cb, callback) {
+    // gets a request token
+    var returnValue= []
+    cb.__call(
+        "oauth_requestToken",
+        { oauth_callback: "oob" },
+        function (reply, rate, err) {
+            if (err) {
+                callback({ status: "ERROR", message: "ERROR: "+err.error});
+                return;
+            }//if (err) {
+            if (reply) {
+                cb.setToken(reply.oauth_token, reply.oauth_token_secret);
+
+                // gets the authorize screen URL
+                cb.__call(
+                    "oauth_authorize",
+                    {},
+                    function (auth_url) {
+                        window.codebird_auth = window.open(auth_url);
+                        // stores reply
+                        callback(reply);
+                    }//cb.__call(
+                );//cb.__call(
+            }//if (reply) {
+        } //function (reply, rate, err) {
+    );//cb.__call(
+}//var authenticateUsingCodebird = function (cb, callback) { 

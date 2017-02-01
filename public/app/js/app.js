@@ -372,5 +372,5 @@ var authCreds = {
 
 }
 var fbConnect = function (callback) {
-    $nectorrFacebookLogin("user_posts", null, callback);
+    callback(null);
 }//var fbConnect = function (callback) {
