@@ -41,12 +41,25 @@ var googlePlusDefaults = {
     }
 }
 var facebookDefaults = {
-    appId : '334582780223007'
-    , appSecret : '85f5abe5d8390c9134c9dd84befa26ed'
+    appId: '582000448664812'
+    , appSecret: '9b089aff5785a8b74f64ed3530f3d6f6'
     , token : ''
 }
 
+var initFacebookAPI = function () {
+    window.fbAsyncInit = function fbAsyncInit() {
+        version = version || 'v2.3'
+        FB.init({
+            appId: facebookDefaults.appId,  // Change appId 409742669131720 with your Facebook Application ID
+            status: true,
+            xfbml: true,
+            cookie: true,
+            version: 'v2.3' // use version 2.7
 
+        });
+
+    }
+}//var initFacebook = function () {
 var linkedInDefaults = {
 
 } //var linkedInDefaults = {
@@ -66,8 +79,9 @@ $nectorrLinkedInLogin = function (linkedInLoginScope, event, callback) {
 $nectorrFacebookLogin = function (fbLoginScope, event, callback) {
 
     if (fbLoginScope) {
+
         FB.init({
-            appId: '334582780223007',  // Change appId 409742669131720 with your Facebook Application ID
+            appId: facebookDefaults.appId,  // Change appId 409742669131720 with your Facebook Application ID
             status: true,
             xfbml: true,
             cookie: true,
@@ -75,11 +89,20 @@ $nectorrFacebookLogin = function (fbLoginScope, event, callback) {
 
         });
 
-        FB.login(function (response) {
-            if (callback) {
+        FB.getLoginStatus(function (response) {
+            if (response.status === 'connected') {
                 callback(response);
+            } else {
+                FB.login(function (response) {
+                    if (response && !response.error) {
+                        callback(response)
+                    } else {
+                        alert("There was an error in connecting with facebook. The recieved message : "+ error)
+                    }
+                }, fbLoginScope);//FB.login(function () {
+
             }
-        }, { scope: fbLoginScope });
+        });//FB.getLoginStatus(function (response) {
 
     }//if (scope) { 
 }; //$facebookLogin = function (scope) {
@@ -96,7 +119,7 @@ $nectorrFacebookLogin = function (fbLoginScope, event, callback) {
 
 window.fbAsyncInit = function () {
     FB.init({
-        appId: '334582780223007',  
+        appId: facebookDefaults.appId,  
         status: true,
         xfbml: true,
         cookie: true,
@@ -257,6 +280,34 @@ var saveGoogleProfileData = function (profile) {
     });
 
 } //var saveGoogleProfileData = function (profile) {
+///twitter/get/lists
+var $getTwitterLists = function (callback) {
+    $.ajax({
+        headers: { "Accept": "application/json" }
+        , type: 'GET'
+        , url: '/twitter/get/lists'
+        , data: "email=" + $getClientEmail()
+        , dataType: "jsonp"
+        , jsonp: "callback"
+        , crossDomain: true
+        , beforeSend: function (xhr) {
+            xhr.withCredentials = true;
+        }
+        , jsonPCallback: "jsonpCallback"
+        , success: function (data) {
+            if (data.status == 'SUCCESS') {
+                if (callback) {
+                    callback(data.data);
+                }
+            } else {
+            } //if (data.status == 'SUCCESS') { 
+        }
+        , error: function (jqXHR, textStatus, errorThrown) {
+            //var msgBox = $('#butrfly-login').find();
+            alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
+        }
+    }); //$.ajax({
+}//var saveFacebookData = function (data) { 
 
 var $saveLoginInfo = function (loginInfo, event, callback) {
     $.ajax({
@@ -356,7 +407,7 @@ var $executeFacebookCommand = function (scope, command, callback) {
 
     if (command){
         FB.init({
-            appId: '334582780223007',  // Change appId 409742669131720 with your Facebook Application ID
+            appId: facebookDefaults.appId,  // Change appId 409742669131720 with your Facebook Application ID
             status: true,
             xfbml: true,
             cookie: true,
@@ -364,23 +415,33 @@ var $executeFacebookCommand = function (scope, command, callback) {
 
         });
 
-        FB.login(function () {
-            FB.api(command, function (res, err) {
-                var error = err;
-                var response = res;
-                if (!res.error) {
-                    // save profile info
-                    //return res;
-                    //VerifyResultAndProcessForFacebook(response,event, caller);
-                    if (callback)
-                        callback(res);
-                }
-                else {
-                    alert('There was an error connecting to facebook. Please try later.');
-                }
+        FB.getLoginStatus(function (response) {
+            if (response.status === 'connected') {
+                FB.api(command, function (res, err) {
+                    if (!err) {
+                        if (callback)
+                            callback(res);
+                    } else {
+                        callback({ status: 'ERROR', message: JSON.stringify(err) });
+                    }
+                });//
+            } else {
+                FB.login(function () {
+                    FB.api(command, function (res, err) {
+                        var error = err;
+                        var response = res;
+                        if (!err) {
+                            if (callback)
+                                callback(res);
+                        } else {
+                            callback({ status: 'ERROR', message: JSON.stringify(err) });
+                        }
 
-            }); //FB.api(cmd, function (res, err) {
-        }, scope);//FB.login(function () {
+                    }); //FB.api(cmd, function (res, err) {
+                }, scope);//FB.login(function () {
+
+            }
+        });//FB.getLoginStatus(function (response) {
     } //if (command) {
 }//var executeFacebookCommand = function (command, callback) {
 var getFacebookPermsFromClient = function (e, callback) {

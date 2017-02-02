@@ -53,7 +53,7 @@ a.hiddenanchor{
 
 #wrapper h1{
 	font-size: 48px;
-	color: rgb(6, 106, 117);
+	color: #ffffff;
 	padding: 2px 0 10px 0;
 	font-family: 'FranchiseRegular','Arial Narrow',Arial,sans-serif;
 	font-weight: bold;
@@ -61,16 +61,16 @@ a.hiddenanchor{
 	padding-bottom: 30px;
 }
 /** For the moment only webkit supports the background-clip:text; */
-#wrapper h1{
+/*#wrapper h1{
     background: -webkit-repeating-linear-gradient(-45deg, 
-	rgb(18, 83, 93) , 
-	rgb(18, 83, 93) 20px, 
-	rgb(64, 111, 118) 20px, 
-	rgb(64, 111, 118) 40px, 
-	rgb(18, 83, 93) 40px);
+	rgb(255, 255, 255) , 
+	rgba(0, 0, 0, 0.07) 20px, 
+	rgba(0, 0, 0, 0.2) 20px, 
+	rgb(225, 234, 235) 40px, 
+	rgba(168, 168, 168, 0.9) 40px);
 	-webkit-text-fill-color: transparent;
 	-webkit-background-clip: text;
-}
+}*/
 #wrapper h1:after{
 	content: ' ';
 	display: block;
@@ -92,7 +92,7 @@ a.hiddenanchor{
 	margin: 0px;
 }
 #wrapper label{
-	color: rgb(64, 92, 96);
+	color: #ffffff;
 	position: relative;
 }
 
@@ -299,7 +299,8 @@ p.change_link{
 	width: 100%;	
 	padding: 18px 6% 60px 6%;
 	margin: 0 0 35px 0;
-	background: rgb(247, 247, 247);
+	background: #333333;
+    color : #ffffff;
 	border: 1px solid rgba(147, 184, 189,0.8);
 	-webkit-box-shadow: 0pt 2px 5px rgba(105, 108, 109,  0.7),	0px 0px 8px 5px rgba(208, 223, 226, 0.4) inset;
 	   -moz-box-shadow: 0pt 2px 5px rgba(105, 108, 109,  0.7),	0px 0px 8px 5px rgba(208, 223, 226, 0.4) inset;

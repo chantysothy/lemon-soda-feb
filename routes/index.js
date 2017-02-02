@@ -6,7 +6,7 @@ var config = require('../config/config');
 var http = require('http');
 var request = require('request');
 var fbCallback;
-var Twitter = require('node-twitter-api');
+var Twitter = require('twitter');
 var fbGraph = require('fbgraph');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
@@ -619,6 +619,30 @@ router.get('/facebook/read/posts', function (req, res) {
     }
 
     //res.render('index', { title: 'Angular, Node and Twitter API' });
+});
+router.get('/twitter/get/lists', function (req, res) {
+    var callback = request.query.callback;
+    if (callback) {
+        var email = req.query.email;
+        if (email) {
+            var screenName = 'edwardvarghese';
+            var client = new Twitter({
+                consumer_key: config.twitter.consumer_key,
+                consumer_secret: config.twitter.consumer_secret,
+                bearer_token: process.env.TWITTER_BEARER_TOKEN
+            });
+
+            client.get('lists/list', { screen_name: screenName }, function (error, lists, response) {
+                var message = { status: "SUCCESS", message: "lists retrieved for "+email, data : lists };
+                sendMessageToServer(msg, callback, res);
+
+            });
+        } else {
+            var message = { status: "ERROR", message: "NECTORR recieved an invalid twitter request." };
+            sendMessageToServer(msg, callback, res);
+        }//if (email) {
+    }//if (callback) {
+    //console.log("Instagram callback : " + JSON.stringify(req.query['#access_token']));
 });
 
 router.get('/auth/twitter', function (req, res) {

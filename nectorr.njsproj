@@ -26,6 +26,7 @@
     <Compile Include="public\app\js\cookie.js" />
     <Compile Include="public\app\js\jsonutils.js" />
     <Compile Include="public\app\js\sm_login.js" />
+    <Compile Include="public\assets\type-ahead\bloodhound.min.js" />
     <Compile Include="public\assets\codebird-js\codebird.js" />
     <Compile Include="public\assets\doT\benchmarks\compileBench.js" />
     <Compile Include="public\assets\doT\benchmarks\jslitmus.js" />
@@ -136,6 +137,8 @@
     <Compile Include="public\assets\moment\min\moment.min.js" />
     <Compile Include="public\assets\moment\moment.js" />
     <Compile Include="public\assets\socialfeed\jquery.socialfeed.js" />
+    <Compile Include="public\assets\type-ahead\typeahead.bundle.min.js" />
+    <Compile Include="public\assets\type-ahead\typeahead.jquery.min.js" />
     <Compile Include="public\booster\js\booster.js" />
     <Compile Include="public\booster\js\bootstrap-tagsinput.js" />
     <Compile Include="public\booster\manage\js\booster-manager.js" />
@@ -1284,6 +1287,7 @@
     <Folder Include="public\assets\sass\layout\" />
     <Folder Include="public\assets\sass\libs\" />
     <Folder Include="public\assets\socialfeed\" />
+    <Folder Include="public\assets\type-ahead\" />
     <Folder Include="public\booster\" />
     <Folder Include="public\booster\js\" />
     <Folder Include="public\booster\css\" />

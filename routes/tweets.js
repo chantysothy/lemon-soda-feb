@@ -49,9 +49,10 @@ function getBearer(callback) {
             console.log("ERROR :" + e);
             console.log("R :" + r)
 
+            var bearerBody = JSON.parse(body);
+            process.env.TWITTER_BEARER_TOKEN = bearerBody.access_token;
 
             console.log("BODY :" + body)
-
         }//        if (callback) {
         returnValue= body;
     });

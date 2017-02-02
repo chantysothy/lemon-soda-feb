@@ -20,13 +20,12 @@ var userSchema = mongoose.Schema( {
         , email         : String
         , name          : String
         , posts         : Object
-        , pageData      : Object
         , permsData     : String
-        , groupsData    : Object
+        , postableLocs: Object
     },
     twitter: {
         profileInfo: Object
-        , listInfo : Object
+        , postableLocs : Object
     },
     googlePlusUser           : {
         //id           : String
@@ -53,12 +52,12 @@ var userSchema = mongoose.Schema( {
         , urls          : Array
         , verified      : Boolean
         , perms : { data : String, dontAsk : Boolean }
-        , posts : Object
+        , posts: Object
+        , postableLocs: Object
     },
     linkedin: {
         profileInfo: Object
-        , pageInfo : Object
-        , groupsInfo    : Object
+        , postableLocs    : Object
     },
     instagram           : {
         id              : String
@@ -66,7 +65,8 @@ var userSchema = mongoose.Schema( {
         , email         : String
         , name          : String
         , perms         : { data : String, dontAsk : Boolean }
-        , posts         : Object
+        , posts: Object
+        , postableLocs : Object
     },
     vimeo              : {
         id             : String
@@ -74,7 +74,8 @@ var userSchema = mongoose.Schema( {
         , email        : String
         , name         : String
         , perms : { data : String, dontAsk : Boolean }
-        , posts : Object
+        , posts: Object
+        , postableLocs : Object
     },
     youtube            : {
         id              : String
@@ -82,7 +83,8 @@ var userSchema = mongoose.Schema( {
         , email         : String
         , name          : String
         , perms         : { data : String, dontAsk : Boolean }
-        , posts         : Object
+        , posts: Object
+        , postableLocs: Object
     },
     pinterest           : {
         id              : String
@@ -90,7 +92,8 @@ var userSchema = mongoose.Schema( {
         , email         : String
         , name          : String
         , perms : { data : String, dontAsk : Boolean }
-        , posts : Object
+        , posts: Object
+        , postableLocs : Object
     },
     telegram           : {
         id             : String
@@ -98,10 +101,11 @@ var userSchema = mongoose.Schema( {
         , email        : String
         , name         : String
         , perms : { data : String, dontAsk : Boolean }
-        , posts : Object
+        , posts: Object
+        , postableLocs: Object
     },
     boostingProfiles: {
-        data: {}
+        data: Object
         /*
         * data to hold each boosting profile.
         each boosting profile to have the following field
