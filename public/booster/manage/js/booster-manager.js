@@ -1,14 +1,24 @@
 ﻿var selectedOptions = [];
-var tempSocialMediaNames = ['facebook','twitter','google'];//, 'google', 'twitter'];
+var tempSocialMediaNames = ['facebook', 'twitter', 'google'];//, 'google', 'twitter'];
+//refer https://developers.google.com/+/domains/api/circles
+var plusDomain = {
+    getCircleList: 'https://www.googleapis.com/plusDomains/v1/people/userId/circles' //get
+    , getACircle: 'https://www.googleapis.com/plusDomains/v1/circles/circleId' //get
+    , addACircle: 'https://www.googleapis.com/plusDomains/v1/people/userId/circles' //post
+    , removeCircle: 'https://www.googleapis.com/plusDomains/v1/circles/circleId'//DELETE
+
+}
 var selectedPostableLocs ={};
 $(window).load(function (e) {
     $("#booster-option-tag-list").tagsinput();
     var smElementCounter = 0;
     for (var smcounter = 0; smcounter < tempSocialMediaNames.length; smcounter++) {
         SocialMediaGroupsAndPages[tempSocialMediaNames[smcounter]].getPostableLocs(function (data) {
-            var socialMediaName = tempSocialMediaNames[smElementCounter];//tempSocialMediaNames[smcounter];
-            selectedPostableLocs[socialMediaName] = data;
-            smElementCounter++
+            if (data) {
+                var socialMediaName = tempSocialMediaNames[smElementCounter];//tempSocialMediaNames[smcounter];
+                selectedPostableLocs[socialMediaName] = data;
+                smElementCounter++
+            } //if (data) {
         });//SocialMediaGroupsAndPages[tempSocialMediaNames[smcounter]].getPostableLocs(function (data) {
     }//for (var smcounter = 0; smcounter < tempSocialMediaNames.length; smcounter++) {
 }); //$(window).load(function () { 
@@ -83,7 +93,7 @@ var SocialMediaGroupsAndPages = {
         screenName: "",
         getPostableLocs: function (callback) {
             $getTwitterLists(function (lists) {
-                if (callback) { callback(lists) } else { callback(null) } 
+                if (callback && (lists.status == "SUCCESS")) { callback(lists.data) } else { callback(null) } 
             });
 
         } //getPostableLocs: function () {
@@ -91,11 +101,22 @@ var SocialMediaGroupsAndPages = {
     "google": {
         userId: "",
         access_token: "",
-        getPostableLocs: function ( callback) {
-            $initializeGoogleAuth2(function (profileInfo) {
-                var a = profileInfo
+        getPostableLocs: function (callback) {
+            initializeGoogle(function (authResponse) {
+                var access_token    
+                getRequest('GET', plusDomain.getCircleList, function (listData) {
+                    //process the list
+                    callback(listData);
+                });//getRequest('GET', plusDomain.getCircleList, function (listData) {
+            }, null, "https://www.googleapis.com/plusDomains/v1/people/userId/circles");
+            //initializeGoogle(callback);
+            //googleApiClientReady(callback);
+            //$initializeGoogleAuth2(function (profileInfo) {
+            //    var a = profileInfo
+            //    if (callback)
+            //        callback(profileInfo);
                 
-            });
+            //});
         },
         getFeaturedCollections: function () { }
     },//"google": {}

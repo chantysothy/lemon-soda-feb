@@ -1,5 +1,19 @@
 ﻿
 var $smPermissionSet = { email: "", sm_name: "", neverAsk: false };
+var googleCallback
+var googleScope = ['    '
+    //, 
+    //,
+    //,', 
+    //,
+    //,
+    //,
+    //,
+    //,'https://www.googleapis.com/auth/plus.media.upload'
+    //,'https://www.googleapis.com/auth/paymentssandbox.make_payments'
+    //,'https://www.googleapis.com/auth/userinfo.email'
+];
+
 $activeSocialMedia = null;
 var $instagramUrls = {
     loginUrl: 'https://www.instagram.com/oauth/authorize/?client_id=f3a4940affd34bd7aaabebde1a685846&redirect_uri=http://localhost:1337/auth/callback/instagram&response_type=token'
@@ -33,11 +47,18 @@ var twitterDefaults = {
 };
 
 var googlePlusDefaults = {
-    clientId: '909374797832-7mp72b0ohm58ioeem4n43340v5alvcj3.apps.googleusercontent.com'
-    , clientSecret: 'flQnNpfxeUGmhrPLtrTn1a1M'
-    , apiKey: 'AIzaSyAysc2oWDZuqMhUGWtZPSxdJdACoc1AyU4'
+    clientId: '74079086779-p78eqegijmojsedbtl42f9ih9viu47ku.apps.googleusercontent.com'
+    , clientSecret: 'PITf1zAhFCKSFlQBociujERc'
+    , apiKey: 'AIzaSyCBed17n_6NdGO8PfHGYTByfKi0q-tmvaQ'
     , scopes: {
-        plusMe : 'https://www.googleapis.com/auth/plus.login'
+        plusMe: 'https://www.googleapis.com/auth/plus.me'
+        , plusLogin: 'https://www.googleapis.com/auth/plus.login'
+        , profilesRead: 'https://www.googleapis.com/auth/plus.profiles.read'
+        , plusCirclesRead: 'https://www.googleapis.com/auth/plus.circles.read'
+        , plusStreamRead: 'https://www.googleapis.com/auth/plus.stream.read'
+        , plusStreamWrite: 'https://www.googleapis.com/auth/plus.stream.write'
+        , plusCirclesWrite: 'https://www.googleapis.com/auth/plus.circles.write'
+        , plusUserInfoProfile: 'https://www.googleapis.com/auth/userinfo.profile' 
     }
 }
 var facebookDefaults = {
@@ -48,7 +69,7 @@ var facebookDefaults = {
 
 var initFacebookAPI = function () {
     window.fbAsyncInit = function fbAsyncInit() {
-        version = version || 'v2.3'
+        version = 'v2.3'
         FB.init({
             appId: facebookDefaults.appId,  // Change appId 409742669131720 with your Facebook Application ID
             status: true,
@@ -186,67 +207,14 @@ var $twitterLogin = function(callback){
 
     } //if (callback) {
 } //allback){
-$initializeGoogleAuth2 = function() {
-    var auth2, authInstance;
-    if (!nvCookie) {
-        gapi.load('auth2', function () {
-            auth2 = gapi.auth2.init({
-                client_id: googlePlusDefaults.clientId
-                ,fetch_basic_profile: false
-                , scope: 'profile'
-            }).then(function () {
-                authInstance = gapi.auth2.getAuthInstance();
-                if (authInstance.isSignedIn) {
-                    authInstance.signIn();
-                }
-                //authInstance.signIn();
-                gapi.client.init({
-                    apiKey : googlePlusDefaults.apiKey
-                    , client_id : googlePlusDefaults.clientId
-                    , scope : googlePlusDefaults.scopes.plusMe
-                })
-                .then(function () {
-                    gapi.client.load('plus', 'v1', function () {
-                        var request = gapi.client.plus.people.get({
-                            'userId': 'me'
-                        });
-                        request.execute(function (resp) {
-                            console.log('Retrieved profile for:' + resp.displayName);
-                            if (!resp.error) {
-                                saveGoogleProfileData(resp);
-                                    // save cookie
-                                    //userLoginTo
-                            }
-                        });
-                    });
 
-                });
-
-            })
-        });
-    } else { 
-            //userLoginTo = set to Google
-    }
-    
+$initializeGoogleAuth2 = function () {
+    initializeGoogle();
 } // Google signIn
+
 $initializeGooglewithCallback = function (callback) {
     var auth2, authInstance;
-        gapi.load('auth2', function () {
-            auth2 = gapi.auth2.init({
-                client_id: googlePlusDefaults.clientId
-                , fetch_basic_profile: false
-                , scope: 'profile'
-            }).then(function () {
-                authInstance = gapi.auth2.getAuthInstance();
-                if (authInstance.isSignedIn) {
-                    authInstance.signIn().then(function () {
-                        if (callback) callback(authInstance.currentUser.get());
-                    });
-                }
-            });//.then(function () {
-                //authInstance.signIn();
-        }); //gapi.load('auth2', function () {
-
+    initializeGoogle(callback, null, true); // default scope but get authResponse from google
 } // Google signIn
 
 var saveGoogleProfileData = function (profile) {
@@ -489,6 +457,157 @@ var getFacebookAccessToPagesAndGroups = function (ev) {
     } //if (getSocialMediaDetails.facebook) {
 
 }//var getFacebookAccessToPagesAndGroups = function () {
+
+var $getInstagramLogin = function (callback) {
+    $.ajax({
+        headers: { "Accept": "application/json" }
+        , type: 'GET'
+        //        , url: twitterUrls.request_token_url
+        , url: 'https://api.instagram.com/oauth/authorize/'
+        , data: { response_type: 'token', redirect_uri: $instagramUrls.callback, client_id: $instagramUrls.clientId }
+        , dataType: "jsonp"
+        , jsonp: "callback"
+        , crossDomain: true
+        , beforeSend: function (xhr) {
+            xhr.withCredentials = true;
+            //xhr.setRequestHeader(JSON.stringify(twitterDefaults.headers));
+        }
+        , jsonPCallback: "jsonpCallback"
+        , success: function (data) {
+            if (callback)
+                callback(data);
+
+            //$("#feeds").children().show();
+        }
+        , error: function (jqXHR, textStatus, errorThrown) {
+            alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
+        }
+    });
+
+}
+/*
+* @param callback
+*/
+var getQueryTags = function (callback) {
+    $.ajax({
+        headers: { "Accept": "application/json" }
+        , type: 'GET'
+        //        , url: twitterUrls.request_token_url
+        , url: '/user-config/get'
+        , data: "email=" + $getClientEmail()
+        , dataType: "jsonp"
+        , jsonp: "callback"
+        , crossDomain: true
+        , beforeSend: function (xhr) {
+            xhr.withCredentials = true;
+            //xhr.setRequestHeader(JSON.stringify(twitterDefaults.headers));
+        }
+        , jsonPCallback: "jsonpCallback"
+        , success: function (data) {
+            if (callback)
+                callback(data);
+
+            //$("#feeds").children().show();
+        }
+        , error: function (jqXHR, textStatus, errorThrown) {
+            alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
+        }
+    });
+
+}//var getConfiguration = function (callback) {
+var pushArray = function (pushTo, getFrom) {
+    for (var counter = 0; counter < getFrom.length; counter++) {
+        if (getFrom[counter] != "")
+            pushTo.push(getFrom[counter]);
+    }//for (counter = 0; counter < getFrom.length; counter++) {
+}
+
+var initializeGoogle = function (callback, scope, getAuthResponse = "") {
+    var auth2, authInstance;
+    var scopes = googlePlusDefaults.scopes.plusLogin + " " + googlePlusDefaults.scopes.plusCirclesRead + " " + googlePlusDefaults.scopes.plusCirclesWrite;//googlePlusDefaults.scopes.plusMe,
+
+    if (scope)
+        scopes = scope;
+
+    if (!nvCookie) {
+        gapi.load('auth2', function () {
+            //plusDomains.Circles.List
+            auth2 = gapi.auth2.init({
+                clientId: googlePlusDefaults.clientId
+                , fetch_basic_profile: false
+                , scope: scopes
+            }).then(function () {
+                gapi.load('client', function () {
+                    gapi.client.init({
+                        apiKey: googlePlusDefaults.apiKey
+                        , client_id: googlePlusDefaults.clientId
+                        , scopes
+                    })
+                    gapi.client.load('plus', 'v1', function () {
+                        authInstance = gapi.auth2.getAuthInstance();
+                        if (authInstance.isSignedIn) {
+                            authInstance.signIn().then(function () {
+
+                                var request = gapi.client.plus.people.get({
+                                    'userId': 'me'
+                                });
+                                request.execute(function (resp) {
+                                    console.log('Retrieved profile for:' + resp.displayName);
+                                    if (!resp.error) {
+
+                                        if (callback) {
+                                            if (getAuthResponse != "") {
+
+                                                getAuthResponse = getAuthResponse.replace('userId', resp.id);
+
+                                                var circleResponse = gapi.client.request({
+                                                    'path': getAuthResponse,
+                                                })
+                                                circleResponse.execute(function (resp) {
+                                                    console.log('Retrieved circles for:' + resp.displayName + ":-- " + JSON.stringify(r));                                                    callback(circleResponse);
+                                                    callback(r);
+                                                });
+                                            } else {
+                                                callback(resp);
+                                            }
+                                        } else {
+                                            saveGoogleProfileData(resp);
+                                        }
+                                        // save cookie
+                                        //userLoginTo
+                                    }
+                                });
+                            });
+                        }
+
+                    });
+
+                });
+
+
+
+
+
+            });
+                //authInstance.signIn();
+        });
+    } else {
+        //userLoginTo = set to Google
+    }
+}//var initializeGoogle = function (callback) {
+var getLinkedInUserDetails = function () {
+    //,"group-memberships:(group:(id,name),membership-state)
+    IN.API.Profile("me")
+        .fields("firstName", "lastName", "industry", "location:(name)", "picture-url", "headline", "num-connections", "public-profile-url", "email-address", "date-of-birth")
+        .result(linkedInCallback)
+        .error(linkedInCallback);
+}
+
+var saveLinkedInUserDetails = function (data) {
+    var a = data;
+}
+
+
 var writeFacebookTextPost = function (text) { 
 
 } //var writeFacebookTextPost = function (text) { 
@@ -546,10 +665,6 @@ var writeLinkedInImagePostsInGroups = function (imageUrl) {
 var getTwitterLists = function (callback) { 
 }//var getTwitterLists = function (callback) { 
 
-var getGoogleCircles = function (callback) { 
-
-}//var getGoogleCircles = function (callback) { 
-
 var getLinkedInGroups = function (callback) { 
 
 }//var getLinkedInGroups = function (callback) { 
@@ -557,18 +672,6 @@ var getLinkedInGroups = function (callback) {
 var getFacebookGroups = function (callback) { 
 
 } //var getFacebookGroups = function (callback) { 
-
-var getLinkedInUserDetails = function () {
-    //,"group-memberships:(group:(id,name),membership-state)
-    IN.API.Profile("me")
-        .fields("firstName", "lastName", "industry", "location:(name)", "picture-url", "headline", "num-connections", "public-profile-url",  "email-address", "date-of-birth")
-        .result(linkedInCallback)
-        .error(linkedInCallback); 
-}
-
-var saveLinkedInUserDetails = function(data){
-    var a = data;
-}
 
 var getSocialFeeds = function(callback) {
     if (callback) {
@@ -676,74 +779,6 @@ var setPublishCredentials = function (userObject,  callback) {
     });//getQueryTags(function (queryObject) {
 }//var setPublishCredentials = function (publishCreds) {
 //
-var $getInstagramLogin = function (callback) {
-    $.ajax({
-        headers: { "Accept": "application/json" }
-        , type: 'GET'
-        //        , url: twitterUrls.request_token_url
-        , url: 'https://api.instagram.com/oauth/authorize/'
-        , data: { response_type: 'token', redirect_uri: $instagramUrls.callback, client_id: $instagramUrls.clientId }
-        , dataType: "jsonp"
-        , jsonp: "callback"
-        , crossDomain: true
-        , beforeSend: function (xhr) {
-            xhr.withCredentials = true;
-            //xhr.setRequestHeader(JSON.stringify(twitterDefaults.headers));
-        }
-        , jsonPCallback: "jsonpCallback"
-        , success: function (data) {
-            if (callback)
-                callback(data);
-
-            //$("#feeds").children().show();
-        }
-        , error: function (jqXHR, textStatus, errorThrown) {
-            alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
-        }
-    });
-
-}//var $getInstagramLogin = function (callback) {
-/*
-        headers: { "Accept": "application/json" }
-        , type: 'GET'
-        , beforeSend: function (xhr) {
-            xhr.withCredentials = true;
-            //xhr.setRequestHeader(JSON.stringify(twitterDefaults.headers));
-        }
-
- *
- * @param callback
- */
-var getQueryTags = function (callback) {
-    $.ajax({
-        headers: { "Accept": "application/json" }
-        , type: 'GET'
-        //        , url: twitterUrls.request_token_url
-        , url: '/user-config/get'
-        , data: "email=" + $getClientEmail()
-        , dataType: "jsonp"
-        , jsonp: "callback"
-        , crossDomain: true
-        , beforeSend: function (xhr) {
-            xhr.withCredentials = true;
-            //xhr.setRequestHeader(JSON.stringify(twitterDefaults.headers));
-        }
-        , jsonPCallback: "jsonpCallback"
-        , success: function (data) {
-            if (callback)
-                callback(data);
-
-            //$("#feeds").children().show();
-        }
-        , error: function (jqXHR, textStatus, errorThrown) {
-            alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
-        }
-    });
-
-}//var getConfiguration = function (callback) {
-var pushArray = function (pushTo, getFrom) {
-    for (var counter = 0; counter < getFrom.length; counter++) {
-        if (getFrom[counter] != "")
-        pushTo.push(getFrom[counter]);
-    }//for (counter = 0; counter < getFrom.length; counter++) {
+var getRequest = function (url, callback) {
+    return $.get(url, callback, 'json');
 }

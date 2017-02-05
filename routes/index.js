@@ -621,21 +621,35 @@ router.get('/facebook/read/posts', function (req, res) {
     //res.render('index', { title: 'Angular, Node and Twitter API' });
 });
 router.get('/twitter/get/lists', function (req, res) {
-    var callback = request.query.callback;
+    var callback = req.query.callback;
     if (callback) {
         var email = req.query.email;
         if (email) {
-            var screenName = 'edwardvarghese';
-            var client = new Twitter({
-                consumer_key: config.twitter.consumer_key,
-                consumer_secret: config.twitter.consumer_secret,
-                bearer_token: process.env.TWITTER_BEARER_TOKEN
-            });
+            
+            var condition = { 'local.email': email }
+            userModel.findOne(condition, function (err, foundUser) {
+                if (!err) {
+                    var screenName = foundUser.twitter.profileInfo.screen_name;
+                    var client = new Twitter({
+                        consumer_key: config.twitter.consumer_key,
+                        consumer_secret: config.twitter.consumer_secret,
+                        bearer_token: process.env.TWITTER_BEARER_TOKEN
+                    });
 
-            client.get('lists/list', { screen_name: screenName }, function (error, lists, response) {
-                var message = { status: "SUCCESS", message: "lists retrieved for "+email, data : lists };
-                sendMessageToServer(msg, callback, res);
+                    client.get('lists/list', { screen_name: screenName }, function (error, lists, response) {
+                        if (!error) {
+                            var message = { status: "SUCCESS", message: "lists retrieved for " + email, data: { "lists": lists } };
+                            sendMessageToServer(message, callback, res);
+                        } else {
+                            var message = { status: "ERROR", message: " TWITTER error code : " + error[0].code + "--" + error.message + " Please try later." };
+                            sendMessageToServer(message, callback, res);
+                        }
+                    });
 
+                } else {
+                    var message = { status: "ERROR", message: "Invalid user id for twitter validation." };
+                    sendMessageToServer(msg, callback, res);
+                }//if (!err) {
             });
         } else {
             var message = { status: "ERROR", message: "NECTORR recieved an invalid twitter request." };
