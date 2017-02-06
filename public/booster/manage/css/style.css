@@ -34,7 +34,7 @@ a.hiddenanchor{
 }
 /** The wrapper that will contain our two forms **/
 #wrapper{
-	width: 60%;
+	width: 80%;
 	right: 0px;
 	min-height: 560px;	
 	margin: 0px auto;	
@@ -291,11 +291,11 @@ p.change_link{
 }
 /** Styling both forms **/
 #register, 
-#login{
+#login, #calendar{
 	position: absolute;
 	top: 0px;
 	width: 88%;	
-	padding: 18px 6% 60px 6%;
+	padding: 18px 2% 60px 2%;
 	margin: 0 0 35px 0;
 	background: rgb(247, 247, 247);
 	border: 1px solid rgba(147, 184, 189,0.8);

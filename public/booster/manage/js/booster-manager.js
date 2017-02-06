@@ -1,5 +1,5 @@
 ﻿var selectedOptions = [];
-var tempSocialMediaNames = ['facebook', 'twitter', 'google'];//, 'google', 'twitter'];
+var tempSocialMediaNames = ['facebook', 'twitter'];//, 'google'];//, 'google', 'twitter'];
 //refer https://developers.google.com/+/domains/api/circles
 var plusDomain = {
     getCircleList: 'https://www.googleapis.com/plusDomains/v1/people/userId/circles' //get
@@ -8,16 +8,73 @@ var plusDomain = {
     , removeCircle: 'https://www.googleapis.com/plusDomains/v1/circles/circleId'//DELETE
 
 }
+
+var year = new Date().getFullYear();
+var month = new Date().getMonth();
+var day = new Date().getDate();
+
+var eventData = {
+    events: [
+        { "id": 1, "start": new Date(year, month, day, 12), "end": new Date(year, month, day, 13, 35), "title": "Launch of nectorr." }
+    ]
+};
+
 var selectedPostableLocs ={};
 $(window).load(function (e) {
-    $("#booster-option-tag-list").tagsinput();
+    $('#weekCalendar').weekCalendar({
+        timeslotsPerHour: 4,
+        height: function ($calendar) {
+            return $(window).height() - $("h1").outerHeight();
+        },
+        eventRender: function (calEvent, $event) {
+            if (calEvent.end.getTime() < new Date().getTime()) {
+                $event.css("backgroundColor", "#aaa");
+                $event.find(".time").css({ "backgroundColor": "#999", "border": "1px solid #888" });
+            }
+        },
+        eventNew: function (calEvent, $event) {
+            displayMessage("<strong>Added event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
+            alert("You've added a new event. You would capture this event, add the logic for creating a new event with your own fields, data and whatever backend persistence you require.");
+        },
+        eventDrop: function (calEvent, $event) {
+            displayMessage("<strong>Moved Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
+        },
+        eventResize: function (calEvent, $event) {
+            displayMessage("<strong>Resized Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
+        },
+        eventClick: function (calEvent, $event) {
+            displayMessage("<strong>Clicked Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
+        },
+        eventMouseover: function (calEvent, $event) {
+            displayMessage("<strong>Mouseover Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
+        },
+        eventMouseout: function (calEvent, $event) {
+            displayMessage("<strong>Mouseout Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
+        },
+        noEvents: function () {
+            displayMessage("There are no events for this week");
+        },
+        data: eventData
+    });
+
+    function displayMessage(message) {
+        $("#message").html(message).fadeIn();
+    }
+
+    //$calendar.weekCalendar("refresh");
+
     var smElementCounter = 0;
     for (var smcounter = 0; smcounter < tempSocialMediaNames.length; smcounter++) {
         SocialMediaGroupsAndPages[tempSocialMediaNames[smcounter]].getPostableLocs(function (data) {
             if (data) {
-                var socialMediaName = tempSocialMediaNames[smElementCounter];//tempSocialMediaNames[smcounter];
-                selectedPostableLocs[socialMediaName] = data;
+                selectedPostableLocs[data.sm_name] = data;
                 smElementCounter++
+                if (smElementCounter == tempSocialMediaNames.length) {
+                    // save PostableLocs
+                    setPostableLocs(selectedPostableLocs, function (message) {
+                        manageServerResponse(message);
+                    });
+                }//if (smElementCounter == tempSocialMediaNames.length) {
             } //if (data) {
         });//SocialMediaGroupsAndPages[tempSocialMediaNames[smcounter]].getPostableLocs(function (data) {
     }//for (var smcounter = 0; smcounter < tempSocialMediaNames.length; smcounter++) {
@@ -25,6 +82,16 @@ $(window).load(function (e) {
 
 $(document).ready(function () {
     initFacebookAPI();
+    $("#divSetCalendar").hide();
+    $("#btnLogin").click(function () {       
+        $("#container_demo").toggle("slide");
+        $("#divSetCalendar").effect("slide");
+    });
+    $("#btnBack").click(function () {
+        $("#divSetCalendar").hide();
+        $("#container_demo").toggle("slide");
+    });
+
     $('#options-add-to-list').click(function (e) {
         var optionToAdd = getSelectedOptions();
         // add as 
@@ -39,7 +106,7 @@ $(document).ready(function () {
     });//$('#options-type-name').focus(function (e) {
 
     $("select").msDropdown({ roundedBorder: true });
-
+    $('#outlookCalendar').show();
 }); //$(document).ready(function () {
 
 var getSelectedOptions = function () {
@@ -77,7 +144,7 @@ var SocialMediaGroupsAndPages = {
                             $executeFacebookCommand('manage_pages', '/' + user_id + '/accounts', function (pageData) {
                                 pushIntoArray(postableLocs.pages, pageData.data);
                                 if (callback) {
-                                    callback(postableLocs);
+                                    callback({ sm_name: "facebook", data: postableLocs });
                                 } else {
                                     return postableLocs;
                                 }
@@ -93,7 +160,7 @@ var SocialMediaGroupsAndPages = {
         screenName: "",
         getPostableLocs: function (callback) {
             $getTwitterLists(function (lists) {
-                if (callback && (lists.status == "SUCCESS")) { callback(lists.data) } else { callback(null) } 
+                if (callback) { callback(lists) }
             });
 
         } //getPostableLocs: function () {
@@ -102,21 +169,16 @@ var SocialMediaGroupsAndPages = {
         userId: "",
         access_token: "",
         getPostableLocs: function (callback) {
-            initializeGoogle(function (authResponse) {
-                var access_token    
-                getRequest('GET', plusDomain.getCircleList, function (listData) {
-                    //process the list
-                    callback(listData);
-                });//getRequest('GET', plusDomain.getCircleList, function (listData) {
-            }, null, "https://www.googleapis.com/plusDomains/v1/people/userId/circles");
-            //initializeGoogle(callback);
-            //googleApiClientReady(callback);
-            //$initializeGoogleAuth2(function (profileInfo) {
-            //    var a = profileInfo
-            //    if (callback)
-            //        callback(profileInfo);
-                
-            //});
+            //initializeGoogle(null);
+            $getCredsFromServer(function (userData) {
+                getGoogleCircles(
+                    function (circleResponse) {
+                        //process the list
+                        callback({ sm_name: "google", data: circleResponse });
+                        //});//getRequest('GET', plusDomain.getCircleList, function (listData) {
+                    }, userData.googlePlusUser.id ,"https://www.googleapis.com/plusDomains/v1/people/userId/circles");
+
+            }, "")
         },
         getFeaturedCollections: function () { }
     },//"google": {}

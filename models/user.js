@@ -27,33 +27,9 @@ var userSchema = mongoose.Schema( {
         profileInfo: Object
         , postableLocs : Object
     },
-    googlePlusUser           : {
-        //id           : String
-        //, token        : String
-         email          : String
-        , aboutMe       :String
-        , circledByCount: Number
-        , cover         : Object
-        , displayName   : String
-        , etag          : String
-        , gender        : String
-        , id            : String
-        , image         : Object
-        , isPlusUser    : Boolean
-        , kind          : String
-        , language      : String
-        , name          : Object
-        , objectType    : String
-        , occupation    : String
-        , organizations : Array
-        , placesLived   : Array
-        , result        : Object
-        , url           : String
-        , urls          : Array
-        , verified      : Boolean
-        , perms : { data : String, dontAsk : Boolean }
-        , posts: Object
-        , postableLocs: Object
+    googlePlusUser: {
+        profileInfo: Object
+        , postableLoc : Object
     },
     linkedin: {
         profileInfo: Object

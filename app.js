@@ -17,7 +17,9 @@ mongoose.connect(configDB.url); // connect to our database
 
 var app = express();
 var server = require('http').createServer(app);
-
+var bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({ extended: false,limit: '50mb'  }));
+    
 //app.route(router);
 // serve static assets from the public directory
 //app.configure(function);
@@ -46,6 +48,8 @@ app.use(expressSession(
         cookie: { secure: true }
     }
 ));
+//app.use(express.json());
+//app.use(express.bodyParser({ limit: '50mb' }));
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 

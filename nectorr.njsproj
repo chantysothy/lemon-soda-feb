@@ -26,6 +26,8 @@
     <Compile Include="public\app\js\cookie.js" />
     <Compile Include="public\app\js\jsonutils.js" />
     <Compile Include="public\app\js\sm_login.js" />
+    <Compile Include="public\assets\jquery.weekcalendar\jquery.weekcalendar.js" />
+    <Compile Include="public\assets\jquery.weekcalendar\jquery.weekcalendar.js.min.js" />
     <Compile Include="public\assets\type-ahead\bloodhound.min.js" />
     <Compile Include="public\assets\codebird-js\codebird.js" />
     <Compile Include="public\assets\doT\benchmarks\compileBench.js" />
@@ -814,6 +816,7 @@
     <Content Include="public\assets\fonts\fontawesome-webfont.woff2" />
     <Content Include="public\assets\fonts\FontAwesome.otf" />
     <Content Include="public\assets\images\social-networkbanner.jpg" />
+    <Content Include="public\assets\jquery.weekcalendar\jquery.weekcalendar.css" />
     <Content Include="public\assets\js\ie\backgroundsize.min.htc" />
     <Content Include="public\assets\moment\.bower.json" />
     <Content Include="public\assets\moment\bower.json" />
@@ -1275,6 +1278,7 @@
     <Folder Include="public\assets\fonts\" />
     <Folder Include="public\assets\images\" />
     <Folder Include="public\assets\instagram\" />
+    <Folder Include="public\assets\jquery.weekcalendar\" />
     <Folder Include="public\assets\js\" />
     <Folder Include="public\assets\js\ie\" />
     <Folder Include="public\assets\moment\" />

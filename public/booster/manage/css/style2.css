@@ -1,7 +1,7 @@
 /* remove nectorr styles and reset the whole thing */
 
 @import url('../../../css/fonts.css');
-#container_demo{
+#container_demo, divSetCalendar{
 	 text-align: left;
 	 margin: 0;
 	 padding: 0;
@@ -35,12 +35,16 @@ a.hiddenanchor{
 	display: none;
 }
 /** The wrapper that will contain our two forms **/
+	#calendar {
+		max-width: 900px;
+		margin: 0 auto;
+	}
 #wrapper{
-	width: 60%;
+	width: 80%;
 	right: 0px;
 	min-height: 560px;	
-	margin: 0px auto;	
-	width: 500px;
+	margin: 80px auto;	
+	/*width: 500px;*/
 	position: relative;	
 }
 /**** Styling the form elements **/
@@ -293,8 +297,8 @@ p.change_link{
 }
 /** Styling both forms **/
 #register, 
-#login{
-	position: absolute;
+#login, #setCalender{
+	position: relative;
 	top: 0px;
 	width: 100%;	
 	padding: 18px 6% 60px 6%;

@@ -11,7 +11,7 @@ var fbGraph = require('fbgraph');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy = require('passport-twitter').Strategy;
-
+var tweets = require('./tweets');
 var fbCode, twitterToken1, twitterToken2, twitterEmail;
 var redirectOptions = {
     successRedirect: '/auth/facebook/callback',
@@ -329,6 +329,7 @@ router.get('/perms/get', function (req, res) {
     var callback = req.query.callback;
     if (callback) {
         var perms_for = req.query.getPermsFor;
+        //perms_for = JSON.parse(perms_for);
         if (perms_for) {
             perms_for = JSON.parse(perms_for);
             email = perms_for.email
@@ -340,8 +341,8 @@ router.get('/perms/get', function (req, res) {
                     return;
                 } //if (err) { 
                 
-                if (permsData) {
-                    var permissionData = { perm_email: email, facebook: permsData.facebook._doc.facebook, twitter: permsData.twitter._doc.twitter, linkedIn: permsData.linkedin._doc.linkedIn };//googlePlusUser: permsData.googlePlusUser._doc.googlePlusUser, 
+                    if (permsData) {
+                    var permissionData = { perm_email: email, facebook: permsData.facebook._doc.facebook, twitter: permsData.twitter._doc.twitter, linkedIn: permsData._doc.linkedin, google : permsData._doc.googlePlusUser };//googlePlusUser: permsData.googlePlusUser._doc.googlePlusUser, 
                     var message = { status: 'SUCCESS', message: 'requested data was found.', 'data': JSON.stringify(permissionData) }
                     sendMessageToServer(message, callback, res);
                     return;
@@ -630,24 +631,27 @@ router.get('/twitter/get/lists', function (req, res) {
             userModel.findOne(condition, function (err, foundUser) {
                 if (!err) {
                     var screenName = foundUser.twitter.profileInfo.screen_name;
-                    var client = new Twitter({
-                        consumer_key: config.twitter.consumer_key,
-                        consumer_secret: config.twitter.consumer_secret,
-                        bearer_token: process.env.TWITTER_BEARER_TOKEN
-                    });
-
-                    client.get('lists/list', { screen_name: screenName }, function (error, lists, response) {
-                        if (!error) {
-                            var message = { status: "SUCCESS", message: "lists retrieved for " + email, data: { "lists": lists } };
-                            sendMessageToServer(message, callback, res);
-                        } else {
-                            var message = { status: "ERROR", message: " TWITTER error code : " + error[0].code + "--" + error.message + " Please try later." };
-                            sendMessageToServer(message, callback, res);
+                    getBearer(function (bearer) {
+                        if (bearer) {
+                            var token = JSON.parse(bearer).access_token; // set for breakpoint... TBR
+                            var client = new Twitter({
+                                consumer_key: config.twitter.consumer_key,
+                                consumer_secret: config.twitter.consumer_secret,
+                                bearer_token: token
+                            });
+                            client.get('lists/list', { screen_name: screenName }, function (error, lists, response) {
+                                if (!error) {
+                                    var message = { status: "SUCCESS", message: "lists retrieved for " + email, data: lists };
+                                    sendMessageToServer(message, callback, res);
+                                } else {
+                                    var message = { status: "ERROR", message: " TWITTER error code : " + error[0].code + "--" + error[0].message + " Please try later." };
+                                    sendMessageToServer(message, callback, res);
+                                }
+                            });
                         }
-                    });
-
+                    });//getBearer(function (bearer) {
                 } else {
-                    var message = { status: "ERROR", message: "Invalid user id for twitter validation." };
+                    var message = { status: "ERROR", message: "Invalid user id detected for twitter validation." };
                     sendMessageToServer(msg, callback, res);
                 }//if (!err) {
             });
@@ -779,10 +783,59 @@ router.get('/auth/twitter/callback', function (req, res) {
 });//router.get('auth/twitter/callback', function (req, res) {
 
 
-router.get('/facebook/post', function (req, res) {
-    res.send({ message: "rendering" });
+router.get('/user/get', function (req, res) {
+    var callback = req.query.callback;
+    if (callback) {
+        var email = req.query.email;
+        if (email) {
+            var condition = { 'local.email': email };
+            userModel.findOne(condition, function (err, userData) {
+                if (!err) {
+                    var message = { status: "SUCCESS", message: "User data found.", data: userData }
+                    sendMessageToServer(message, callback, res);
+                } else {
+                    var message = { status: "ERROR", message: "there was an error in locating your profile info."}
+                    sendMessageToServer(message, callback, res);
+
+                }
+
+            });
+        }
+    }//if (callback) {
+
+
+
     res.end();
 });
+
+router.get('/postable-loc/set', function (req, res) {
+    var callback = req.query.callback;
+    if (callback) {
+        var email = req.query.email;
+        var postableLocs = req.query.postableLocs;
+        postableLocs= JSON.parse(postableLocs)
+
+        if (email && postableLocs) {
+            getUser(email, function (userData) {
+                var sm_names = Object.keys(postableLocs);
+                for (var sm_counter = 0; sm_counter < sm_names.length; sm_counter++) {
+                    if (userData[sm_names[sm_counter]]) {
+                        userData[sm_names[sm_counter]].postableLocs = postableLocs[sm_names[sm_counter]];
+                    }//if (userData[sm_names[sm_counter]]) {
+                }//for (var sm_counter = 0; sm_counter < sm_names.length; sm_counter++) {
+                userData.save(function (err, doc, a) {
+                    var message 
+                    if (!err) {
+                        message = { status: "SUCCESS", message: "Postable locations data validated." };
+                    } else {
+                        message = {status : "ERROR", message : "There was an error in validating Postable location data. Please try after sometime."}
+                    }
+                    sendMessageToServer(message, callback, res);
+                });
+            });//getUser(email, function (userData) {
+        }//if (email && postableLocs) {
+    }//if (callback) {
+});//router.get('/postable-loc/set', function (req, res) {
 
 function getUserCondition(userType) {
     var returnValue = null;
@@ -807,6 +860,27 @@ function getUserCondition(userType) {
     }
     return returnValue;
 }
+
+var getUser = function (email, callback) {
+    var condition = { 'local.email': email }
+    userModel.findOne(condition, function (err, doc) {
+        if (err) {
+            var message = { status: 'ERROR', message: 'There was an error locating user credentials.' }
+            if (callback)
+                callback(message)
+            else return message;
+
+            return;
+        }//if (err)
+        if (doc) {
+            if (callback) {
+                callback(doc);
+            } else {
+                return doc;
+            }//if (callback) {
+        }//if (doc) {
+    });//userModel.findOne(condition, function (err, doc) {
+}//var getUser= function (email) {
 
 function saveUser(userType, userInfo) {
     var resMsg = {
@@ -1160,7 +1234,7 @@ var getBearer= function(callback) {
     var returnValue
     request.post(oauthOptions, function (e, r, body) {
         if (callback) {
-            callback(r);
+            callback(body);
         } else {
             console.log("ERROR :" + e);
             console.log("R :" + r)

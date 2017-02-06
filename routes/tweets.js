@@ -39,25 +39,8 @@ var oauthOptions = {
     body: 'grant_type=client_credentials'
 };
 
-var BearerCode = getBearer();
-function getBearer(callback) {
-    var returnValue
-    request.post(oauthOptions, function (e, r, body) {
-        if (callback) {
-            callback(r);
-        } else {
-            console.log("ERROR :" + e);
-            console.log("R :" + r)
+var BearerCode = getBearerCode();
 
-            var bearerBody = JSON.parse(body);
-            process.env.TWITTER_BEARER_TOKEN = bearerBody.access_token;
-
-            console.log("BODY :" + body)
-        }//        if (callback) {
-        returnValue= body;
-    });
-    return returnValue;
-}
 router.get('/user_timeline/:user', function(req, res) {
 
     var bearer;//= JSON.parse(BearerCode).access_token;
@@ -204,4 +187,24 @@ var sendMessageToServer = function (msg, callback, res) {
     res.send(returnValue);
     res.end();
 }
+
+function getBearerCode(callback) {
+    var returnValue
+    request.post(oauthOptions, function (e, r, body) {
+        if (callback) {
+            callback(r);
+        } else {
+            console.log("ERROR :" + e);
+            console.log("R :" + r)
+
+            var bearerBody = JSON.parse(body);
+            process.env.TWITTER_BEARER_TOKEN = bearerBody.access_token;
+
+            console.log("BODY :" + body)
+        }//        if (callback) {
+        returnValue = body;
+    });
+    return returnValue;
+};
+
 module.exports = router;
