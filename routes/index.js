@@ -6,7 +6,7 @@ var config = require('../config/config');
 var http = require('http');
 var request = require('request');
 var fbCallback;
-var Twitter = require('twitter');
+var Twitter = require('node-twitter-api');
 var fbGraph = require('fbgraph');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
@@ -673,7 +673,8 @@ router.get('/auth/twitter', function (req, res) {
         });//var twitterAPI = new Twitter(
         twitterAPI.getRequestToken(function (error, requestToken, requestTokenSecret, results) {
             if (error) {
-                console.log("Error getting OAuth request token : " + error);
+                var message = { status: 'ERROR', message: 'Unable to reach twitter at the moment. Please try after some time.' }
+                sendMessageToServer(message, callback, res);
             } else {
                 twitterToken1 = requestToken;
                 twitterToken2 = requestTokenSecret;
@@ -781,7 +782,6 @@ router.get('/auth/twitter/callback', function (req, res) {
     });
 
 });//router.get('auth/twitter/callback', function (req, res) {
-
 
 router.get('/user/get', function (req, res) {
     var callback = req.query.callback;

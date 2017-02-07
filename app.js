@@ -1,4 +1,6 @@
 var express = require('express');
+var contentType = require('content-type');
+var getRawBody = require('raw-body');
 var path = require('path');
 var expressSession = require('express-session');
 var router = require('./routes/index');
@@ -18,8 +20,9 @@ mongoose.connect(configDB.url); // connect to our database
 var app = express();
 var server = require('http').createServer(app);
 var bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({ extended: false,limit: '50mb'  }));
-    
+
+app.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }));
+//app.use(express.limit('10mb'));    
 //app.route(router);
 // serve static assets from the public directory
 //app.configure(function);

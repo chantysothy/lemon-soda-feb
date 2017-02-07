@@ -17,20 +17,20 @@ router.get('/google/profile', function (req, res) {
 
         //userModel.bind(userModel.googlePlusProfile, req.query.googlePlusProfile.toArray());
         if (!profile.id) {
-            var errorMessage = { status : 'ERROR' , message : 'Invalid profile id recieved by nectorr server.' };
-            res.send(callback + JSON.stringify(errorMessage));
+            var errorMessage = { status : 'ERROR' , message : 'Invalid Google+ profile recieved detected. Login with the correct Google+ profile.' };
+            res.send(callback + '('+JSON.stringify(errorMessage)+')');
             res.end();
             return;
 
         } //if (!profile.id) {
         userModel.findOne({ 'local.email' : profile.email}, null, function (err, result) {
             if (result) {
-                if (result.googlePlusUser.profileInfo == profile.id) {
+                if (result.googlePlusUser.profileInfo.id == profile.id) {
                     result.googlePlusUser.profileInfo = profile;
                     result.save(function (err, doc, numberRec) {
                         if (!err) {
                             var successMessage = { status: "SUCCESS", message: "Google+ profile successfully validated." };
-                            res.send(callback + '(' + responseMessage + ')');
+                            res.send(callback + '(' + JSON.stringify(successMessage) + ')');
                             res.end();
                             return;
                         }
@@ -40,7 +40,6 @@ router.get('/google/profile', function (req, res) {
                     res.send(callback + "(" + JSON.stringify(errorMessage) + ")");
                     res.end();
                     return;
-
                 } //if (result.googlePlusUser.profileInfo == profile.id) {
                     //res.setHeader("nv", );
                 } else {

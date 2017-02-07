@@ -34,7 +34,7 @@ $(window).load(function (e) {
         },
         eventNew: function (calEvent, $event) {
             displayMessage("<strong>Added event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
-            alert("You've added a new event. You would capture this event, add the logic for creating a new event with your own fields, data and whatever backend persistence you require.");
+           // alert("You've added a new event. You would capture this event, add the logic for creating a new event with your own fields, data and whatever backend persistence you require.");
         },
         eventDrop: function (calEvent, $event) {
             displayMessage("<strong>Moved Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
@@ -70,6 +70,8 @@ $(window).load(function (e) {
                 selectedPostableLocs[data.sm_name] = data;
                 smElementCounter++
                 if (smElementCounter == tempSocialMediaNames.length) {
+                    // prepare List for auto complete
+
                     // save PostableLocs
                     setPostableLocs(selectedPostableLocs, function (message) {
                         manageServerResponse(message);
@@ -125,6 +127,8 @@ var SocialMediaGroupsAndPages = {
     "facebook": {
         userId: "",
         access_token: "",
+        groups: Object,
+        pages : Object,
         getPostableLocs: function ( callback) {
             var returnValue = []; // calling function needs to look at returnValue.length>0 to proceed. This method shall run asynchronously.
             // get relevant scopes and login
@@ -158,22 +162,25 @@ var SocialMediaGroupsAndPages = {
     },//"facebook": {}
     "twitter": {
         screenName: "",
+        postableLocs: {},
         getPostableLocs: function (callback) {
             $getTwitterLists(function (lists) {
+                listData['lists'] = lists;
                 if (callback) { callback(lists) }
             });
-
         } //getPostableLocs: function () {
     },//"twitter": {}
     "google": {
         userId: "",
         access_token: "",
+        postableLocs: {},
         getPostableLocs: function (callback) {
             //initializeGoogle(null);
             $getCredsFromServer(function (userData) {
                 getGoogleCircles(
                     function (circleResponse) {
                         //process the list
+                        postableLocs["circles"] = circleResponse;
                         callback({ sm_name: "google", data: circleResponse });
                         //});//getRequest('GET', plusDomain.getCircleList, function (listData) {
                     }, userData.googlePlusUser.id ,"https://www.googleapis.com/plusDomains/v1/people/userId/circles");
@@ -185,12 +192,14 @@ var SocialMediaGroupsAndPages = {
     "instagram": {
         user_id: "",
         access_token: "",
+        postableLocs: {},
         getPostableLocs: function (callback) {
         }
     }, //"instagram": {}
     "pinterest": {
         user_id: "",
         access_token: "",
+        boards : Object,
         getPostableLocs: function () {
 
         }//getPostableLocs: function () {
@@ -198,10 +207,25 @@ var SocialMediaGroupsAndPages = {
     "linkedin": {
         userId: "",
         access_token: "",
-        getPostableLocs: function () {
-        }//        getPostableLocs: function () {
-    } //linkedIn
+        postableLoc: Object,        
+        getPostableLocs: function() {
+            IN.API.Raw("/people/~/group-memberships:(group:(id,name,counts-by-category))?membership-state=member")
+                .result(function (groups) {
+                    var a = groups;
+                })
+                .error(function (error) {
+                    var a = error;
+                });
 
+        }//        getPostableLocs: function () {
+    }, //linkedIn
+    "Utils": {
+        prepareListForAutoSuggest: function () {
+            var returnValue = [];
+            
+            return returnValue;
+        } //prepareListForAutoSuggest: function () {
+    } //Utils
 } //var SocialMediaGroupsAndPages = {
 
 var pushIntoArray = function (toArray, fromArray) {

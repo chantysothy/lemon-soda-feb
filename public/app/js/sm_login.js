@@ -68,10 +68,10 @@ var facebookDefaults = {
 }
 
 var initFacebookAPI = function () {
-    window.fbAsyncInit = function fbAsyncInit() {
+    window.fbAsyncInit = function () {
         version = 'v2.3'
         FB.init({
-            appId: facebookDefaults.appId,  // Change appId 409742669131720 with your Facebook Application ID
+            appId: facebookDefaults.appId,  
             status: true,
             xfbml: true,
             cookie: true,
@@ -92,7 +92,8 @@ $nectorrLinkedInLogin = function (linkedInLoginScope, event, callback) {
     
     IN.Event.on(IN, "auth", getLinkedInUserDetails); 
     IN.User.authorize(function (data, metadata) {
-            
+            //save linkedin authorization
+
     });
     //getLinkedInUserDetails();
 }//$nectorrLinkedInLogin = function (linkedInLoginScope, event, callback) {
@@ -137,17 +138,6 @@ $nectorrFacebookLogin = function (fbLoginScope, event, callback) {
         js.src = "//connect.facebook.net/en_US/all.js";
         fjs.parentNode.insertBefore(js, fjs);
     }(document, 'script', 'facebook-jssdk'));
-
-window.fbAsyncInit = function () {
-    FB.init({
-        appId: facebookDefaults.appId,  
-        status: true,
-        xfbml: true,
-        cookie: true,
-        version    : 'v2.3' // use version 2.7
-
-    });
-}; // var $facebookLogin
 
 var $nectorrTwitterLogin = function (callback) {
     var command = $twitterUrls.authorize_url;
@@ -236,7 +226,7 @@ $initializeGoogleAuth2 = function () {
 
 $initializeGooglewithCallback = function (callback) {
     var auth2, authInstance;
-    initializeGoogle(callback, null, true); // default scope but get authResponse from google
+    initializeGoogle(true, callback); // default scope but get authResponse from google
 } // Google signIn
 
 var saveGoogleProfileData = function (profile) {
@@ -260,7 +250,8 @@ var saveGoogleProfileData = function (profile) {
         }
         ,jsonPCallback: "jsonpCallback"
         , success: function (data) {
-            alert("SUCCESS+" + data);
+            manageServerResponse(data);
+            //alert("SUCCESS+" + data);
             // set global variable and move to the next tab for setup
             // VerifyResultAndProcessForGooglePlus(data);
             // $("#feeds").children().show();
@@ -358,10 +349,14 @@ var $getCredsFromServer = function (email, callback) {
 
 }//var getCredsFromServer = function (email) { 
 
-var setPostableLocs = function (postableLoc,callback) {
+var setPostableLocs = function (postableLoc, callback) {
+    var queryParam = "email=" + $getClientEmail() + "&postableLocs=";
+    var postableLocLength = JSON.stringify(postableLoc).length;
+    var lengthOfParams = queryParam.length + postableLocLength
+   
     if (callback) {
         $.ajax({
-            headers: { "Accept": "application/json" }
+            headers: { "Accept": "application/json"}
             , type: 'GET'
             , url: '/postable-loc/set'
             , data: "email=" + $getClientEmail() + "&postableLocs=" + JSON.stringify(postableLoc)
@@ -370,6 +365,8 @@ var setPostableLocs = function (postableLoc,callback) {
             , crossDomain: true
             , beforeSend: function (xhr) {
                 xhr.withCredentials = true;
+                //                xhr.setRequestHeader('content-length', queryParam.length + postableLocLength);
+                xhr.setRequestHeader('Content-Length', lengthOfParams.toString());
             }
             , jsonPCallback: "jsonpCallback"
             , success: function (data) {
@@ -570,7 +567,7 @@ var pushArray = function (pushTo, getFrom) {
 
 var googleUserScope = googlePlusDefaults.scopes.plusMe;//+ " " +
 var googleCircleScope = googlePlusDefaults.scopes.plusCirclesRead + " " + googlePlusDefaults.scopes.plusCirclesWrite;//googlePlusDefaults.scopes.plusMe,
-var initializeGoogle = function (callback, getAuthResponse = "") {
+var initializeGoogle = function (getAuthResponse = false, callback) {
     var auth2, authInstance;
 
 
@@ -603,16 +600,25 @@ var initializeGoogle = function (callback, getAuthResponse = "") {
                                 request.execute(function (resp) {
                                     console.log('Retrieved profile for:' + resp.displayName);
                                     if (!resp.error) {
+                                        var returnValue
+                                        if (getAuthResponse) {
+                                            returnValue = authInstance;
+                                        } else {
+                                            returnValue = resp;
+                                        }
 
                                         if (callback) {
-                                            callback(resp);
+
+                                            callback(returnValue);
                                         } else {
                                             saveGoogleProfileData(resp);
                                         }
                                         // save cookie
                                         //userLoginTo
                                     } else {
-                                        callback(resp);
+                                        //error
+
+                                        callback({status : "ERROR", message : "Unable to connect with Google+ at the moment."});
                                     }
                             //    });
                             });

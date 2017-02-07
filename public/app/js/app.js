@@ -7,6 +7,7 @@
     } else {
         $('#invite').show();
         $('#logout').show();
+
         getQueryTags(function (searchOptions) {
             var publishCredentials = {
                 // FACEBOOK
@@ -83,62 +84,67 @@
                 template_html: '../template.html'
                 //update_period : 300
             }
-            fbConnect(function (response) {
-                facebookAuthObject = response;
-                publishCredentials.facebook.access_token = response.authResponse.accessToken;
-                var instagramAuthUrl = "https://api.instagram.com/oauth/authorize/?client_id=" + "f3a4940affd34bd7aaabebde1a685846" + "&response_type=code"
-                var feedDiv = $('#socialfeeds');
-                $initializeGooglewithCallback(function (googleResponse) {
-                    googleAuthObject = googleResponse.getAuthResponse();
-                    var googleUser = googleResponse.getId();
+            $nectorrFacebookLogin("publish_actions, user_managed_groups, manage_pages, publish_pages, pages_show_list",null,function (response) {
+                if (response) {
+                    facebookAuthObject = response;
+                    publishCredentials.facebook.access_token = response.authResponse.accessToken;
+                    var instagramAuthUrl = "https://api.instagram.com/oauth/authorize/?client_id=" + "f3a4940affd34bd7aaabebde1a685846" + "&response_type=code"
+                    var feedDiv = $('#socialfeeds');
+                    $initializeGooglewithCallback(function (googleResponse) {
+                        googleAuthObject = googleResponse.currentUser.get().getAuthResponse();//getAuthResponse();
+                        var googleUser = googleResponse.currentUser.get().getId();
 
-                    var socialFeedLoginInfo = {
-                        // INSTAGRAM
-                        facebook: {
-                            accounts: ['@' + facebookAuthObject.authResponse.userID],  //Array: Specify a list of accounts from which to pull posts
-                            limit: 5,                                    //Integer: max number of posts to load
-                            client_id: 'wj888T3jlauiQIjcdu751AELB', // make sure to have your app read-only
-                            access_token: response.authResponse.accessToken, // make sure to have your app read-only
-                        },
-                        twitter: {
-                            accounts: ['@edwardvarghese'],  //Array: Specify a list of accounts from which to pull posts
-                            limit: 5,                                    //Integer: max number of posts to load
-                            consumer_key: 'zR30W1z6cTQfYKaeMMrUdbXKm', // make sure to have your app read-only
-                            consumer_secret: 'W3k4tedpDKJ0hM6Hnn2I4hAHWag1INFw2ipaBOhgYBqt5zaxL2', // make sure to have your app read-only
-                        },
-                        google: {
-                            accounts: ['@' + googleUser],  //Array: Specify a list of accounts from which to pull posts
-                            limit: 5,                                    //Integer: max number of posts to load
-                            client_id: googlePlusDefaults.clientId,       //String: Instagram client id (optional if using access token)
-                            access_token: googlePlusDefaults.apiKey,
+                        var socialFeedLoginInfo = {
+                            // INSTAGRAM
+                            facebook: {
+                                accounts: ['@' + facebookAuthObject.authResponse.userID],  //Array: Specify a list of accounts from which to pull posts
+                                limit: 5,                                    //Integer: max number of posts to load
+                                client_id: 'wj888T3jlauiQIjcdu751AELB', // make sure to have your app read-only
+                                access_token: response.authResponse.accessToken, // make sure to have your app read-only
+                            },
+                            twitter: {
+                                accounts: ['@edwardvarghese'],  //Array: Specify a list of accounts from which to pull posts
+                                limit: 5,                                    //Integer: max number of posts to load
+                                consumer_key: 'zR30W1z6cTQfYKaeMMrUdbXKm', // make sure to have your app read-only
+                                consumer_secret: 'W3k4tedpDKJ0hM6Hnn2I4hAHWag1INFw2ipaBOhgYBqt5zaxL2', // make sure to have your app read-only
+                            },
+                            google: {
+                                accounts: ['@' + googleUser],  //Array: Specify a list of accounts from which to pull posts
+                                limit: 5,                                    //Integer: max number of posts to load
+                                client_id: googlePlusDefaults.clientId,       //String: Instagram client id (optional if using access token)
+                                access_token: googlePlusDefaults.apiKey,
 
-                            // GENERAL SETTINGS
-                            length: 400,                                      //Integer: For posts with text longer than this length, show an ellipsis.
-                        },
-                        blogger: {
-                            accounts: ['@' + googleUser],  //Array: Specify a list of accounts from which to pull posts
-                            limit: 5,                                    //Integer: max number of posts to load
-                            client_id: googlePlusDefaults.clientId,       //String: Instagram client id (optional if using access token)
-                            access_token: googlePlusDefaults.apiKey,
+                                // GENERAL SETTINGS
+                                length: 400,                                      //Integer: For posts with text longer than this length, show an ellipsis.
+                            },
+                            blogger: {
+                                accounts: ['@' + googleUser],  //Array: Specify a list of accounts from which to pull posts
+                                limit: 5,                                    //Integer: max number of posts to load
+                                client_id: googlePlusDefaults.clientId,       //String: Instagram client id (optional if using access token)
+                                access_token: googlePlusDefaults.apiKey,
 
-                            // GENERAL SETTINGS
-                            length: 400,                                      //Integer: For posts with text longer than this length, show an ellipsis.
-                        },
-                        update_period: 5000,
-                        show_media: true
+                                // GENERAL SETTINGS
+                                length: 400,                                      //Integer: For posts with text longer than this length, show an ellipsis.
+                            },
+                            update_period: 5000,
+                            show_media: true
 
-                    } //var socialFeedLoginInfo = {
-                    var searchDetails = ['Monitor', 'ListenTo', 'Engagement', 'Trending', 'ListenTo'];
-                    for (var searchDetailsCounter = 0; searchDetailsCounter < searchDetails.length; searchDetailsCounter++) {
-                        var searchData = searchOptions.StreamObject[searchDetails[searchDetailsCounter]].split(',');
-                        pushArray(socialFeedLoginInfo.facebook.accounts, searchData);
-                        pushArray(socialFeedLoginInfo.twitter.accounts, searchData);
-                        pushArray(socialFeedLoginInfo.google.accounts, searchData);
-                    }//for (var searchDetailsCounter = 0; searchDetailsCounter < searchDetails.length; searchDetailsCounter++) {
-                    feedDiv.socialfeed(socialFeedLoginInfo);
+                        } //var socialFeedLoginInfo = {
+                        var searchDetails = ['Monitor', 'ListenTo', 'Engagement', 'Trending', 'ListenTo'];
+                        for (var searchDetailsCounter = 0; searchDetailsCounter < searchDetails.length; searchDetailsCounter++) {
+                            var searchData = searchOptions.StreamObject[searchDetails[searchDetailsCounter]].split(',');
+                            pushArray(socialFeedLoginInfo.facebook.accounts, searchData);
+                            pushArray(socialFeedLoginInfo.twitter.accounts, searchData);
+                            pushArray(socialFeedLoginInfo.google.accounts, searchData);
+                        }//for (var searchDetailsCounter = 0; searchDetailsCounter < searchDetails.length; searchDetailsCounter++) {
+                        feedDiv.socialfeed(socialFeedLoginInfo);
 
-                });
+                    });
+                } else {
+                    var message = { status: "ERROR", message: "There was an error connecting with Facebook. Do try again after a few minutes." }
+                    $showMessage('serverResponse', message.message, message.status.toLowerCase(), true);
 
+                }
             });//fbconnect
 
         });
@@ -148,6 +154,13 @@
 
 }); //$(window).load(function () {
 $(document).ready(function () {
+    if (!$isLoggedIn()) {
+        $('#invite').hide();
+        $('#logout').hide();
+        window.location.href = '/signup/local';
+    }
+
+    initFacebookAPI();
     var googleProfile, resourceName;
     //setCookie();    
     var linkedInProfile = {
@@ -183,7 +196,7 @@ $(document).ready(function () {
                         window.open(response.data, "Ratting", "toolbar = 0, status = 0,")
                         console.log('twitter windowis open or closed');
                     } else {
-                        manageServerResponse(response);
+                        $showMessage('serverResponse', response.message, response.status, true, ev);
                     }
                     break;
             }//switch (response.status) {
@@ -206,7 +219,7 @@ $(document).ready(function () {
             var email = $getClientEmail();
             var linkedInProfile = { registeredEmail: email, sm_name: 'linkedIn', loginInfo: linkedInProfileData };
             $saveLoginInfo(linkedInProfile, event, function (res) {
-                manageServerResponse(res);
+                $showMessage('serverResponse', res.message, res.status.toLowerCase(), true, ev);
             });//$saveLoginInfo(linkedInProfile, event, function (res) {
             //save profile data
         });//$nectorrLinkedInLogin('', 'auth', function (data) {
@@ -371,6 +384,3 @@ var authCreds = {
     "google": { client_id: "102046510109174994539" }
 
 }
-var fbConnect = function (callback) {
-    callback(null);
-}//var fbConnect = function (callback) {
