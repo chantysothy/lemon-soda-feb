@@ -1,5 +1,6 @@
 ﻿var selectedOptions = [];
-var tempSocialMediaNames = ['facebook', 'twitter'];//, 'google'];//, 'google', 'twitter'];
+var autoCompleteList = [];
+var tempSocialMediaNames = ['facebook', 'twitter'];//'google'];//, 'linkedin'];
 //refer https://developers.google.com/+/domains/api/circles
 var plusDomain = {
     getCircleList: 'https://www.googleapis.com/plusDomains/v1/people/userId/circles' //get
@@ -19,7 +20,8 @@ var eventData = {
     ]
 };
 
-var selectedPostableLocs ={};
+var selectedPostableLocs = {};
+
 $(window).load(function (e) {
     $('#weekCalendar').weekCalendar({
         timeslotsPerHour: 4,
@@ -66,16 +68,42 @@ $(window).load(function (e) {
     var smElementCounter = 0;
     for (var smcounter = 0; smcounter < tempSocialMediaNames.length; smcounter++) {
         SocialMediaGroupsAndPages[tempSocialMediaNames[smcounter]].getPostableLocs(function (data) {
-            if (data) {
-                selectedPostableLocs[data.sm_name] = data;
-                smElementCounter++
+            if (data ) {
+                SocialMediaGroupsAndPages[data.sm_name].postableLocs = data;
+                setupAutoCompleteList(autoCompleteList, data.sm_name);
+                smElementCounter++;
                 if (smElementCounter == tempSocialMediaNames.length) {
                     // prepare List for auto complete
-
-                    // save PostableLocs
-                    setPostableLocs(selectedPostableLocs, function (message) {
-                        manageServerResponse(message);
+                    // setup auto complete list values
+                    
+                    $("#sm-options-type-name").magicsearch({
+                        dataSource: autoCompleteList,
+                        fields: ['sm_name', 'type', 'desc'],
+                        format: '%sm_name% · %type% /%desc%',                    
+                        id: 'id',
+                        type: '',
+                        ajaxOptions: {},
+                        hidden: false,
+                        maxShow: 5,
+                        isClear: true,
+                        showSelected: true,
+                        dropdownBtn: false,
+                        dropdownMaxItem: 8,
+                        multiple: true,
+                        focusShow: false,
+                        multiField: 'desc',
+                        multiStyle: {space:5, width: 200},
+                        maxItem: true,
+                        noResult: 'no such postable location found'
                     });
+                    $("#sm-options-type-name").attr('data-id', 'id, desc');
+                    //fillCombo('sm-options-type-name', autoCompleteList);
+                    //var fbPostableLocs = SocialMediaGroupsAndPages.facebook.; // update it on save as well.
+                    // save PostableLocs
+                    //$('#options-type-name').redraw();
+                    //setPostableLocs(selectedPostableLocs, function (message) {
+                        //manageServerResponse(message);
+                    //});
                 }//if (smElementCounter == tempSocialMediaNames.length) {
             } //if (data) {
         });//SocialMediaGroupsAndPages[tempSocialMediaNames[smcounter]].getPostableLocs(function (data) {
@@ -85,51 +113,49 @@ $(window).load(function (e) {
 $(document).ready(function () {
     initFacebookAPI();
     $("#divSetCalendar").hide();
-    $("#btnLogin").click(function () {       
+    $("#btnLogin").click(function (e) {       
+        e.stopPropagation();
+        e.preventDefault();
         $("#container_demo").toggle("slide");
         $("#divSetCalendar").effect("slide");
     });
-    $("#btnBack").click(function () {
+    $("#btnBack").click(function (e) {
+        e.stopPropagation();
+        e.preventDefault();
         $("#divSetCalendar").hide();
         $("#container_demo").toggle("slide");
     });
 
-    $('#options-add-to-list').click(function (e) {
-        var optionToAdd = getSelectedOptions();
-        // add as 
-    });//$('#options-add-to-list').click(function (e) {
 
-    $('#options-type-name').focus(function (e) {
-        var selectedOptions = getSelectedOptions();
-        var postableLocs = SocialMediaGroupsAndPages[selectedOptions.sm_name].getPostableLocs(function (postableLocations) {
-            selectedPostableLocs = addElementToArray("", postableLocations);
-        });
-        
-    });//$('#options-type-name').focus(function (e) {
 
-    $("select").msDropdown({ roundedBorder: true });
+    $("#social-media").msDropdown({ roundedBorder: true });
+    $("#postLoc").msDropdown({ roundedBorder: true });
+
     $('#outlookCalendar').show();
 }); //$(document).ready(function () {
 
 var getSelectedOptions = function () {
     var returnValue
     var selectedSocialMedia = $("#social-media").val();
-    var postableLoc = $("#tech").val();
+    var postableLoc = $("#postLoc").val();
     returnValue = { sm_name: selectedSocialMedia, loc: postableLoc, locValue: "" };
     return returnValue
 }//var getSelectedOptions = functions(){
+
 var checkDuplicateSelection = function (valueToCheck) {
     if (valueToCheck) {
 
     }//if (valueToCheck) {
 } //var checkDuplicate = function (valueToCheck) {
+
 var SocialMediaGroupsAndPages = {
     "facebook": {
         userId: "",
         access_token: "",
         groups: Object,
-        pages : Object,
-        getPostableLocs: function ( callback) {
+        pages: Object,
+        postableLocs  : Object,
+        getPostableLocs: function (callback) {
             var returnValue = []; // calling function needs to look at returnValue.length>0 to proceed. This method shall run asynchronously.
             // get relevant scopes and login
             $nectorrFacebookLogin("user_managed_groups", null, function (data) {
@@ -139,20 +165,30 @@ var SocialMediaGroupsAndPages = {
                     function (response) {
                         if (response && !response.error) {
                             var postableLocs = {
-                                    groups: []
-                                    , pages : []
-                                
+                                groups: []
+                                , pages: []
+
                             }
                             pushIntoArray(postableLocs.groups, response.data);
+
                             /* get pages*/
                             $executeFacebookCommand('manage_pages', '/' + user_id + '/accounts', function (pageData) {
                                 pushIntoArray(postableLocs.pages, pageData.data);
                                 if (callback) {
-                                    callback({ sm_name: "facebook", data: postableLocs });
+                                    setPostableLocs(postableLocs, 'facebook', function (data) {
+                                        if (data.status == "SUCCESS") {
+                                            callback({ sm_name: "facebook", data: postableLocs });
+                                        } else {
+                                            manageServerResponse(data);
+                                        }
+                                    });
                                 } else {
-                                    return postableLocs;
+                                    //return postableLocs;
                                 }
                             });
+                        } else {
+                            var message = { status: "ERROR", message: "ERROR while automatically updating Postable locations : " + JSON.stringify(response.error) }
+                            manageServerResponse(message);
                         }//if (response && !response.error) {
                     } //function (response) {
                 ); //FB.api("/" + user_id+"/groups",
@@ -161,12 +197,21 @@ var SocialMediaGroupsAndPages = {
         }//getPostableLocs: function (userInfo) { 
     },//"facebook": {}
     "twitter": {
+        Id: String,
         screenName: "",
         postableLocs: {},
         getPostableLocs: function (callback) {
             $getTwitterLists(function (lists) {
-                listData['lists'] = lists;
-                if (callback) { callback(lists) }
+                //this.SocialMediaGroupsAndPages.twitter.postableLocs['lists'] = lists;
+                setPostableLocs(lists, 'twitter', function (data) {
+                    if (data.status == "ERROR") {
+                        manageServerResponse(data)
+                    } else {
+                        if (callback) {
+                            callback({ sm_name: 'twitter', data: lists })
+                        }
+                    }
+                });
             });
         } //getPostableLocs: function () {
     },//"twitter": {}
@@ -176,16 +221,29 @@ var SocialMediaGroupsAndPages = {
         postableLocs: {},
         getPostableLocs: function (callback) {
             //initializeGoogle(null);
-            $getCredsFromServer(function (userData) {
-                getGoogleCircles(
-                    function (circleResponse) {
-                        //process the list
-                        postableLocs["circles"] = circleResponse;
-                        callback({ sm_name: "google", data: circleResponse });
-                        //});//getRequest('GET', plusDomain.getCircleList, function (listData) {
-                    }, userData.googlePlusUser.id ,"https://www.googleapis.com/plusDomains/v1/people/userId/circles");
+            if (callback) {
+                setTimeout(
+                    getLoggedInUserDetails(function (userData) {
+                        if (userData.status == "SUCCESS") {
+                            getGoogleCircles(function (circleResponse) {
+                                //process the list
 
-            }, "")
+                                postableLocs["circles"] = circleResponse;
+                                setPostableLocs(circleResponse, 'googlePlusUser', function (data) {
+                                    if (data.status == "SUCCESS") {
+                                        callback({ sm_name: "google", data: circleResponse });
+                                    } else {
+                                        manageServerResponse(data);
+                                    }
+                                });//setPostableLocs(circleResponse, 'googlePlusUser', function (data) {
+                                //});//getRequest('GET', plusDomain.getCircleList, function (listData) {
+                            }, userData.googlePlusUser.id, "https://www.googleapis.com/plusDomains/v1/people/userId/circles");
+                        } else {
+                            manageServerResponse(userData);
+                        } //if (userData.status == "SUCCESS") {
+                }),200);//getLoggedInUserDetails(function (userData) {
+            } //if (callback) {
+            
         },
         getFeaturedCollections: function () { }
     },//"google": {}
@@ -221,7 +279,7 @@ var SocialMediaGroupsAndPages = {
     }, //linkedIn
     "Utils": {
         prepareListForAutoSuggest: function () {
-            var returnValue = [];
+            var returnValue = [{status : "Not to be used."}];
             
             return returnValue;
         } //prepareListForAutoSuggest: function () {
@@ -246,6 +304,7 @@ var prepareArrayForPostableLocs = function (type,result) {
     }//for (var counter = 0; counter < result.length; counter++) {
     return returnValue;
 } //var prepareArrayForPostableLocs = function (result) {
+
 var authenticateUsingCodebird = function (cb, callback) {
     // gets a request token
     var returnValue= []
@@ -283,3 +342,95 @@ var addElementToArray = function (elementName, elementArray) {
     }//for (var counter = 0; counter < elementArray.length; counter++) {
     return returnValue;
 }//var addElementToArray = function (elementName, elementArray) {
+
+var setupAutoCompleteList = function (valArr, smName) {
+    var returnValue = valArr;
+    var fbPostableLocs = SocialMediaGroupsAndPages.facebook.postableLocs;
+    var twitterPostableLocs = SocialMediaGroupsAndPages.twitter.postableLocs;
+    var googlePostableLocs = SocialMediaGroupsAndPages.google.postableLocs;
+    if (smName == 'facebook') {
+        pushArray(returnValue, getElementsFromLocObj("group", fbPostableLocs.data.groups, smName));
+        pushArray(returnValue, getElementsFromLocObj("pages", fbPostableLocs.data.pages, smName));
+    }
+    if (smName == 'twitter') {
+        pushArray(returnValue, getElementsFromLocObj("list", twitterPostableLocs.data, smName));
+    }
+    if (smName == 'google') {
+        pushArray(returnValue, getElementsFromLocObj("list", googlePostableLocs.data, smName));
+    }
+        //pushArray(returnValue, fbPostableLocs.data.pages);
+//    pushArray(returnValue, GetFbpostableLoc(facebookPagesArray));
+
+    return returnValue;
+} //var setupAutoCompleteList = function () {
+
+var getElementsFromLocObj = function (type, locArr,smName= "not-set") {
+    returnValue = [];
+    for (var counter = 0; counter < locArr.length; counter++) {
+        var element = {};
+        if (smName == 'facebook') {
+            var currentElement = locArr[counter];
+            if (type == 'pages') {
+                element['id'] = returnValue.length;
+                element['type'] = 'page';
+                element['sm_name'] = smName;
+                element['sm_id'] = currentElement.id;
+                element['desc'] = currentElement.name;
+                element['otherInfo'] = {
+                    'category': currentElement.category
+                    , 'access_token': currentElement.access_token
+                    , 'categoryList': currentElement.category.category_list
+                    , 'permissions': currentElement.perms
+
+                }//element['otherInfo'] = {
+                returnValue.push(element);
+
+            } else {
+
+                element['id'] = returnValue.length;
+                element['type'] = 'group';
+                element['sm_name'] = smName;
+                element['sm_id'] = currentElement.id;
+                element['desc'] = currentElement.name;
+                element['otherInfo'] = {
+                    'privacy': currentElement.privacy
+                }//element['otherInfo'] = {
+                returnValue.push(element);
+            }//        if (type == 'pages') {
+        } else if (smName =='twitter'){
+            var currentElement = locArr[counter];
+
+            element['id'] = returnValue.length;
+            element['type'] = 'list';
+            element['sm_name'] = smName;
+            element['sm_id'] = currentElement.id;
+            element['desc'] = currentElement.name;
+            element['otherInfo'] = currentElement;
+            returnValue.push(element);
+        }
+        else if (smName == 'google') {
+
+        }
+    }//for (var counter = 0; counter < locObj.length; counter++) {
+    valArr = returnValue;
+    return returnValue;
+}//var getElementsFromLocObj = function (type, locObj) {
+
+var fillCombo = function (comboId, dataList) {
+    $.each(dataList, function (i, dataItem) {
+        var valueString = dataItem.type + '~' + dataItem.sm_name + '~' + dataItem.sm_id;
+        var optionData = new Option(dataItem.sm_name + " " + dataItem.type + ":" + dataItem.desc, valueString);
+        optionData.innerHTML = dataItem.sm_name + ":" + dataItem.desc;
+        document.getElementById(comboId).appendChild(optionData)
+        //$('#' + comboId).append($('<option>', {
+        //    value: valueString,
+        //    text: dataItem.desc
+        //}));
+    });
+
+}//var fillCombo = function (comboId, dataList) {
+$.fn.redraw = function () {
+    $(this).each(function () {
+        var redraw = this.offsetHeight;
+    });
+};

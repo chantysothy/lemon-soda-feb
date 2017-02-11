@@ -1,5 +1,6 @@
 ﻿
 var $smPermissionSet = { email: "", sm_name: "", neverAsk: false };
+var loggedInUserId
 var googleCallback
 var googleScope = ['    '
     //, 
@@ -13,6 +14,7 @@ var googleScope = ['    '
     //,'https://www.googleapis.com/auth/paymentssandbox.make_payments'
     //,'https://www.googleapis.com/auth/userinfo.email'
 ];
+
 
 $activeSocialMedia = null;
 var $instagramUrls = {
@@ -170,12 +172,12 @@ $nectorrTwitterExecCommand = function(url,callback) {
     });
 
 }//$twitterLogin = function() {
-var getLoggedInUserDetails = function (callback) {//'/user/get'
+var setPostableLocs = function (newPostableLocs, sm_name, callback) {//'/user/get'
     $.ajax({
         headers: { "Accept": "application/json" }
-        , type: 'GET'
-        , url: '/user/get'
-        , data: "email=" + $getClientEmail()
+        , type: 'POST'
+        , url: '/postable-loc/set'
+        , data: "email=" + $getClientEmail() + "&sm_name=" + sm_name + "&postLoc=" + JSON.stringify(newPostableLocs)
         , dataType: "jsonp"
         , jsonp: "callback"
         , crossDomain: true
@@ -189,9 +191,39 @@ var getLoggedInUserDetails = function (callback) {//'/user/get'
             } //if (callback) { 
         }
         , error: function (jqXHR, textStatus, errorThrown) {
-            alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + errorThrown);
+            alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
         }
     }); //$.ajax({
+}//var setPostableLocs = function (newPostableLocs, sm_name, callback) {
+
+var getLoggedInUserDetails = function (callback) {//'/user/get'
+    if (loggedInUserId) {
+        var message = { status: "SUCCESS", message: "User already logged in", data: { userId: loggedInUserId } }
+        callback(message);
+    } else {
+        $.ajax({
+            headers: { "Accept": "application/json" }
+            , type: 'post'
+            , url: '/user/get'
+            , data: "email=" + $getClientEmail()
+            , dataType: "jsonp"
+            , jsonp: "callback"
+            , crossDomain: true
+            , beforeSend: function (xhr) {
+                xhr.withCredentials = true;
+            }
+            , jsonPCallback: "jsonpCallback"
+            , success: function (data) {
+                loggedInUserId = data;
+                if (callback) {
+                    callback(data);
+                } //if (callback) { 
+            }
+            , error: function (jqXHR, textStatus, errorThrown) {
+                alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
+            }
+        }); //$.ajax({
+    } //if (loggedInUserId) {
 }//var getLoggedInUserDetails = function (callback) {
 var $twitterLogin = function (callback) {
     if (callback) {
@@ -213,7 +245,7 @@ var $twitterLogin = function (callback) {
                     } //if (callback) { 
             }
             , error: function (jqXHR, textStatus, errorThrown) {
-                alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + errorThrown);
+                alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + eJSON.stringify(rrorThrown));
             }
         }); //$.ajax({
 
@@ -258,7 +290,7 @@ var saveGoogleProfileData = function (profile) {
         }
         , error: function (jqXHR, textStatus, errorThrown) {
             //var msgBox = $('#butrfly-login').find();
-            alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
+            alert("ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
         }
     });
 
@@ -278,16 +310,13 @@ var $getTwitterLists = function (callback) {
         }
         , jsonPCallback: "jsonpCallback"
         , success: function (data) {
-            if (data.status == 'SUCCESS') {
                 if (callback) {
-                    callback({ sm_name: "twitter", 'data': data.data});
+                    callback({ status : data.status, sm_name: "twitter", 'data': data.data});
                 }
-            } else {
-            } //if (data.status == 'SUCCESS') { 
         }
         , error: function (jqXHR, textStatus, errorThrown) {
             //var msgBox = $('#butrfly-login').find();
-            alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
+            alert("ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
         }
     }); //$.ajax({
 }//var saveFacebookData = function (data) { 
@@ -317,7 +346,7 @@ var $saveLoginInfo = function (loginInfo, event, callback) {
         }
         , error: function (jqXHR, textStatus, errorThrown) {
             //var msgBox = $('#butrfly-login').find();
-            alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
+            alert("ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
         }
     }); //$.ajax({
 }//var saveFacebookData = function (data) { 
@@ -343,13 +372,13 @@ var $getCredsFromServer = function (email, callback) {
                 } //if (callback) { 
         }
         , error: function (jqXHR, textStatus, errorThrown) {
-            alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + errorThrown);
+            alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
         }
     }); //$.ajax({
 
 }//var getCredsFromServer = function (email) { 
 
-var setPostableLocs = function (postableLoc, callback) {
+var setPostableLoc = function (postableLoc, callback) {
     var queryParam = "email=" + $getClientEmail() + "&postableLocs=";
     var postableLocLength = JSON.stringify(postableLoc).length;
     var lengthOfParams = queryParam.length + postableLocLength
@@ -366,7 +395,7 @@ var setPostableLocs = function (postableLoc, callback) {
             , beforeSend: function (xhr) {
                 xhr.withCredentials = true;
                 //                xhr.setRequestHeader('content-length', queryParam.length + postableLocLength);
-                xhr.setRequestHeader('Content-Length', lengthOfParams.toString());
+                //xhr.setRequestHeader('Content-Length', lengthOfParams.toString());
             }
             , jsonPCallback: "jsonpCallback"
             , success: function (data) {
@@ -375,7 +404,7 @@ var setPostableLocs = function (postableLoc, callback) {
                     } //if (callback) { 
             }
             , error: function (jqXHR, textStatus, errorThrown) {
-                alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + errorThrown);
+                alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
             }
         }); //$.ajax({
     } // if callback
@@ -406,7 +435,7 @@ var $setCredsToServer = function (creds, callback) {
                 } //if (data.status == 'SUCCESS') { 
             }
             , error: function (jqXHR, textStatus, errorThrown) {
-                alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + errorThrown);
+                alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
             }
         }); //$.ajax({
 
@@ -523,7 +552,7 @@ var $getInstagramLogin = function (callback) {
             //$("#feeds").children().show();
         }
         , error: function (jqXHR, textStatus, errorThrown) {
-            alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
+            alert("ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
         }
     });
 
@@ -553,7 +582,7 @@ var getQueryTags = function (callback) {
             //$("#feeds").children().show();
         }
         , error: function (jqXHR, textStatus, errorThrown) {
-            alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
+            alert("ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
         }
     });
 
@@ -637,45 +666,13 @@ var initializeGoogle = function (getAuthResponse = false, callback) {
 var getGoogleCircles = function (callback, loggedInUserId,getAuthResponse = "") {
     var auth2, authInstance;
     // assumes that auth2 & gapi.client is initiated and loaded
-
-    auth2 = gapi.auth2.getAuthInstance()
-            .then(function () {
-                gapi.load('client:auth2', function () {
-
-                    gapi.client.init({
-                        apiKey: googlePlusDefaults.apiKey
-                        , clientId: googlePlusDefaults.clientId
-                        , scope: googleCircleScope
-                    })
-
-                    gapi.client.load('plus', 'v1', function () {
-                        authInstance = gapi.auth2.getAuthInstance();
-                        if (!authInstance.isSignedIn.get()) {
-                            authInstance.signIn();
-                        } else if (authInstance.isSignedIn.get()) {
-
-                            authInstance = gapi.auth2.getAuthInstance();
-                            if (callback) {
-                                if (getAuthResponse != "") {
-                                    getAuthResponse = getAuthResponse.replace('userId', loggedInUserId);
-                                    var circleResponse = gapi.client.request({
-                                        'path': getAuthResponse
-                                    })
-                                    circleResponse.execute(function (circleResponse) {
-                                        console.log('Retrieved circles for:' + resp.displayName + ":-- " + JSON.stringify(circleResponse)); callback(circleResponse);
-                                        callback(circleResponse);
-                                    });
-                                } else {
-                                    //                         callback(resp);
-                                } //if (getAuthResponse != "") {
-                            }//if callback
-                        }// else if
-                    });
-                    //            });
-                    //authInstance.signIn();
-                });
-            });// then
-    //});//gapi.load('auth2', 
+    if (!gapi.auth2) {
+        initGapi(function (data) {
+            getGapiInfo(callback);
+        });
+    } else {
+        getGapiInfo(callback);
+    }
 }//var getGoogleCircles = function (callback
 var getLinkedInUserDetails = function () {
     //,"group-memberships:(group:(id,name),membership-state)
@@ -688,7 +685,6 @@ var getLinkedInUserDetails = function () {
 var saveLinkedInUserDetails = function (data) {
     var a = data;
 }
-
 
 var writeFacebookTextPost = function (text) { 
 
@@ -795,7 +791,7 @@ var getLoginObject = function (callback) {
             } //if (data.status == 'SUCCESS') {
         }
         , error: function (jqXHR, textStatus, errorThrown) {
-            alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
+            alert("ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
         }
     });
 
@@ -863,4 +859,65 @@ var setPublishCredentials = function (userObject,  callback) {
 //
 var getRequest = function (url, callback) {
     return $.get(url, callback, 'json');
+}
+var initGapi = function () {
+    var auth2;
+    gapi.load('auth2', function () {
+        //plusDomains.Circles.List
+        auth2 = gapi.auth2.init({
+            client_id: googlePlusDefaults.clientId
+            , fetch_basic_profile: false
+            , scope: googleUserScope
+        }).then(function () {
+            gapi.load('client', function () {
+
+                gapi.client.init({
+                    apiKey: googlePlusDefaults.apiKey
+                    , clientId: googlePlusDefaults.clientId
+                    , scope: googleUserScope
+                })//gapi.client.init({
+            })//gapi.load('client', function () {
+        });//}).then(function () {
+    });//gapi.load('auth2', function () {
+}//var initGapi = function () 
+var getGapiInfo = function (callback) {
+    auth2 = gapi.auth2.getAuthInstance()
+        .then(function () {
+            gapi.load('client:auth2', function () {
+
+                gapi.client.init({
+                    apiKey: googlePlusDefaults.apiKey
+                    , clientId: googlePlusDefaults.clientId
+                    , scope: googleCircleScope
+                })
+
+                gapi.client.load('plus', 'v1', function () {
+                    authInstance = gapi.auth2.getAuthInstance();
+                    if (!authInstance.isSignedIn.get()) {
+                        authInstance.signIn();
+                    } else if (authInstance.isSignedIn.get()) {
+
+                        authInstance = gapi.auth2.getAuthInstance();
+                        if (callback) {
+                            if (getAuthResponse != "") {
+                                getAuthResponse = getAuthResponse.replace('userId', loggedInUserId);
+                                var circleResponse = gapi.client.request({
+                                    'path': getAuthResponse
+                                })
+                                circleResponse.execute(function (circleResponse) {
+                                    console.log('Retrieved circles for:' + resp.displayName + ":-- " + JSON.stringify(circleResponse)); callback(circleResponse);
+                                    callback(circleResponse);
+                                });
+                            } else {
+                                //                         callback(resp);
+                            } //if (getAuthResponse != "") {
+                        }//if callback
+                    }// else if
+                });
+                //            });
+                //authInstance.signIn();
+            });
+        });// then
+    //});//gapi.load('auth2', 
+
 }

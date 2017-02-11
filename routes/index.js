@@ -6,7 +6,7 @@ var config = require('../config/config');
 var http = require('http');
 var request = require('request');
 var fbCallback;
-var Twitter = require('node-twitter-api');
+var Twitter = require('twitter');
 var fbGraph = require('fbgraph');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
@@ -132,7 +132,6 @@ router.get('/signup/invitation', function (req, res) {
                                 message = { status : 'ERROR', message : 'Unable to update license information.'}
                                 sendMessageToServer(message, callback, res);
                                 return;
-
                             }//if (!err) { 
                         });//data.save(function (err) {
                         //
@@ -454,6 +453,40 @@ router.get('auth/facebook/callback', function (req, res) {
 
 });//router.get('auth / facebook / callback', function (req, res) {
 
+router.post('/postable-loc/set', function (req, res) {
+    var callback = req.body.callback;
+    if (callback) {
+        var email = req.body.email;
+        if (email) {
+            var sm_name = req.body.sm_name;
+            var condition = { 'local.email': email };
+            userModel.findOne(condition, function (err, doc) {
+                if (err) {
+                    var message = { status: "ERROR", message: "There was an error in validating your profile. You may try after sometime." };
+                    sendMessageToServer(message, callback, res);
+                    return;
+                }
+                if (doc) {
+                    var postableLoc = JSON.parse(req.body.postLoc);
+                    doc[sm_name].postableLocs = postableLoc; 
+                    doc.save(function (err, doc, numRows) {
+                        if (err) {
+                            var message = { status: "ERROR", message: "Unable to update postable locations on social media automatically. You may continue with your work." };
+                            sendMessageToServer(message, callback, res);
+                        } else {
+                            var message = { status: "SUCCESS", message: "Postable locations automatically updated for -" + sm_name };
+                            sendMessageToServer(message, callback, res);
+                        }//if (err) {
+
+                    });
+                    //var message = { status: "SUCCESS", message: "User data found and validated.", data: doc._doc }
+                    //sendMessageToServer(message, callback, res);
+                }
+            });//userModel.findOne(condition, function (err, doc) {
+        }//if (email) {
+    }//if (callback) {
+});//router.get('', function (req, res) {
+
 router.get('/profile/save', function (req, res) { 
     var callback = req.query.callback;
 if (callback) {
@@ -505,22 +538,6 @@ if (callback) {
 });//router.get('', function (req, res) { 
 
 
-router.get('/facebook/save/user', function (req, res) {
-    var fbUser = require('../models/user').facebook;
-    varfbUserModel = require('../models/facebook').facebookUser;
-    var rtVal = '{"error":';
-    if (!req.query.callback) {
-        res.send(rtVal + "Protocol not supported.");
-        res.end();
-        return;
-    }
-    else {
-        var callback = req.query.callback;
-        var returnValue = saveUser('facebook', req.query.profile);
-        res.send(callback + '(' + returnValue + ')');
-        res.end();
-    }
-});
 
 router.get('/facebook/read/posts', function (req, res) {
     var rtVal = '{"error":';
@@ -621,6 +638,8 @@ router.get('/facebook/read/posts', function (req, res) {
 
     //res.render('index', { title: 'Angular, Node and Twitter API' });
 });
+
+
 router.get('/twitter/get/lists', function (req, res) {
     var callback = req.query.callback;
     if (callback) {
@@ -644,7 +663,7 @@ router.get('/twitter/get/lists', function (req, res) {
                                     var message = { status: "SUCCESS", message: "lists retrieved for " + email, data: lists };
                                     sendMessageToServer(message, callback, res);
                                 } else {
-                                    var message = { status: "ERROR", message: " TWITTER error code : " + error[0].code + "--" + error[0].message + " Please try later." };
+                                    var message = { status: "ERROR", message: " Twitter error code : " + error[0].code + "--" + error[0].message + ". Please try later." };
                                     sendMessageToServer(message, callback, res);
                                 }
                             });
@@ -681,9 +700,7 @@ router.get('/auth/twitter', function (req, res) {
                 twitterEmail = req.query.email;
                 var twitterAuthURL = twitterAPI.getAuthUrl(requestToken);
                 var message = { status: "SUCCESS", message: "Get a child window with params in data.", data: twitterAuthURL }
-                var returnValue = callback + '(' + JSON.stringify(message) + ')';
-                res.send(returnValue);
-                res.end();
+                sendMessageToServer(message, callback, res);
             }
         });//twitterAPIgetRequestToken(function (error, requestToken, requestTokenSecret, results) {
     }//if (callback){
@@ -783,7 +800,7 @@ router.get('/auth/twitter/callback', function (req, res) {
 
 });//router.get('auth/twitter/callback', function (req, res) {
 
-router.get('/user/get', function (req, res) {
+router.post('/user/get', function (req, res) {
     var callback = req.query.callback;
     if (callback) {
         var email = req.query.email;
@@ -791,7 +808,7 @@ router.get('/user/get', function (req, res) {
             var condition = { 'local.email': email };
             userModel.findOne(condition, function (err, userData) {
                 if (!err) {
-                    var message = { status: "SUCCESS", message: "User data found.", data: userData }
+                    var message = { status: "SUCCESS", message: "User data found.", data: userData._doc }
                     sendMessageToServer(message, callback, res);
                 } else {
                     var message = { status: "ERROR", message: "there was an error in locating your profile info."}
@@ -808,12 +825,18 @@ router.get('/user/get', function (req, res) {
     res.end();
 });
 
-router.get('/postable-loc/set', function (req, res) {
+router.get('/postable-locs/set', function (req, res) {
     var callback = req.query.callback;
     if (callback) {
         var email = req.query.email;
         var postableLocs = req.query.postableLocs;
-        postableLocs= JSON.parse(postableLocs)
+        try {
+            postableLocs = JSON.parse(postableLocs)
+        } catch (ex) {
+            message = { status: "ERROR", message: "Unable to interpret data sent by the user." }
+            sendMessageToServer(message, callback, res);
+            return;
+        }
 
         if (email && postableLocs) {
             getUser(email, function (userData) {
@@ -931,10 +954,9 @@ function readFBPosts(request, response, code) {
                     fbGraph.get('/me/home', {}, function (err, data) {
                         if (!err) {
                             clientFeed = data.data;
-                            returnValue = '{"userData":' + JSON.stringify(userData) + '},';
+                            returnValue = '{status :'+"SUCCESS,"+"data :" + JSON.stringify(userData) + '},';
                             returnValue += '"userFeed":' + JSON.stringify(clientFeed) + '}'
-                            res.send(returnValue);
-                            res.end();
+                            sendMessageToServer(returnValue);
                         }
                         else {
                             console.log("fb/me/home: error" + JSON.stringify(err));
@@ -986,7 +1008,7 @@ var sendEmail = function (recieverName,recieverEmail, emailText) {
     });
 }//var sendEmail = function (senderName, recieverName,recieverEmail, text) {
 
-var sendMessageToServer = function(msg, callback, res) {
+var sendMessageToServer = function(msg, callback, res, post = false) {
     // msg has to be a valid json object
     var payload = JSON.stringify(msg);
     payload = payload.replace(/\\n/g, "\\n")
@@ -1001,12 +1023,14 @@ var sendMessageToServer = function(msg, callback, res) {
     payload = payload.replace(/[\u0000-\u0019]+/g, "");
     var response = JSON.stringify(msg);
     //res.writeHead(200, { 'Content-Type': 'text/plain', 'Content-Length': +response.length + '' });
-
-    var returnValue = callback + '(' + response+ ')';
-    //res.header('content-type', 'application / json' );
-    //res.header('content-length', payload.length);
-    res.send(returnValue);
-    res.end();
+    if (!post) {
+        var returnValue = callback + '(' + response + ')';
+        res.send(returnValue);
+        res.end();
+    } else {
+        res.write(returnValue);
+        res.end();
+    }
 }
 
 var getPermissionData = function (userData,email) {

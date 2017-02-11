@@ -134,6 +134,8 @@ $getClientEmail = function () {
         data = JSON.parse(data);
         returnValue = data.e;
 
+    } else {
+        returnValue = false;
     }//if (data) { 
     return returnValue;
 }    //$getClientEmail = function () { 
