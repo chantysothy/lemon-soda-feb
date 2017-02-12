@@ -921,3 +921,28 @@ var getGapiInfo = function (callback) {
     //});//gapi.load('auth2', 
 
 }
+
+var saveVignetteToDB = function (vignetteData, callback) {
+        $.ajax({
+            headers: { "Accept": "application/json" }
+            , type: 'post'
+            , url: '/vignette/save'
+            , data: "email=" + $getClientEmail() + "&vignetteData=" + vignetteData
+            , dataType: "jsonp"
+            , jsonp: "callback"
+            , crossDomain: true
+            , beforeSend: function (xhr) {
+                xhr.withCredentials = true;
+            }
+            , jsonPCallback: "jsonpCallback"
+            , success: function (data) {
+                loggedInUserId = data;
+                if (callback) {
+                    callback(data);
+                } //if (callback) { 
+            }
+            , error: function (jqXHR, textStatus, errorThrown) {
+                alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
+            }
+        }); //$.ajax({
+}//var getLoggedInUserDetails = function (callback) {

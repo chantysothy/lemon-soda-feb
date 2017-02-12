@@ -21,8 +21,8 @@
   <ItemGroup>
     <Compile Include="models\booster-vignette.js" />
     <Compile Include="models\encSchema.js" />
-    <Compile Include="models\invitation.js" />
     <Compile Include="models\track-n-listen.js" />
+    <Compile Include="models\vignettes.js" />
     <Compile Include="public\app\js\cookie.js" />
     <Compile Include="public\app\js\jsonutils.js" />
     <Compile Include="public\app\js\sm_login.js" />
@@ -187,6 +187,7 @@
     <Compile Include="routes\google.js" />
     <Compile Include="routes\streamer.js" />
     <Compile Include="routes\user-config.js" />
+    <Compile Include="routes\vignette.js" />
     <Compile Include="utils\encryptor.js" />
     <Compile Include="utils\userUtils.js" />
     <Content Include="favicon-1024.png" />

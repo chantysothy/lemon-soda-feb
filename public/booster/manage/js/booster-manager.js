@@ -1,6 +1,7 @@
 ﻿var selectedOptions = [];
 var autoCompleteList = [];
-var tempSocialMediaNames = ['facebook', 'twitter'];//'google'];//, 'linkedin'];
+var timeLines = [];
+var tempSocialMediaNames = ['facebook', 'twitter'];//'google'];//, 'linkedin','instagram','youtube', blogger','tumblr'];
 //refer https://developers.google.com/+/domains/api/circles
 var plusDomain = {
     getCircleList: 'https://www.googleapis.com/plusDomains/v1/people/userId/circles' //get
@@ -92,9 +93,9 @@ $(window).load(function (e) {
                         multiple: true,
                         focusShow: false,
                         multiField: 'desc',
-                        multiStyle: {space:5, width: 200},
+                        multiStyle: {space:5},
                         maxItem: true,
-                        noResult: 'no such postable location found'
+                        noResult: 'no such postable location found.'
                     });
                     $("#sm-options-type-name").attr('data-id', 'id, desc');
                     //fillCombo('sm-options-type-name', autoCompleteList);
@@ -125,13 +126,26 @@ $(document).ready(function () {
         $("#divSetCalendar").hide();
         $("#container_demo").toggle("slide");
     });
-
-
-
     $("#social-media").msDropdown({ roundedBorder: true });
     $("#postLoc").msDropdown({ roundedBorder: true });
 
     $('#outlookCalendar').show();
+
+    $('#btnSave').click(function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        var formValidationStatus = validateForm();
+        if (!formValidationStatus.error) {
+            saveVignette(function (message) {
+                manageServerResponse(message);
+            });
+        } else {
+            manageMultipleServerResponse({ errors: formValidationStatus.error }, true);
+        }//if (!validateForm().error) {
+        //e.preventDefault();
+        e.stopPropagation();
+        e.preventDefault();
+    });//$('#btnSave').click(function (e) {
 }); //$(document).ready(function () {
 
 var getSelectedOptions = function () {
@@ -434,3 +448,94 @@ $.fn.redraw = function () {
         var redraw = this.offsetHeight;
     });
 };
+
+var getVignette = function(){
+    var returnValue;
+    var selectedLocs = getPostableLocsForDB('sm-options-type-name');
+    return { vignetteName: getVignetteName(), locs: selectedLocs, timeline: timeLines }
+}//var saveVignette = function(vignetteObject, callback){
+
+var getPostableLocsForDB = function (divName) {
+    var returnValue = [];
+    var searchDiv = "#" + divName;
+    var childCounter = searchDiv.children().length;
+    for (var divCounter = 0; divCounter < childCounter; divCounter++){
+        var childItem = searchDiv.children(counter);
+        var childText = childItem.val();
+        var childItemArray = childText.split(' . ');
+
+        var elementId = childItem.attr('data-id');
+
+        var vignettePostableLoc = { postableLocId: autoCompleteList[elementId], postableLocName: childItemArray[2], type: childItemArray[1], sm_name:childItemArray[0] };
+        returnValue.push(vignettePostableLoc);
+
+    }//for (var divCounter = 0; divCounter < childCounter; divCounter++){
+    return returnValue;
+}//var getPostableLos = function (divName) {
+
+var getPostableElement = function (id) {
+    return autoCompleteList[id];
+}//var getPostableElement = function (id) {
+
+var saveVignette = function (callback) {
+    var vignetteToSave = getVignette();
+    saveVignetteToDB(vignetteToSave, callback);
+}//var saveVignette = function (callback) {
+var validateForm = function () {
+    var returnValue = { 'error': {}};
+
+    var vignetteName = $('#input-vignette-name').val();
+    if (vignetteName != "") {
+        returnValue = true;
+    } else {
+        returnValue.error[0] = {status: "ERROR", message:"A vignette name should have a valid value.Give it a relevant name. Click on the back button."}
+    }
+    var postableLocsValue = $('#sm-options-type-name').val();
+
+    if (!postableLocsValue || postableLocsValue == "") {
+        returnValue.error[1] = { status: "ERROR", message:"Select one or more locations to post. Nectorr wont be able to schedule or post for you. Click on the back button." }
+    } else {
+        if (returnValue) returnValue = true
+    }//if (!postableLocsValue || postableLocsValue == "") {
+
+    if (!timeLines || timeLines <= 0) {
+        returnValue.error[2] = { status: "ERROR", message:"A vignette is for automated post on behalf of you. Click on the calendar to set time." }
+    } else {
+        if (returnValue) returnValue = true;
+    }//if (!postableLocsValue || postableLocsValue == "") {
+
+    return returnValue;
+}//var validateForm = function () {
+
+var manageMultipleServerResponse = function (data, multipleRecords = false) {
+    if (!multipleRecords) {
+        if (data) {
+            if (data.status == 'ERROR') {
+                $('#serverResponse').css('background-color', 'rgba(243, 0, 0, 0.6)');
+                $('#serverResponse').css('color', '#ffffff');
+            } else if (data.status == 'SUCCESS') {
+                $('#serverResponse').css('background-color', 'rgba(10, 185, 5, 0.6)');
+                $('#serverResponse').css('color', '#ffffff');
+            } //if (data.status == 'ERROR') {
+            $('#serverResponse').text(data.message);
+            $('#serverResponse').show();
+
+        }//if (data) {
+    } else {
+        var serverResponse = $('#serverResponse');
+        var errorList = data.errors;
+        var errorNo = 0;
+        $.each(errorList, function (element) {
+            var childDiv = document.createElement("div");
+            var thisElement = errorList[errorNo.toString()];
+            if (thisElement.status == 'ERROR') {
+                childDiv.style.cssText='background-color:rgba(243, 0, 0, 0.6);color: #ffffff ;margin-top:2px; margin-bottom-2px';
+            } else if (thisElement.status == 'SUCCESS') {
+                childDiv.style.cssText = 'background-color:rgba(10, 185, 5, 0.6); color', '#ffffff ;margin-top:2px; margin-bottom-2px';
+            } //if (data.status == 'ERROR') {
+            childDiv.innerHTML = thisElement.message;
+            $(childDiv).appendTo(serverResponse);
+            errorNo += 1;
+        });//$.each(errorList, function (element) {
+    }//if (!multipleRecords) {
+}//var manageServerResponse = function(data) {

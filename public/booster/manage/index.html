@@ -60,41 +60,21 @@
                     <div id="login" class="animate form nectorr-body-dark-text">
                         <form autocomplete="on">
                             <h1>Add a new vignette</h1>
+
                             <p>
                                 <label for="vignette-name" class="uname"> Give your vignette a name </label>
                                 <input id="input-vignette-name" name="vignette-name" required="required" type="text" placeholder="e.g. soft launch of new product XYZ." />
                             </p>
-                            <div id="select-options">
-                                <p style="margin-left: 15px">Click on the images to make selections.<br /><br /></p>
-                                <div id="options-select-social-media" class="col-xs-2">
-                                    <select id="social-media" name="social-media" style="height: 45px;width:45px;">
-                                        <option value=""></option>
-                                        <option value="facebook" selected="selected" data-image="../../img/social/facebook-45.png"></option>
-                                        <option value="twitter" data-image="../../img/social/twitter-45.png"></option>
-                                        <option value="instagram" data-image="../../img/social/instagram-45.png"></option>
-                                        <option value="google-plus" data-image="../../img/social/google-plus-45.png"></option>
-                                        <option value="linkedin" data-image="../../img/social/linkedin-45.png"></option>
-                                        <option value="youtube" data-image="../../img/social/youtube-45.png"></option>
-                                    </select>
-                                </div>
-                                <div id="sm-option-type" class="col-xs-2" style="height: 45px;width:45px;">
-                                    <select style="width:45px" class="tech" name="tech" data-id="id" id="postLoc" >
-                                        <option value="group" data-image="images/icon-group.png"></option>
-                                        <option value="pages" data-image="images/icon-page.png">page</option>
-                                    </select>
-                                </div>
-                                <br /><br />
-                                <div class="col-xs-12" id="options-type-name">
-                                    <input id="sm-options-type-name" name="sm-options-type-name" required="required" type="text" 
-                                             placeholder="e.g. group, page, circle, list name" class="magicsearch"
-                                           />
-                                </div>
-                                <div><br /><br /></div>
+                            <div><br /><br /></div>
 
+                            <p class="uname">Start keying in a postable location.</p>
+                            <div class="col-xs-12" id="options-type-name">
+                                <input id="sm-options-type-name" name="sm-options-type-name" required="required" type="text"
+                                       placeholder="e.g. group, page, circle, list name" class="magicsearch" />
                             </div>
 
-                            <p id="serverResponse">
-                            </p>
+                            <div><br /><br /></div>
+                            <div id="select-options2"></div>
                             <p class="login button">
                                 <input id="btnLogin" type="submit" value="Next" />
                             </p>
@@ -119,7 +99,7 @@
 
                             <div id="weekCalendar" style="color:#333333"></div>
 
-                            <p id="serverResponse">
+                            <div id="serverResponse" class="col-xs-12"></div>
                             </p>
                             <p class="login button">
                                 <input id="btnBack" type="submit" value="Back" class="pull-left" />

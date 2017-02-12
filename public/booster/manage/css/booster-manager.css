@@ -2,12 +2,9 @@
     margin-left: 10px;
     padding-left:10px
 }
-#select-options {
+#select-options2 {
 padding-top: 20px;
 padding-bottom : 20px;
-border-color : #0094ff;
-border-style :dashed;
-border-width: 1px
 }
     #select-options p {
         margin-left: 5px;

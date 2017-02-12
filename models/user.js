@@ -80,7 +80,7 @@ var userSchema = mongoose.Schema( {
         , posts: Object
         , postableLocs: Object
     },
-    boostingProfiles: {
+    vignettes: {
         data: Object
         /*
         * data to hold each boosting profile.

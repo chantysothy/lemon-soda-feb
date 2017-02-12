@@ -142,19 +142,35 @@ var getHTML = function (url, callback) {
     });
 } //var getElementsFromUrl = function (url, element, callback) {
 
-var manageServerResponse = function (data) {
-    if (data) {
-        if (data.status == 'ERROR') {
-            $('#serverResponse').css('background-color', 'rgba(243, 0, 0, 0.6)');
-            $('#serverResponse').css('color', '#ffffff');
-        } else if (data.status == 'SUCCESS') {
-            $('#serverResponse').css('background-color', 'rgba(10, 185, 5, 0.6)');
-            $('#serverResponse').css('color', '#ffffff');
-        } //if (data.status == 'ERROR') {
-        $('#serverResponse').text(data.message);
-        $('#serverResponse').show();
+var manageServerResponse = function (data, multipleRecords = false) {
+    if (!multipleRecords) {
+        if (data) {
+            if (data.status == 'ERROR') {
+                $('#serverResponse').css('background-color', 'rgba(243, 0, 0, 0.6)');
+                $('#serverResponse').css('color', '#ffffff');
+            } else if (data.status == 'SUCCESS') {
+                $('#serverResponse').css('background-color', 'rgba(10, 185, 5, 0.6)');
+                $('#serverResponse').css('color', '#ffffff');
+            } //if (data.status == 'ERROR') {
+            $('#serverResponse').text(data.message);
+            $('#serverResponse').show();
 
-    }//if (data) {
+        }//if (data) {
+    } else {
+        var serverResponse = $('#serverResponse');
+        var errorList = data;
+        $.each(errorList, function (element) {
+            var childDiv = $("<div>" + element.message + "</div>");
+            if (element.status == 'ERROR') {
+                childDiv.css('background-color', 'rgba(243, 0, 0, 0.6)');
+                childDiv.css('color', '#ffffff');
+            } else if (element.status == 'SUCCESS') {
+                childDiv.css('background-color', 'rgba(10, 185, 5, 0.6)');
+                childDiv.css('color', '#ffffff');
+            } //if (data.status == 'ERROR') {
+            $(childDiv).appendTo(serverResponse);
+        });//$.each(errorList, function (element) {
+    }//if (!multipleRecords) {
 }//var manageServerResponse = function(data) {
 
 var shortenUrl = function (longUrl, callback) {

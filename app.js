@@ -7,6 +7,8 @@ var router = require('./routes/index');
 var tweets = require('./routes/tweets');
 var google = require('./routes/google');
 var streamer = require('./routes/streamer.js');
+var vignette = require('./routes/vignette.js');
+
 var mongodb = require('mongodb');
 var mongoose = require('mongoose');
 var passport = require('passport');
@@ -73,12 +75,13 @@ app.use(google);
 app.use(tweets);
 app.use(userConfig);
 app.use(streamer);
+app.use(vignette);
 //app.use('/tweets', tweets);
 
+var port = 1337;//process.env.PORT || 5000;
 app.set('port', port);
 module.exports = app;
 
-var port = 1337;//process.env.PORT || 5000;
 app.listen(port, function() {
   console.log('localhost:1337 is listening on ' + port);
 });
