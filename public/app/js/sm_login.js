@@ -71,13 +71,13 @@ var facebookDefaults = {
 
 var initFacebookAPI = function () {
     window.fbAsyncInit = function () {
-        version = 'v2.3'
+        version = 'v2.8'
         FB.init({
             appId: facebookDefaults.appId,  
             status: true,
             xfbml: true,
             cookie: true,
-            version: 'v2.3' // use version 2.7
+            version: 'v2.8' // use version 2.7
 
         });
 
@@ -109,7 +109,7 @@ $nectorrFacebookLogin = function (fbLoginScope, event, callback) {
             status: true,
             xfbml: true,
             cookie: true,
-            version: 'v2.3' // use version 2.7
+            version: 'v2.8' // use version 2.7
 
         });
 
@@ -451,7 +451,7 @@ var $executeFacebookCommand = function (scope, command, callback) {
             status: true,
             xfbml: true,
             cookie: true,
-            version: 'v2.3' // use version 2.7
+            version: 'v2.8' // use version 2.7
 
         });
 
@@ -860,6 +860,7 @@ var setPublishCredentials = function (userObject,  callback) {
 var getRequest = function (url, callback) {
     return $.get(url, callback, 'json');
 }
+
 var initGapi = function () {
     var auth2;
     gapi.load('auth2', function () {
@@ -880,6 +881,7 @@ var initGapi = function () {
         });//}).then(function () {
     });//gapi.load('auth2', function () {
 }//var initGapi = function () 
+
 var getGapiInfo = function (callback) {
     auth2 = gapi.auth2.getAuthInstance()
         .then(function () {
@@ -922,12 +924,12 @@ var getGapiInfo = function (callback) {
 
 }
 
-var saveVignetteToDB = function (vignetteData, callback) {
-        $.ajax({
-            headers: { "Accept": "application/json" }
-            , type: 'post'
-            , url: '/vignette/save'
-            , data: "email=" + $getClientEmail() + "&vignetteData=" + vignetteData
+var saveVignetteToDB = function (vignetteName, vignetteData, callback) {
+    $.ajax({
+        headers: { "Accept": "application/json" }
+        , type: 'post'
+        , url: '/vignette/set'
+        , data: "email=" + $getClientEmail() + "&vignetteInfo=" + JSON.stringify(vignetteData) + "&vignette_name=" + vignetteName
             , dataType: "jsonp"
             , jsonp: "callback"
             , crossDomain: true
@@ -936,7 +938,6 @@ var saveVignetteToDB = function (vignetteData, callback) {
             }
             , jsonPCallback: "jsonpCallback"
             , success: function (data) {
-                loggedInUserId = data;
                 if (callback) {
                     callback(data);
                 } //if (callback) { 
@@ -945,4 +946,31 @@ var saveVignetteToDB = function (vignetteData, callback) {
                 alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
             }
         }); //$.ajax({
+}//var getLoggedInUserDetails = function (callback) {
+
+var boostNow = function (dataToPost, callback) {
+    $.ajax({
+        headers: { "Accept": "application/json" }
+        , type: 'get'
+        , url: '/send/post/now'
+        , data: "email=" + $getClientEmail() + "&dataToPost=" + JSON.stringify(dataToPost)
+        , dataType: "jsonp"
+        , jsonp: "callback"
+        , crossDomain: true
+        , beforeSend: function (xhr) {
+            xhr.withCredentials = true;
+            xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+            xhr.setRequestHeader('Access-Control-Allow-Methods', 'POST');
+            xhr.setRequestHeader('Access-Control-Max-Age', '50000');
+        }
+        , jsonPCallback: "jsonpCallback"
+        , success: function (data) {
+            if (callback) {
+                callback(data);
+            } //if (callback) { 
+        }
+        , error: function (jqXHR, textStatus, errorThrown) {
+            alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
+        }
+    }); //$.ajax({
 }//var getLoggedInUserDetails = function (callback) {

@@ -1,6 +1,7 @@
 ﻿var mongoose = require('mongoose');
 var vignetteSchema = mongoose.Schema( {
-    email : String 
+    email: String 
+    , vignette_name : String
     , data : Object 
 });
 

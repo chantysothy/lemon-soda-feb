@@ -191,14 +191,14 @@ var sendMessageToServer = function (msg, callback, res) {
 function getBearerCode(callback) {
     var returnValue
     request.post(oauthOptions, function (e, r, body) {
+
+        var bearerBody = JSON.parse(body);
+        process.env.TWITTER_BEARER_TOKEN = bearerBody.access_token;
         if (callback) {
-            callback(r);
+            callback(bearerBody);
         } else {
             console.log("ERROR :" + e);
             console.log("R :" + r)
-
-            var bearerBody = JSON.parse(body);
-            process.env.TWITTER_BEARER_TOKEN = bearerBody.access_token;
 
             console.log("BODY :" + body)
         }//        if (callback) {

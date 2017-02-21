@@ -22,6 +22,7 @@
     <Compile Include="models\booster-vignette.js" />
     <Compile Include="models\encSchema.js" />
     <Compile Include="models\track-n-listen.js" />
+    <Compile Include="models\userposts.js" />
     <Compile Include="models\vignettes.js" />
     <Compile Include="public\app\js\cookie.js" />
     <Compile Include="public\app\js\jsonutils.js" />
@@ -147,6 +148,7 @@
     <Compile Include="public\assets\socialfeed\jquery.socialfeed.js" />
     <Compile Include="public\assets\type-ahead\typeahead.bundle.min.js" />
     <Compile Include="public\assets\type-ahead\typeahead.jquery.min.js" />
+    <Compile Include="public\assets\underscore\underscore.js" />
     <Compile Include="public\booster\js\booster.js" />
     <Compile Include="public\booster\js\bootstrap-tagsinput.js" />
     <Compile Include="public\booster\manage\js\booster-manager.js" />
@@ -184,6 +186,7 @@
     <Compile Include="public\signup\invite\js\invite.js" />
     <Compile Include="public\signup\js\login.js" />
     <Compile Include="public\signup\local\js\invite.js" />
+    <Compile Include="routes\postmanager.js" />
     <Compile Include="routes\google.js" />
     <Compile Include="routes\streamer.js" />
     <Compile Include="routes\user-config.js" />
@@ -1298,6 +1301,7 @@
     <Folder Include="public\assets\sass\libs\" />
     <Folder Include="public\assets\socialfeed\" />
     <Folder Include="public\assets\type-ahead\" />
+    <Folder Include="public\assets\underscore\" />
     <Folder Include="public\booster\" />
     <Folder Include="public\booster\js\" />
     <Folder Include="public\booster\css\" />
@@ -1324,6 +1328,7 @@
     <Folder Include="public\signup\local\js\" />
     <Folder Include="typings\" />
     <Folder Include="typings\globals\" />
+    <Folder Include="typings\globals\cheerio\" />
     <Folder Include="typings\globals\connect-flash\" />
     <Folder Include="typings\globals\express-handlebars\" />
     <Folder Include="typings\globals\express-session\" />
@@ -1628,6 +1633,7 @@
     <Folder Include="views" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="typings\globals\cheerio\index.d.ts" />
     <TypeScriptCompile Include="typings\globals\connect-flash\index.d.ts" />
     <TypeScriptCompile Include="typings\globals\express-handlebars\index.d.ts" />
     <TypeScriptCompile Include="typings\globals\express-session\index.d.ts" />

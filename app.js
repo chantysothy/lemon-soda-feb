@@ -8,6 +8,7 @@ var tweets = require('./routes/tweets');
 var google = require('./routes/google');
 var streamer = require('./routes/streamer.js');
 var vignette = require('./routes/vignette.js');
+var postManager = require('./routes/postmanager.js');
 
 var mongodb = require('mongodb');
 var mongoose = require('mongoose');
@@ -76,14 +77,14 @@ app.use(tweets);
 app.use(userConfig);
 app.use(streamer);
 app.use(vignette);
-//app.use('/tweets', tweets);
+app.use(postManager);
 
 var port = 1337;//process.env.PORT || 5000;
 app.set('port', port);
 module.exports = app;
 
 app.listen(port, function() {
-  console.log('localhost:1337 is listening on ' + port);
+  console.log('nectorr is listening on ' + port);
 });
 //server.listen(80, '192.169.178.96', function () {
 //  console.log('localhost:1337 is listening on ' + port);

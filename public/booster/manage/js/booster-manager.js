@@ -36,13 +36,15 @@ $(window).load(function (e) {
             }
         },
         eventNew: function (calEvent, $event) {
-            displayMessage("<strong>Added event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
+            timeLines.push(calEvent);
+            // displayMessage("<strong>Added event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
            // alert("You've added a new event. You would capture this event, add the logic for creating a new event with your own fields, data and whatever backend persistence you require.");
         },
         eventDrop: function (calEvent, $event) {
             displayMessage("<strong>Moved Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
         },
         eventResize: function (calEvent, $event) {
+            //set the font sizes here
             displayMessage("<strong>Resized Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
         },
         eventClick: function (calEvent, $event) {
@@ -80,7 +82,7 @@ $(window).load(function (e) {
                     $("#sm-options-type-name").magicsearch({
                         dataSource: autoCompleteList,
                         fields: ['sm_name', 'type', 'desc'],
-                        format: '%sm_name% · %type% /%desc%',                    
+                        format: '%sm_name% · %type% · %desc%',                    
                         id: 'id',
                         type: '',
                         ajaxOptions: {},
@@ -132,6 +134,7 @@ $(document).ready(function () {
     $('#outlookCalendar').show();
 
     $('#btnSave').click(function (e) {
+        $(this).closest('.nectorr-message').remove();
         e.stopPropagation();
         e.preventDefault();
         var formValidationStatus = validateForm();
@@ -367,10 +370,10 @@ var setupAutoCompleteList = function (valArr, smName) {
         pushArray(returnValue, getElementsFromLocObj("pages", fbPostableLocs.data.pages, smName));
     }
     if (smName == 'twitter') {
-        pushArray(returnValue, getElementsFromLocObj("list", twitterPostableLocs.data, smName));
+        pushArray(returnValue, getElementsFromLocObj("list", twitterPostableLocs.data.data, smName));
     }
     if (smName == 'google') {
-        pushArray(returnValue, getElementsFromLocObj("list", googlePostableLocs.data, smName));
+        pushArray(returnValue, getElementsFromLocObj("circles", googlePostableLocs.data, smName));
     }
         //pushArray(returnValue, fbPostableLocs.data.pages);
 //    pushArray(returnValue, GetFbpostableLoc(facebookPagesArray));
@@ -390,13 +393,13 @@ var getElementsFromLocObj = function (type, locArr,smName= "not-set") {
                 element['sm_name'] = smName;
                 element['sm_id'] = currentElement.id;
                 element['desc'] = currentElement.name;
-                element['otherInfo'] = {
+                element['otherInfo'] = JSON.stringify({
                     'category': currentElement.category
                     , 'access_token': currentElement.access_token
                     , 'categoryList': currentElement.category.category_list
                     , 'permissions': currentElement.perms
 
-                }//element['otherInfo'] = {
+                });//element['otherInfo'] = {
                 returnValue.push(element);
 
             } else {
@@ -406,9 +409,9 @@ var getElementsFromLocObj = function (type, locArr,smName= "not-set") {
                 element['sm_name'] = smName;
                 element['sm_id'] = currentElement.id;
                 element['desc'] = currentElement.name;
-                element['otherInfo'] = {
+                element['otherInfo'] = JSON.stringify({
                     'privacy': currentElement.privacy
-                }//element['otherInfo'] = {
+                });//element['otherInfo'] = {
                 returnValue.push(element);
             }//        if (type == 'pages') {
         } else if (smName =='twitter'){
@@ -419,7 +422,7 @@ var getElementsFromLocObj = function (type, locArr,smName= "not-set") {
             element['sm_name'] = smName;
             element['sm_id'] = currentElement.id;
             element['desc'] = currentElement.name;
-            element['otherInfo'] = currentElement;
+            element['otherInfo'] = JSON.stringify(currentElement);
             returnValue.push(element);
         }
         else if (smName == 'google') {
@@ -451,18 +454,19 @@ $.fn.redraw = function () {
 
 var getVignette = function(){
     var returnValue;
-    var selectedLocs = getPostableLocsForDB('sm-options-type-name');
-    return { vignetteName: getVignetteName(), locs: selectedLocs, timeline: timeLines }
-}//var saveVignette = function(vignetteObject, callback){
+    var selectedLocs = getPostableLocsForDB();
+    return { vignette_name: $('#input-vignette-name').val(),locs: selectedLocs, timeline: timeLines }
+}//var getVignette = function(vignetteObject, callback){
 
-var getPostableLocsForDB = function (divName) {
+var getPostableLocsForDB = function () {
     var returnValue = [];
-    var searchDiv = "#" + divName;
-    var childCounter = searchDiv.children().length;
-    for (var divCounter = 0; divCounter < childCounter; divCounter++){
-        var childItem = searchDiv.children(counter);
-        var childText = childItem.val();
-        var childItemArray = childText.split(' . ');
+    var multiItems = $(".multi-item").map(function () {
+        return "'" + this.outerHTML + "'";
+    }).get().join().split(',');
+    for (var divCounter = 0; divCounter < multiItems.length; divCounter++){
+        var childItem = $(multiItems[divCounter]);
+        var childText = childItem.attr('title');
+        var childItemArray = childText.split('·');
 
         var elementId = childItem.attr('data-id');
 
@@ -479,35 +483,46 @@ var getPostableElement = function (id) {
 
 var saveVignette = function (callback) {
     var vignetteToSave = getVignette();
-    saveVignetteToDB(vignetteToSave, callback);
+    setsmDetailsForVignetteSave(autoCompleteList, vignetteToSave.locs);
+    saveVignetteToDB(vignetteToSave.vignette_name, vignetteToSave, callback);
 }//var saveVignette = function (callback) {
-var validateForm = function () {
-    var returnValue = { 'error': {}};
 
+var validateForm = function () {
+    var returnValue = {};
+    returnValue['success'] = {};
+
+    
     var vignetteName = $('#input-vignette-name').val();
     if (vignetteName != "") {
-        returnValue = true;
+        //returnValue = {};
+        // check in the database before adding this value
+        returnValue.success[0] = { status: "SUCCESS", message: "Valid vignette name." }
     } else {
+        if (!returnValue.error) returnValue['error'] = {}
         returnValue.error[0] = {status: "ERROR", message:"A vignette name should have a valid value.Give it a relevant name. Click on the back button."}
     }
     var postableLocsValue = $('#sm-options-type-name').val();
 
-    if (!postableLocsValue || postableLocsValue == "") {
-        returnValue.error[1] = { status: "ERROR", message:"Select one or more locations to post. Nectorr wont be able to schedule or post for you. Click on the back button." }
+//    if (!postableLocsValue || postableLocsValue == "") {
+    if (getPostableLocsForDB().length<=0){
+        if (!returnValue.error) returnValue['error'] = {}
+        returnValue.error[1] = { status: "ERROR", message: "Select one or more locations to post. Nectorr wont be able to schedule or post for you. Click on the back button." }
     } else {
-        if (returnValue) returnValue = true
+        returnValue.success[1] = { status: "SUCCESS", message: "Postable locations validated successfully." }
     }//if (!postableLocsValue || postableLocsValue == "") {
 
-    if (!timeLines || timeLines <= 0) {
+    if (!timeLines || timeLines.length <= 0) {
+        if (!returnValue.error) returnValue['error'] = {}
         returnValue.error[2] = { status: "ERROR", message:"A vignette is for automated post on behalf of you. Click on the calendar to set time." }
     } else {
-        if (returnValue) returnValue = true;
+        returnValue.success[2] = { status: "SUCCESS", message: "Timelines validated successfully." }
     }//if (!postableLocsValue || postableLocsValue == "") {
 
     return returnValue;
 }//var validateForm = function () {
 
 var manageMultipleServerResponse = function (data, multipleRecords = false) {
+    
     if (!multipleRecords) {
         if (data) {
             if (data.status == 'ERROR') {
@@ -528,14 +543,28 @@ var manageMultipleServerResponse = function (data, multipleRecords = false) {
         $.each(errorList, function (element) {
             var childDiv = document.createElement("div");
             var thisElement = errorList[errorNo.toString()];
-            if (thisElement.status == 'ERROR') {
-                childDiv.style.cssText='background-color:rgba(243, 0, 0, 0.6);color: #ffffff ;margin-top:2px; margin-bottom-2px';
-            } else if (thisElement.status == 'SUCCESS') {
-                childDiv.style.cssText = 'background-color:rgba(10, 185, 5, 0.6); color', '#ffffff ;margin-top:2px; margin-bottom-2px';
-            } //if (data.status == 'ERROR') {
-            childDiv.innerHTML = thisElement.message;
-            $(childDiv).appendTo(serverResponse);
-            errorNo += 1;
+            if (thisElement) {
+                if (thisElement.status == 'ERROR') {
+                    childDiv.style.cssText = 'background-color:rgba(243, 0, 0, 0.6);color: #ffffff ;margin-top:2px; margin-bottom-2px';
+                    childDiv.addClass("nectorr-msg");
+                } else if (thisElement.status == 'SUCCESS') {
+                    childDiv.style.cssText = 'background-color:rgba(10, 185, 5, 0.6); color, #ffffff ;margin-top:2px; margin-bottom-2px';
+                    childDiv.addClass("nectorr-msg");
+                } //if (data.status == 'ERROR') {
+                childDiv.innerHTML = thisElement.message;
+                $(childDiv).appendTo(serverResponse);
+                errorNo += 1;
+            }
         });//$.each(errorList, function (element) {
     }//if (!multipleRecords) {
 }//var manageServerResponse = function(data) {
+
+var setsmDetailsForVignetteSave = function (masterList, selectedItems) {
+
+    return  _.filter(masterList, function (val) {
+        return _.some(this, function (val2) {
+            return val2['postableLocId.sm_id'] === val['sm_id'];
+        });//return _.some(this, function (val2) {
+    }, selectedItems);//return
+}//var setsmDetailsForVignetteSave = function (list, selectedItems) {
+

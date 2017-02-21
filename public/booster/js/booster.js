@@ -8,13 +8,40 @@ var selectedSocialMediaList = $('#selectedSocialMediaList');
 var boostingResources = [];    
 var slideIndex = 1;
 var imageList;
-
+var originalUrl, shortUrlForServer, imageUrlForServer, headingForServer, textForServer
 $(window).load(function (e) {
     //ShowAvailableSocialMediaIcons();//
 }); //$(window).load(function () { 
 
 $(document).ready(function () {
     //createBoostingProfile();
+    $('#postNow').click(function (e) {
+        // get Url, get imgUrl, get Caption, get Text
+        //var originalUrl, shortUrlForServer, imageUrlForServer, headingForServer, textForServer
+        $nectorrFacebookLogin('publish_actions, publish_stream, user_photos, user_photo_video_tags, user_posts', null, function (fbResponse) {
+            var dataForPost = { url: shortUrlForServer, imgUrl: (!imageUrlForServer) ? null : "@"+imageUrlForServer, caption: headingForServer, text: textForServer, sm_names: ['facebook', 'twitter'], accessToken: fbResponse.authResponse.accessToken }
+            boostNow(dataForPost, function (serverMessage) {
+                manageServerResponse(serverMessage);
+            });//boostNow(dataForPost, function (data) {
+        });//$nectorrFacebookLogin(['user_posts', 'manage_pages'], null, function (fbResponse) {
+        e.preventDefault();
+        // ask for social media?
+        // get Url shortened one
+        // get image Url
+        // get Text
+        //get relevantbearer token      
+        //call graph api to post
+        //repeat with twitter
+    });//$('#postNow').click(function (e) {
+
+    $('#scheduleNow').click(function (e) {
+
+    });//$('#postLater').click(function (e) {
+
+    $('#scheduleAuto').click(function (e) {
+
+    });//$('#postLater').click(function (e) {
+
     $('#linkedIn').click(function (ev) {
         iconClick(ev, 'linkedin');
         
@@ -29,30 +56,36 @@ $(document).ready(function () {
     $('#boosterTextArea').bind("paste", function (e) {
         // access the clipboard using the api
         var pastedData = e.originalEvent.clipboardData.getData('text');
+        originalUrl = pastedData; //for server comm
+        //, , imageUrlForServer, headingForServer, textForServer
         //$('#boosterTextArea').val(pastedData);
         // preview pane
-        var baseUrl = getBaseUrl(pastedData);    
-        
+        //var baseUrl = getBaseUrl(pastedData);    
+        $('#serverResponse').hide();
         // google shortner
         shortenUrl(pastedData, function (data) {
             var shortUrl = data.shortUrl;
+            shortUrlForServer = shortUrl; //used for server comm
             $('#boosterTextArea').val(shortUrl);
             $("#boosterPreview").attr("src", shortUrl);
             // get list of images
             getHTML(pastedData, function (html) {
-                var h1Data = html.find('h1');
-                var parentDiv = h1Data[0].parentElement;
-                $("#h1Text").text(h1Data[0].innerText);
-                var paras = html.find('p');
-                var para = paras[0].innerText, strLen;
+                var h1Data = html.h1Tags
+                $("#h1Text").text(h1Data[0]);
+                headingForServer = h1Data[0];
+
+                var paras = html.pTags;
+                var para = paras[0], strLen;
+                if (paras[0] || paras[0] == "") para = paras[1];
                 if (para.length > 97) { strLen = 97 } else { strLen = para.length - 1 }
                 para = para.substr(0, strLen);
                 para += '...';
                 $('#paraText').text(para);
+                textForServer = para;
             
                 slideIndex = 0;
-                imageList = html.find('img');
-                imageList = cleanImageList(imageList);
+                imageList = html.imgTags;
+                //imageList = cleanImageList(imageList);
                 //imageList = $(parentDiv).children('img').map(function () { return $(this) }).get();
                 plusDivs(slideIndex);// display images
                 //addImageListToDiv("", imageList);
@@ -88,10 +121,12 @@ var cleanImageList = function (imgList) {
     }//for (var counter = 0; counter < imgList.length; counter++) {
     return returnValue;
 }//var cleanImageList = function (imgList) {
-var plusDivs= function (n) {
+var plusDivs= function (index) {
     //showDivs(slideIndex += n);
-    if (imageList.length <n)
-    $("#imageHolder").html("<img src=\"" + imageList[slideIndex].src + "\">");
+    if (index < imageList.length) {
+        $("#imageHolder").html("<img src=\"" + imageList[slideIndex] + "\">");
+        imageUrlForServer = imageList[slideIndex];
+    }
 }//function plusDivs(n) {
 
 
@@ -111,12 +146,12 @@ var getElementsFromDivs = function (div, element) {
 var getHTML = function (url, callback) {
     var a = document.createElement('a');
     a.href = url;
-    var urlReq = { host: a.hostname, path: a.pathname + a.search,uri:url }
+    var urlReq = { host: a.hostname, path: a.pathname }//,uri:url }
     $.ajax({
         headers: { "Accept": "application/json" }
         , type: 'GET'
         , url: '/get/html'
-        , data: "urlPath=" + JSON.stringify(urlReq)
+        , data: "urlPath=" + url
         , dataType: "jsonp"
         , jsonp: "callback"
         , crossDomain: true
@@ -129,7 +164,7 @@ var getHTML = function (url, callback) {
                 var html = data.data;
                 //var elementList = $(html).find(element);
                 if (callback) {
-                    callback($(html));
+                    callback(html);
                 }
             } else {
                 manageServerResponse(data);
@@ -395,7 +430,7 @@ var getJSONNode = function (jsonClass, fieldName, value) {
         ); //return jsonClass.filter(
 }//var getJSONNode = function (getConnectedSocialMedia, value) {
 
-var createBoostingProfile = function (param, callback) { }
+
 
 var removeBaseUrl= function (url) {
     var returnValue = "";

@@ -5,6 +5,7 @@ var router = express.Router();
 var config = require('../config/config');
 var http = require('http');
 var request = require('request');
+var url = require('url');
 var fbCallback;
 var Twitter = require('twitter');
 var fbGraph = require('fbgraph');
@@ -12,6 +13,7 @@ var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy = require('passport-twitter').Strategy;
 var tweets = require('./tweets');
+var cheerio = require("cheerio");
 var fbCode, twitterToken1, twitterToken2, twitterEmail;
 var redirectOptions = {
     successRedirect: '/auth/facebook/callback',
@@ -43,58 +45,19 @@ router.get('/get/booster-profiles', function (req, res) {
 router.get('/get/html', function (req, res) {
     var callback= getCallback(req);
     if (callback) {
-        var url = req.query.urlPath;
-        var urlInfo;
-        try {
-            urlInfo = JSON.parse(url);
-        }
-        catch (error) {
-            var serverMessage = { status: 'ERROR', message: error.message }
-            sendMessageToServer(serverMessage, callback, res);
-
-            console.log(error);
-            return;
-        }//try {
-        if (url) {
+        var clientUrl = req.query.urlPath;
+        if (clientUrl) {
             var request = require("request");
             request({
-                url: urlInfo.uri
+                uri: clientUrl //.host+clientUrl.path
                 ,json: true
             }, function (error, response, body) {
 
                 if (!error && response.statusCode === 200) {
-                    // console.log(body) // Print the json response
-                    var serverMessage = { status: 'SUCCESS', message: "URL read successfully", data: body }
-                    //res.write(data.toString());
-                    //res.end();
+                    var serverMessage = { status: 'SUCCESS', message: "URL read successfully", data: getTagsForBooster(body, clientUrl) }
                     sendMessageToServer(serverMessage, callback, res);
-                } else if (error) {
-                    var serverMessage = { status: 'ERROR', message: error.message}
-                    sendMessageToServer(serverMessage, callback, res);
-
                 }//if (!error && response.statusCode === 200) {
             });
-            //url = JSON.parse(url);
-            //var options = {
-            //    host: urlInfo.host
-            //    , path: urlInfo.path
-            //}
-
-            //var req = http.request(options, function (response) {
-            //    var str = ''
-            //    response.on('data', function (chunk) {
-            //        str += chunk;
-            //    });
-            //    response.on('error', function (error) {
-            //        var serverMessage = { status: 'ERROR', message: error.message }
-            //        sendMessageToServer(serverMessage, callback, res);
-            //    });
-            //    response.on('end', function () {
-            //        var serverMessage = { status: 'SUCCESS', message: 'url successfully read.', data: str.toString() }
-            //        sendMessageToServer(serverMessage, callback, res);
-            //    });
-            //}); //var req = http.request(options, function (response) {
-
         }//if (url) {
     }//if (callback) {
 });//router.get('get/html', function (req,res) {
@@ -638,6 +601,28 @@ router.get('/facebook/read/posts', function (req, res) {
 
     //res.render('index', { title: 'Angular, Node and Twitter API' });
 });
+var getTagsForBooster = function (body,url) {
+    var tagsArray = ['h1', 'img', 'p'];
+    var attribArray = [null, 'src', null];
+    var returnValue = {}
+    for (var counter = 0; counter < tagsArray.length; counter++){
+        var tagResult = getTagsFromHTML(tagsArray[counter], attribArray[counter], body,url);
+        returnValue[tagsArray[counter]+'Tags'] = tagResult;
+    }//for (var counter = 0; counter < tagsArray.length; counter++){
+    return returnValue;
+} //var getTagsForBooster = function () {
+var getTagsFromHTML = function (tag, attrib, html, page_url) {
+    var returnValue = [];
+    var $ = cheerio.load(html);
+    $(tag).each(function (i, item) {
+        if (attrib != 'src') {
+            returnValue.push($(item).text());
+        } else {
+            returnValue.push(url.resolve(page_url, $(item).attr('src')));
+        }//if (attrib != 'src') {
+    });
+    return returnValue;
+}//var getTagsFromHTML = function (tag, html) {
 
 
 router.get('/twitter/get/lists', function (req, res) {
@@ -1008,7 +993,7 @@ var sendEmail = function (recieverName,recieverEmail, emailText) {
     });
 }//var sendEmail = function (senderName, recieverName,recieverEmail, text) {
 
-var sendMessageToServer = function(msg, callback, res, post = false) {
+var sendMessageToServer = function(msg, callback, res, post ){//= false) {
     // msg has to be a valid json object
     var payload = JSON.stringify(msg);
     payload = payload.replace(/\\n/g, "\\n")

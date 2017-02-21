@@ -6,6 +6,7 @@
     "bluebird": "^3.4.7",
     "body-parser": "^1.15.2",
     "browserify": "^6.0.3",
+    "cheerio": "^0.22.0",
     "connect-flash": "^0.1.1",
     "content-type": "^1.0.2",
     "cookie-parser": "^1.4.3",
@@ -37,6 +38,7 @@
     "twit": "^2.2.5",
     "twitter": "^1.7.0",
     "uglify-js": "~2.4.15",
+    "url": "^0.11.0",
     "watchify": "^3.8.0"
   },
   "devDependencies": {},
