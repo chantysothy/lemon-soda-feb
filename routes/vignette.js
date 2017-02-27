@@ -9,18 +9,19 @@ router.post('/vignette/set', function (req, res) {
     if (callback) {
         var email = req.body.email;
         if (email) {
-            var vignetteInfo = req.body.vignetteInfo
+            var vignetteInfo = JSON.parse(req.body.vignetteInfo);
             if (vignetteInfo) {
                 var condition = { 'email': email };
                 var data = vignetteInfo;
                 var vignetteName = req.body.vignette_name;
-                vignetteModel.findOne(condition, function (err, doc) {
+                vignetteModel.find(condition, function (err, docs) {
                     if (err) {
                         var message = { status: "ERROR", message: "There was an error in locating your vignette information. Please try after some time." }
                         sendMessageToServer(message, callback, res);
                         return;
                     }//if (err) {
-                    if (doc) {
+                    if (docs && findVignetteInArray(vignetteName,docs)) {
+                        //update doc
                         doc.data = data;
                         doc.save(function (err, vignette, numRows) {
                             if (err) {
@@ -32,19 +33,17 @@ router.post('/vignette/set', function (req, res) {
                             }//if (err) {
                         });//doc.save(function (err, user, numRows) {
                     } else {
-                        //first time
+                        // append doc
                         var vignette = new vignetteModel({
                             'email': email
                             , vignette_name: vignetteName
                             , 'data': vignetteInfo
-
                         });
                         vignette.save(function (err, doc, numRows) {
                             if (err) {
                                 var msg = { status: "ERROR", message: "An error occured while creating a new vignette. Please try after sometime." }
                                 sendMessageToServer(msg, callback, res)
                             } else {
-
                                 var msg = { status: "SUCCESS", message: "A new vignette was created." }
                                 sendMessageToServer(msg, callback, res)
                             }//if (err) {
@@ -58,23 +57,23 @@ router.post('/vignette/set', function (req, res) {
 });//router.get('/vignette/save', function (req, res) {
 
 router.get('/vignette/get', function (req, res) {
-    var callback = req.body.callback;
+    var callback = req.query.callback;
     if (callback) {
-        var email = req.body.email;
+        var email = req.query.email;
         if (email) {
             var condition = { 'email': email };
 
-            vignetteModel.findOne(function (condition, err, doc) {
+            vignetteModel.find(condition, function (err, docs) {
                 if (err) {
                     var message = { status: "ERROR", message: "There was an error in locating your vignettes. Please try after some time." }
                     sendMessageToServer(message, callback, res);
                     return;
                 }//if (err) {
-                if (doc) {
-                    var message = { status: "SUCCESS", message: "Your vignettes were successfully located.", data: doc._doc }
+                if (docs) {
+                    var message = { status: "SUCCESS", message: "Your vignettes were successfully located.", data: docs }
                     sendMessageToServer(message, callback, res);
                 } else {
-                    var message = { status: "ERROR", message: "No vignettes were found for this login.", data: doc._doc }
+                    var message = { status: "ERROR", message: "No vignettes were found for this login." }//, data: doc._doc }
                     sendMessageToServer(message, callback, res);
                 }//if(doc){
             });//vignetteModel.findOne(function (condition, err, doc) {
@@ -109,4 +108,9 @@ var sendMessageToServer = function (msg, callback, res, post = false) {
     }
 }
 
+var findVignetteInArray = function (name, array) {
+    var returnValue= false
+    array.filter(function (item) { 
+        return item.vignette_name === name; });
+}
 module.exports = router;

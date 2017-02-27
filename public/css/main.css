@@ -1095,6 +1095,9 @@ input:checked + label {
     color : #000
     
 }
+    .booster-preview img {
+    height: 450px; height: 249px;
+    }
 .booster-button {
     background-color : #6086ba;
     color : #ffffff;
@@ -1121,4 +1124,14 @@ input:checked + label {
         /*padding-right: 15px;
         border-radius:10px;*/
 
+}
+#buttonPanel {
+    margin-top: 10px;
+    padding-top: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    background-color: #efa555
+}
+.close-btn {
+   cursor:pointer
 }

@@ -27,7 +27,7 @@ $(window).load(function (e) {
     $('#weekCalendar').weekCalendar({
         timeslotsPerHour: 4,
         height: function ($calendar) {
-            return $(window).height() - $("h1").outerHeight();
+            return 240//$(window).height() - $("h1").outerHeight();
         },
         eventRender: function (calEvent, $event) {
             if (calEvent.end.getTime() < new Date().getTime()) {

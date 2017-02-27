@@ -7,51 +7,54 @@ var iconValue = ['facebook', 'twitter', 'googlePlusUser', 'instagram', 'linkedin
 var selectedSocialMediaList = $('#selectedSocialMediaList');
 var boostingResources = [];    
 var slideIndex = 1;
-var imageList;
+var imageList=[];
 var originalUrl, shortUrlForServer, imageUrlForServer, headingForServer, textForServer
 $(window).load(function (e) {
+    $('#currentImg').height(250).width(470);
+    //$('#boosterPreview').left();
+    $('#boosterPreview').height('auto');
+
+    $('#boosterPreview').hide();
+
+    //$('#imageHolder').append();
     //ShowAvailableSocialMediaIcons();//
 }); //$(window).load(function () { 
 
 $(document).ready(function () {
     //createBoostingProfile();
+    $("#manageVignette").animatedModal({
+        modalTarget: 'manageVignetteModal',
+        animatedIn: 'fadeIn',
+        animatedOut: 'fadeOut',
+        animationDuration: '0.7s',
+        color: 'rgba(51,51,51,0.9)',
+        //color:'#3498db',
+        // Callbacks
+        beforeOpen: function () {
+            console.log("The animation before open was called");
+        },
+        afterOpen: function () {
+            console.log("The animation after open is completed");
+        },
+        beforeClose: function () {
+            console.log("The animation before close was called");
+        },
+        afterClose: function () {
+            console.log("The animation after close is completed");
+        }
+    });
     $('#postNow').click(function (e) {
         // get Url, get imgUrl, get Caption, get Text
         //var originalUrl, shortUrlForServer, imageUrlForServer, headingForServer, textForServer
         $nectorrFacebookLogin('publish_actions, publish_stream, user_photos, user_photo_video_tags, user_posts', null, function (fbResponse) {
-            var dataForPost = { url: shortUrlForServer, imgUrl: (!imageUrlForServer) ? null : "@"+imageUrlForServer, caption: headingForServer, text: textForServer, sm_names: ['facebook', 'twitter'], accessToken: fbResponse.authResponse.accessToken }
+            var dataForPost = { url: shortUrlForServer, imgUrl: (!imageUrlForServer) ? null : imageUrlForServer, caption: headingForServer, text: textForServer, sm_names: ['facebook', 'twitter'], accessToken: fbResponse.authResponse.accessToken }
             boostNow(dataForPost, function (serverMessage) {
                 manageServerResponse(serverMessage);
             });//boostNow(dataForPost, function (data) {
         });//$nectorrFacebookLogin(['user_posts', 'manage_pages'], null, function (fbResponse) {
         e.preventDefault();
-        // ask for social media?
-        // get Url shortened one
-        // get image Url
-        // get Text
-        //get relevantbearer token      
-        //call graph api to post
-        //repeat with twitter
     });//$('#postNow').click(function (e) {
 
-    $('#scheduleNow').click(function (e) {
-
-    });//$('#postLater').click(function (e) {
-
-    $('#scheduleAuto').click(function (e) {
-
-    });//$('#postLater').click(function (e) {
-
-    $('#linkedIn').click(function (ev) {
-        iconClick(ev, 'linkedin');
-        
-    });//$('#linkedIn').click(function (e) {
-    $('#twitter').click(function (ev) {
-        iconClick(ev,'twitter');
-    });
-    $('#facebook').click(function (e) {
-        iconClick(e, 'facebook');
-    });
 
     $('#boosterTextArea').bind("paste", function (e) {
         // access the clipboard using the api
@@ -88,6 +91,7 @@ $(document).ready(function () {
                 //imageList = cleanImageList(imageList);
                 //imageList = $(parentDiv).children('img').map(function () { return $(this) }).get();
                 plusDivs(slideIndex);// display images
+                $('#boosterPreview').show();
                 //addImageListToDiv("", imageList);
                 //showDivs(slideIndex);
             });//getElementsFromUrl(pastedData, 'h1', function (h1Data) {
@@ -123,9 +127,11 @@ var cleanImageList = function (imgList) {
 }//var cleanImageList = function (imgList) {
 var plusDivs= function (index) {
     //showDivs(slideIndex += n);
-    if (index < imageList.length) {
-        $("#imageHolder").html("<img src=\"" + imageList[slideIndex] + "\">");
+    if (index < imageList.length - 1) {
+        var imgHTML = "<img src=\"" + imageList[index] + "\">";
+        $("#currentImg").attr('src',imageList[slideIndex]);
         imageUrlForServer = imageList[slideIndex];
+        slideIndex=slideIndex+index;
     }
 }//function plusDivs(n) {
 

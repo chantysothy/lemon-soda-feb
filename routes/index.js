@@ -178,8 +178,33 @@ router.get('/signup/invitation/validate', function (req, res) {
             });//invitationModel.findOne({}, function (err, data) {
         }//if (creds) {
     } //if (callback) {
-});//router.get('/signup/invitation/validate', function (req, res) { 
-router.get('/login/details', function (req, res) {
+});//router.get('/signup/invitation/validate', function (req, res) {
+router.get('/login/change-password', function (req, res) {
+    var callback = req.query.callback;
+    if (callback) {
+        var email = req.query.email;
+        var pwd = req.query.password;
+        if (email) {
+            var condition = { "local.email": email };
+            userModel.findOne({ 'local.email': email }, function (err, doc) {
+                if (doc) {
+                    doc.local.password = pwd;
+                    doc.save(function (error, doc, numAfffected) {
+                        if (!error) {
+                            sendMessageToServer({ status: "SUCCESS", message: "The changes were recorded successfully." },callback,res);
+                        } else {
+                            sendMessageToServer({ status: "ERROR", message: "An error occured while updating nectorr servers. Please try after sometime." },callback,res);
+
+                        }
+                    });//doc.save(function (error, doc, numAfffected) {
+                } else {
+                    sendMessageToServer({ status: "ERROR", message: "We were unable to locate your credentials. Please try after sometime." });
+                }//if (doc){
+            });//userModel.findOne({ 'local.email': email }, function (err, data) {
+            }//if (email) {
+    }//if (callback) {
+}); //router.post('/login/set', function (req,res) {
+router.get('/login/details', function (req, res)  {
     // get query params
     var callback = getCallback(req);
     if (callback) {
@@ -618,7 +643,18 @@ var getTagsFromHTML = function (tag, attrib, html, page_url) {
         if (attrib != 'src') {
             returnValue.push($(item).text());
         } else {
-            returnValue.push(url.resolve(page_url, $(item).attr('src')));
+            if (typeof page_url != undefined) {
+                var relativePath = $(item).attr('src');
+                url.parse(page_url);
+                var host = url.parse(page_url).protocol + "//" + url.parse(page_url).hostname;
+                if (relativePath) {
+                    if (($(item).attr('height') > 450) && ($(item).attr('height')>230) )
+                        returnValue.push(url.resolve(host, $(item).attr('src')));
+                }
+
+            } else {
+                //returnValue.push(null);
+            }
         }//if (attrib != 'src') {
     });
     return returnValue;

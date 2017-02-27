@@ -797,6 +797,37 @@ var getLoginObject = function (callback) {
 
 }//var getLoginObject = function (invitationCode) {
 
+var setLoginDetails = function (userObject, callback) {
+    if (callback) {
+        var email = $getClientEmail(), userDetails = JSON.stringify(userObject);
+        $.ajax({
+            headers: { "Accept": "application/json" }
+            , type: 'get'
+            //        , url: twitterUrls.request_token_url
+            , url: '/login/change-password'
+            , data: "email=" + email + "&password=" + userObject.local.password
+            , dataType: "jsonp"
+            , jsonp: "callback"
+            , crossDomain: true
+            , beforeSend: function (xhr) {
+                xhr.withCredentials = true;
+                //xhr.setRequestHeader(JSON.stringify(twitterDefaults.headers));
+            }
+            , jsonPCallback: "jsonpCallback"
+            , success: function (data) {
+                if (callback)
+                    callback(data);
+
+                //$("#feeds").children().show();
+            }
+            , error: function (jqXHR, textStatus, errorThrown) {
+                alert("ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
+            }
+        });
+
+    }//if (callback) {
+};
+
 var setPublishCredentials = function (userObject,  callback) {
     var smName = ["facebook", "twitter", "instagram", "youtube", "dribbble", "blogger"];
 
@@ -923,6 +954,29 @@ var getGapiInfo = function (callback) {
     //});//gapi.load('auth2', 
 
 }
+var getVignetteFromDb = function (callback) {
+    $.ajax({
+        headers: { "Accept": "application/json" }
+        , type: 'get'
+        , url: '/vignette/get'
+        , data: "email=" + $getClientEmail() //+ "&vignetteInfo=" + JSON.stringify(vignetteData) + "&vignette_name=" + vignetteName
+        , dataType: "jsonp"
+        , jsonp: "callback"
+        , crossDomain: true
+        , beforeSend: function (xhr) {
+            xhr.withCredentials = true;
+        }
+        , jsonPCallback: "jsonpCallback"
+        , success: function (data) {
+            if (callback) {
+                callback(data);
+            } //if (callback) { 
+        }
+        , error: function (jqXHR, textStatus, errorThrown) {
+            alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
+        }
+    }); //$.ajax({
+}//var getLoggedInUserDetails = function (callback) {
 
 var saveVignetteToDB = function (vignetteName, vignetteData, callback) {
     $.ajax({

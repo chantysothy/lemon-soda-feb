@@ -22,7 +22,7 @@ router.get('/send/post/now', function (req, res) {
     //var dataToPost={ url: shortUrlForServer, imgUrl: imageUrlForServer, caption= headingForServer, text: textForServer, sm_names :['facebook','twitter'] }
     if (callback) {
         var email = req.query.email;
-        var dataToPost = JSON.parse(req.query.dataToPost);
+        var dataToPost = JSON.parse(escapeSpecialChars(req.query.dataToPost));
         for (var smCounter = 0; smCounter < dataToPost.sm_names.length; smCounter++) {
             var sm_name = dataToPost.sm_names[smCounter];
             //var dataToPost;////dataToPost. postToString, caption, link, pictureLink
@@ -101,77 +101,94 @@ var uploadMediaToTwitter = function (pathUri, callback) {
     }//if (callback) {
 } //var uploadMediaToTwitter = function (pathUri) {
 
+var getUrl = function (url, callback) {
+    request.get(url, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            if (callback) {
+                callback(body)
+            } else {
+                return body;
+            }
+        }
+    });
+}
+var getMediaPathForUpload = function (uploadOptions) {
+    var returnValue = '/me';
+    if (uploadOptions.me_type) {
+        returnValue += '/' + uploadOptions.me_type + 's/' + uploadOptions.me_Id;
+    }
+    return returnValue;
+}//var getMediaPathForUpload = function (uploadOptions) {
+
+var uploadMediaToFacebook = function (uploadOptions, callback) {
+    var returnValue, params = {};
+    var mediaUploadPath = getMediaPathForUpload(uploadOptions);
+    getUrl(uploadOptions.imgUrl, function (imgObject) {
+    mediaUploadPath += '/photos';
+
+    fbGraph.post(mediaUploadPath, { "url": uploadOptions.imgUrl }, function (err, imgResponse) {
+        if (err) {
+            callback({
+                "error":
+                "Error while uploading media to facebook. Code - " + err.code
+            });
+        } else {
+            callback({
+                fbImageInfo: imgResponse
+            });
+        }//if (err) {
+
+    });//fbGraph.post(mediaUploadPath, {}, function (err, doc, next) {
+
+    });//getUrl(uploadOptions.imgUrl, function (imgObject) {
+}//var uploadMediaToFacebook = function(mediaUrl, callback)
+
 var postToFacebook = function (dataToPost, callback) { //dataToPost. postToString, caption, link, pictureLink
     var message = {};
     //var post = { caption: dataToPost.caption, link: dataToPost.link, picture: dataToPost.pictureLink, message: dataToPost.caption };
     var params = {};
-    params['message'] = dataToPost.caption;
-    params['name'] = dataToPost.text;
-    //params['description'] = 'this is a description';
-    params['link'] = dataToPost.url;
-    params['picture'] = '@'+dataToPost.imgUrl;
-    params['caption'] = dataToPost.caption;
-    params['me_id'] = dataToPost.me_Id;
-    params['me_type'] = dataToPost.me_type;
-    var path = '/me';
+
     fbGraph.setAccessToken(dataToPost.accessToken);
     fbGraph.extendAccessToken({
         "access_token": dataToPost.accessToken
         , "client_id": config.facebookAuth.client_id
         , "client_secret": config.facebookAuth.client_secret
     }, function (err, facebookRes) {
-        //console.log(facebookRes);
-        if (params.me_type) {
-            if (params.me_type == 'page') {
-                path += "/pages/";//+ param.me_id;
-            } else { // (param.me_type == 'group') {
-                path += "/groups/";//+ param.me_id;
-            }//if (param.me_type == 'page') {
-
-
-            if (params.picture) {
-                findAlbum(path + '/albums/', 'nectorr-images', function (albumResponse) {
-                    //set path in params
-                    if (albumResponse && !albumResponse.error) {
-                        fbGraph.post(path, params, function (err, res) {
-                            if (err) {
-                                message['status'] = "ERROR";
-                                message['message'] = "An error occured while posting to facebook."
-                                callback(message);
-                                return;
-                            }//if (err) {
-                            if (res) {
-                                message['status'] = "SUCCESS";
-                                message['message'] = "Successfully posted to facebook."
-                                callback(message);
-                                return;
-                            }//if (res) {
-                        });//fbGraph.post(dataToPost.postToString, post, function (err, res) {
-                    }
-                });//findAlbum(path, params.me_id, function (response) {
+        params['message'] = dataToPost.caption;
+        params['name'] = dataToPost.text;
+        //params['description'] = 'this is a description';
+        params['link'] = dataToPost.url;
+        params['picture'] = dataToPost.imgUrl;
+        params['caption'] = dataToPost.caption;
+        params['me_id'] = dataToPost.me_Id;
+        params['me_type'] = dataToPost.me_type;
+        var path = '/me';
+        uploadMediaToFacebook(dataToPost, function (mediaResponse) {
+            // set params value
+            if (mediaResponse.error) {
+                callback({ 'status': 'ERROR', data: mediaResponse.error });
             } else {
-                fbGraph.post(params.path + params.me_id, params, function (err, res) {
-                    if (err) callback({ status: "ERROR", data: "There was an error in posting... Please try after sometime." });
-                    if (res) calback({ status: "SUCCESS", message: "Posted successfully on facebook.", data: fbResponse.data });
-                })//fbGraph.post(params.path + params.me_id, params, function (err, res) {
-            }
-        } else {
-            fbGraph.post(path, params, function (err, res) {
-                if (err) {
-                    message['status'] = "ERROR";
-                    message['message'] = "An error occured while posting to facebook. Code - " + err.code;
-                    callback(message);
-                    return;
-                }//if (err) {
-                if (!res.error) {
-                    message['status'] = "SUCCESS";
-                    message['message'] = "Successfully posted to facebook."
-                    callback(message);
-                    return;
-                }//if (res) {
-            });//fbGraph.post(dataToPost.postToString, post, function (err, res) {
-        }//if (param.me_type) {
-    });//fbGraph.extendAccessToken({
+                //params.picture = mediaResponse.fbImageInfo.id;
+                fbGraph.post(path+'/feed', params, function (err, res) {
+                    if (err) {
+                        message['status'] = "ERROR";
+                        message['message'] = "An error occured while posting to facebook. Code - " + err.code;
+                        callback(message);
+                        return;
+                    }//if (err) {
+                    if (!res.error) {
+                        message['status'] = "SUCCESS";
+                        message['message'] = "Successfully posted to facebook."
+                        callback(message);
+                        return;
+                    }//if (res) {
+                });//fbGraph.post(dataToPost.postToString, post, function (err, res) {
+
+
+            }//if (mediaResponse.error) { } else {
+        });//uploadMediaToFacebook(uploadOptions, function (mediaResponse) {
+        //console.log(facebookRes);
+        })//fbGraph.extendAccessToken({;
 }//var postToFacebook = function (options, accessToken) {
 
 var getStringForPost = function (data) {
@@ -316,4 +333,14 @@ var uploadVideo = function (albumPath, albumName, videoUrl,callback) {
 
 }//var uploadVideo = function (albumPath, albumName, callback) {
 
+var escapeSpecialChars    = function (param) {
+    return param.replace(/\\n/g, "\\n")
+        .replace(/\\'/g, "\\'")
+        .replace(/\\"/g, '\\"')
+        .replace(/\\&/g, "\\&")
+        .replace(/\\r/g, "\\r")
+        .replace(/\\t/g, "\\t")
+        .replace(/\\b/g, "\\b")
+        .replace(/\\f/g, "\\f");
+};
 module.exports = router;
