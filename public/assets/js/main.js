@@ -346,6 +346,11 @@
 
 				});
 
+            $('#learnMore').click(function (e) {
+                var $menu = $('#menu')._toggle();
+            });
+            $('#knowMore').click(function (e) {
+                var $menu = $('#menu')._toggle();
+            });
 	});
-
 })(jQuery);

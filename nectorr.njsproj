@@ -21,6 +21,8 @@
   <ItemGroup>
     <Compile Include="models\booster-vignette.js" />
     <Compile Include="models\encSchema.js" />
+    <Compile Include="models\invitation.js" />
+    <Compile Include="models\schedulerData.js" />
     <Compile Include="models\track-n-listen.js" />
     <Compile Include="models\userposts.js" />
     <Compile Include="models\vignettes.js" />
@@ -195,6 +197,7 @@
     <Compile Include="public\signup\local\js\invite.js" />
     <Compile Include="routes\postmanager.js" />
     <Compile Include="routes\google.js" />
+    <Compile Include="routes\scheduler.js" />
     <Compile Include="routes\streamer.js" />
     <Compile Include="routes\user-config.js" />
     <Compile Include="routes\vignette.js" />
@@ -1808,6 +1811,7 @@
     <Folder Include="typings\globals\express-session\" />
     <Folder Include="typings\globals\jszip\" />
     <Folder Include="typings\globals\mongoose\" />
+    <Folder Include="typings\globals\node-schedule\" />
     <Folder Include="typings\globals\nodemailer\" />
     <Folder Include="typings\globals\node\" />
     <Folder Include="typings\globals\passport\" />
@@ -2113,6 +2117,7 @@
     <TypeScriptCompile Include="typings\globals\express-session\index.d.ts" />
     <TypeScriptCompile Include="typings\globals\jszip\index.d.ts" />
     <TypeScriptCompile Include="typings\globals\mongoose\index.d.ts" />
+    <TypeScriptCompile Include="typings\globals\node-schedule\index.d.ts" />
     <TypeScriptCompile Include="typings\globals\nodemailer\index.d.ts" />
     <TypeScriptCompile Include="typings\globals\node\index.d.ts" />
     <TypeScriptCompile Include="typings\globals\passport\index.d.ts" />

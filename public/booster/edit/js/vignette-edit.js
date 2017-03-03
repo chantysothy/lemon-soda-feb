@@ -3,10 +3,11 @@
 $(window).load(function (e) {
     getVignetteDetails(function (vignetteInfo) {
         var vignetteDetails = vignetteInfo.data;
-        $('#vignetteTable').DataTable({
-            "data": vignetteDetails,
-            "columns": [
-                { "title": "Vignette Name", "data": "vignette_name" }
+        $('#vignetteTable').dataTable({
+            //"data": vignetteDetails,
+            bProcesssing : true
+            , "aaData": vignetteDetails
+            //    [{ "title": "Vignette Name", "data": "vignette_name" }
                 //,{
                 //    "title": " ", "data": "data.locs", "width": 50, "render": function (data, type, row, meta) {
                 //        var json = JSON.parse(data);
@@ -16,7 +17,7 @@ $(window).load(function (e) {
                 //}
                 //{ "title": "Title", "data": locs},
                 //{ "title": "Title", "data": vignette_name },
-            ]
+            //]
         });
         //for (var vignetteCounter = 0; vignetteCounter < vignetteDetails.length; vignetteCounter++) {
         //    var postableLocs = vignetteDetails[vignetteCounter].data.locs

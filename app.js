@@ -8,6 +8,7 @@ var tweets = require('./routes/tweets');
 var google = require('./routes/google');
 var streamer = require('./routes/streamer.js');
 var vignette = require('./routes/vignette.js');
+var scheduler = require('./routes/scheduler.js');
 var postManager = require('./routes/postmanager.js');
 
 var mongodb = require('mongodb');
@@ -77,6 +78,7 @@ app.use(tweets);
 app.use(userConfig);
 app.use(streamer);
 app.use(vignette);
+app.use(scheduler);
 app.use(postManager);
 
 var port = 1337;//process.env.PORT || 5000;

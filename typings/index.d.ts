@@ -4,6 +4,7 @@
 /// <reference path="globals/express-session/index.d.ts" />
 /// <reference path="globals/jszip/index.d.ts" />
 /// <reference path="globals/mongoose/index.d.ts" />
+/// <reference path="globals/node-schedule/index.d.ts" />
 /// <reference path="globals/node/index.d.ts" />
 /// <reference path="globals/nodemailer/index.d.ts" />
 /// <reference path="globals/passport/index.d.ts" />
