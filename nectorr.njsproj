@@ -26,6 +26,7 @@
     <Compile Include="models\track-n-listen.js" />
     <Compile Include="models\userposts.js" />
     <Compile Include="models\vignettes.js" />
+    <Compile Include="public\about\js\main.js" />
     <Compile Include="public\app\js\cookie.js" />
     <Compile Include="public\app\js\jsonutils.js" />
     <Compile Include="public\app\js\sm_login.js" />
@@ -1400,8 +1401,14 @@
     <Content Include="public\fonts\linecons.svg" />
     <Content Include="public\fonts\linecons.ttf" />
     <Content Include="public\fonts\linecons.woff" />
+    <Content Include="public\images\about-us-new.jpg" />
+    <Content Include="public\images\about-us.jpg" />
+    <Content Include="public\images\banner.jpg" />
+    <Content Include="public\images\contact-us.jpg" />
+    <Content Include="public\images\edward.png" />
     <Content Include="public\images\image-bg-old.jpg" />
     <Content Include="public\images\image-bg.jpg" />
+    <Content Include="public\images\jim-morrison.jpg" />
     <Content Include="public\images\loading-animation.GIF" />
     <Content Include="public\images\logo-old.png" />
     <Content Include="public\images\logo.png" />
@@ -1726,6 +1733,7 @@
   <ItemGroup>
     <Folder Include="config\" />
     <Folder Include="models\" />
+    <Folder Include="public\about\js\" />
     <Folder Include="public\assets\" />
     <Folder Include="public\assets\animated-modal\" />
     <Folder Include="public\assets\animate\" />
@@ -1783,6 +1791,7 @@
     <Folder Include="public\booster\manage\images\" />
     <Folder Include="public\booster\manage\js\" />
     <Folder Include="public\configure\js\" />
+    <Folder Include="public\legal\" />
     <Folder Include="public\signup\" />
     <Folder Include="public\signup\change-password\" />
     <Folder Include="public\signup\change-password\css\" />

@@ -1,9 +1,4 @@
-/*
-	Forty by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
-*/
-
+var menuTmp
 (function($) {
 
 	skel.breakpoints({
@@ -207,8 +202,8 @@
 					$window.trigger('scroll');
 				});
 
-			$window.on('load', function() {
-
+            $window.on('load', function () {
+                menuTmp = $("#menu");
 					$banner.scrollex({
 						bottom:		$header.height() + 10,
 						terminate:	function() { $header.removeClass('alt'); },
@@ -346,12 +341,12 @@
 
 				});
 
-            $('#learnMore').click(function (e) {
-                var $menu = $('#menu')._toggle();
-            });
 	});
+    $('#learnMore').click(function (e) {
+        var $menu = $('#menu')._toggle();
+    });
     $('#knowMore').click(function (e) {
-        var $menu = $('#menu')
-            $menu._toggle();
+        //var $menu = $('#menu')
+        menuTmp._toggle();
     });
 })(jQuery);
