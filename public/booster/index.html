@@ -18,12 +18,12 @@
     <meta name="description" content="Website of nectorr.com">
     <!-- Mobile Specific Meta -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="../images/logo2x.png" type="image/x-icon">
-    <script type="text/javascript" src="//platform.linkedin.com/in.js">
-        api_key: 8161blmvykyv0a
-    authorize: true
+    <link rel="shortcut icon" href="../favicon-1024.png" type="image/x-icon">
+    <!--<script type="text/javascript" src="//platform.linkedin.com/in.js">
+        api_key: 8161blmvykyv0a;
+        authorize: true;
     onLoad: onLinkedInLoad
-    </script>
+    </script>-->
     <script>
         var onLinkedInLoad = function () {
             //alert('linkedIn API loaded');
@@ -40,7 +40,7 @@
     <link href="../assets/animate/animate.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="../css/font-awesome.min.css">
     <link href="css/w3.css" rel="stylesheet" />
-    <link rel="stylesheet" href="./assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/main.css">
     <script src="../js/modernizr-2.6.2.min.js"></script>
     <!-- Twitter Bootstrap css -->
     <!--<link rel="stylesheet" href="../css/bootstrap.min.css">-->
@@ -75,73 +75,76 @@
     ==================================== -->
 
     <div class="container">
-        <div class="row">
-            <div>
-                <h1>SOCIAL BOOSTER <span>&reg;</span></h1>
-                <br />
-                <br />
-                <div id="buttonPanel" class="col-xs-12">
-                    <div class="col-md-1 col-lg-1">
-                        <div id="icon_display" >
-                            <a href="#">
-                                <img id="postNow" class="image" src="./img/boost-now.png" />
-                            </a>
-                        </div>
+        <div class="row" >
+            <div style="align-content : center">
+                <br /> 
+                <h2>SOCIAL BOOSTER <span>&reg;</span></h2>
 
-                    </div>
-                    <div class="col-md-1 col-lg-1">
-                        <div id="icon_display">
-                            <a id="boostWithVignette" href="#">
-                                <img  class="image" src="./img/boost-vignette.png" />
-                            </a>
-                        </div>
-
-                    </div>
-                    <div class="col-md-1 col-lg-1">
-                        <div id="icon_display">
-                            <a id="manageVignette" href="#manageVignetteModal">
-                                <img  class="image" src="./img/create-vignette.png"  />
-                            </a>
-                        </div>
-
-                    </div>
-                </div>
                                 
-                <br />
                 <div id="showMessage" style="font-family:GothamRoundedLight">
 
                 </div>
 
                 <br /><br />
                 <div id="boosterArea"  style="margin-top: 10px; margin-bottom: 10px">
-                    <textarea id="boosterTextArea" rows="3" cols="106" class="booster" placeholder="copy/paste url here for social boosting." ></textarea>
+                    <textarea id="boosterTextArea" rows="3" cols="70" class="booster" placeholder="copy/paste url here for social boosting." ></textarea>
                 </div>
                 <div id="serverResponse" class="col-md-8 col-lg-8"></div>
                 <div id ="boosterPreview" class="booster-preview col-md-8 col-lg-8" >
                     Preview of your URL. <br />
-                    <div id="imageHolder"class="w3-content w3-display-container" style="align-content:center; height:auto">
+                    <div id="imageHolder"class="w3-content w3-display-container" style="align-content:center; height:auto" >
                         <img id="currentImg" style="width: auto; height:auto"/>
                         <a class="w3-btn-floating w3-display-left" onclick="plusDivs(-1)">&#10094;</a>
                         <a class="w3-btn-floating w3-display-right" onclick="plusDivs(1)">&#10095;</a>
                     </div>
-                    <div id="TextHolder">
-                        <h1 id="h1Text" style="font-size: 30px; color:#333333 ; margin-top: 10px;  margin-bottom:10px; text-align:left"></h1>
-                        <p id="paraText" style="font-size:15px;text-align:left"></p>
+                    <div id="TextHolder" style="width:450px">
+                        <h1 id="h1Text" style="font-size: 30px; color:#333333 ; margin-top: 10px;  margin-bottom:10px; text-align:left; color :#ffffff"></h1>
+                        <p id="paraText" style="font-size:15px;text-align:left; color: #ffffff"></p>
                     </div>
                     <!--<iframe id="boosterPreview" style="height:100%;width: 100% ; background-color:#ffffff"></iframe>-->
+                </div>
+                <div id="buttonPanel" class="col-xs-12">
+                    <div class="col-md-2 col-lg-2">
+                        <div id="icon_display">
+                            <a href="#">
+                                <img id="postNow" class="image" src="./img/boost-now.png" />
+                            </a>
+                            <p>Post now</p>
+                        </div>
+
+                    </div>
+                    <div class="col-md-2 col-lg-2">
+                        <div id="icon_display">
+                            <a id="selectVignette" href="#selectVignetteModal">
+                                <img class="image" src="./img/boost-vignette.png" />
+                            </a>
+                            <p>Post with Vignettes</p>
+                        </div>
+
+                    </div>
+                    <div class="col-md-2 col-lg-2">
+                        <div id="icon_display">
+                            <a id="manageVignette" href="#manageVignetteModal">
+                                <img class="image" src="./img/create-vignette.png" />
+                            </a>
+                        </div>
+                        <p>Manage Vignette</p>
+                    </div>
                 </div>
                 
                 <!-- create boosting profile section -->
             </div>
         </div>
     </div>
-    <div id="selectVignetteModal" hidden="hidden">
+    <div id="selectVignetteModal" >
         <div id="btn-close-modal" class="close-selectVignetteModal close-btn">
             <img src="../assets/forms/img/close.png" />
         </div>
 
         <div class="modal-content">
             <!--Your modal content goes here-->
+            <iframe src="select/index.html" style="width:100%; height: 700px" scrolling="no" frameborder="0"></iframe>
+
         </div>
     </div>
     <div id="manageVignetteModal">
@@ -153,7 +156,7 @@
             <iframe src="manage/index.html" style="width:100%; height: 700px" scrolling="no" frameborder="0"></iframe>
         </div>
     </div>
-
+    <hr />
     <footer id="footer">
         <div class="inner">
             <ul class="icons">
@@ -184,7 +187,7 @@
     <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery.form/3.32/jquery.form.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.1/jquery.validate.min.js"></script>
     <!-- Google Map -->
-    <script src="../assets/animated-modal/animatedModal.min.js"></script>
+    <script src="../assets/animated-modal/animatedModal.js"></script>
     <script src="https://apis.google.com/js/client.js"> </script>
     <!--<script src="https://apis.google.com/js/api.js" type="text/javascript"></script>-->
     <!-- Custom Functions -->

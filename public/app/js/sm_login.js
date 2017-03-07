@@ -119,13 +119,26 @@ $nectorrFacebookLogin = function (fbLoginScope, event, callback) {
             } else {
                 FB.login(function (response) {
                     if (response && !response.error) {
-                        callback(response)
+                        var accessToken = response.authResponse.accessToken;
+                        if (accessToken) {
+                            //extending access token
+                            var oAuthParams = {};
+                            oAuthParams['client_id'] = facebookDefaults.appId;
+                            oAuthParams['client_secret'] = facebookDefaults.appSecret;
+                            oAuthParams['grant_type'] = 'fb_exchange_token';
+                            oAuthParams['fb_exchange_token'] = 'accessToken';
+                            oAuthParams['response_type'] = 'token';
+                            FB.api('/oauth/access_token', 'post', oAuthParams, function (response) {
+                                callback(response)
+                            });//FB.api('/oauth/access_token', 'post', OauthParams, function (response) {
+                        } else {
+                            alert("We are experiencing difficulties in extending your access token. Please try after sometime.");
+                        }
                     } else {
-                        alert("There was an error in connecting with facebook. The recieved message : "+ error)
+                        alert("There was an error in connecting with facebook. The  message nectorr recieved is : "+ error)
                     }
                 }, fbLoginScope);//FB.login(function () {
-
-            }
+            }//if (response.status === 'connected') {
         });//FB.getLoginStatus(function (response) {
 
     }//if (scope) { 
@@ -960,6 +973,30 @@ var getVignetteFromDb = function (callback) {
         , type: 'get'
         , url: '/vignette/get'
         , data: "email=" + $getClientEmail() //+ "&vignetteInfo=" + JSON.stringify(vignetteData) + "&vignette_name=" + vignetteName
+        , dataType: "jsonp"
+        , jsonp: "callback"
+        , crossDomain: true
+        , beforeSend: function (xhr) {
+            xhr.withCredentials = true;
+        }
+        , jsonPCallback: "jsonpCallback"
+        , success: function (data) {
+            if (callback) {
+                callback(data);
+            } //if (callback) { 
+        }
+        , error: function (jqXHR, textStatus, errorThrown) {
+            alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
+        }
+    }); //$.ajax({
+}//var getLoggedInUserDetails = function (callback) {
+
+var postUsingVignette = function (vignetteInfo,callback) {
+    $.ajax({
+        headers: { "Accept": "application/json" }
+        , type: 'post'
+        , url: '/send/post/vignette'
+        , data: "email=" + $getClientEmail() + "&dataToPost=" + JSON.stringify(vignetteInfo.dataToPost + "&vignettes=" + vignetteInfo.vignettes + "&timelines=" + JSON.parse(vignetteInfo.timelines))//+ "&vignetteInfo=" + JSON.stringify(vignetteData) + "&vignette_name=" + vignetteName
         , dataType: "jsonp"
         , jsonp: "callback"
         , crossDomain: true

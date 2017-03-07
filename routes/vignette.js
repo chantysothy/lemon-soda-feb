@@ -4,6 +4,8 @@ var userModel = require('../models/user');
 var vignetteModel = require('../models/vignettes');
 
 var config = require('../config/config');
+
+
 router.post('/vignette/set', function (req, res) {
     var callback = req.body.callback;
     if (callback) {
@@ -81,8 +83,37 @@ router.get('/vignette/get', function (req, res) {
         }//        if (email) {
     }//    if (callback) {
 });//router.get('/vignette/save', function (req, res) {
+router.get('/vignette/get/min', function (req, res) {
+    var callback = req.query.callback;
+    if (callback) {
+        var email = req.query.email;
+        if (email) {
+            var condition = { 'email': email };
 
+            vignetteModel.find(condition, function (err, docs) {
+                if (err) {
+                    var message = { status: "ERROR", message: "There was an error in locating your vignettes. Please try after some time." }
+                    sendMessageToServer(message, callback, res);
+                    return;
+                }//if (err) {
+                if (docs) {
+                    var message = { status: "SUCCESS", message: "Your vignettes were successfully located.", data: getMinVignettes(docs) }
+                    sendMessageToServer(message, callback, res);
+                } else {
+                    var message = { status: "ERROR", message: "No vignettes were found for this login." }//, data: doc._doc }
+                    sendMessageToServer(message, callback, res);
+                }//if(doc){
+            });//vignetteModel.findOne(function (condition, err, doc) {
 
+        }//        if (email) {
+    }//    if (callback) {
+});//router.get('/vignette/save', function (req, res) {
+
+var getMinVignetes = function (doc) {
+    var returnValue = { vignettes_min: []};
+    // get id and description and return is as returnValue
+    //for each  (vignette in docs)
+} //var getMinVignetes= function(doc){
 var sendMessageToServer = function (msg, callback, res, post = false) {
     // msg has to be a valid json object
     var payload = JSON.stringify(msg);

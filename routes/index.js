@@ -42,6 +42,27 @@ router.get('/get/booster-profiles', function (req, res) {
     }//if (callback) {
 }); //router.get('/get/booster-profiles', function (req, res) {
 
+router.get('/get/html/old',function (req, res) {
+    var callback = getCallback(req);
+    if (callback) {
+        var clientUrl = req.query.urlPath;
+        if (clientUrl) {
+            var request = require("request");
+            request({
+                uri: clientUrl //.host+clientUrl.path
+                , json: true
+            }, function (error, response, body) {
+
+                if (!error && response.statusCode === 200) {
+                    $= cheerio.load(body);
+                    
+                    var serverMessage = { status: 'SUCCESS', message: "URL read successfully", data: getTagsForBooster(body, clientUrl) }
+                    sendMessageToServer(serverMessage, callback, res);
+                }//if (!error && response.statusCode === 200) {
+                });//function (error, response, body) {
+        }//if (clientUrl) {
+    }//if (callback) {
+});//router.get('/get/html',function (req, res) {
 router.get('/get/html', function (req, res) {
     var callback= getCallback(req);
     if (callback) {
@@ -52,8 +73,9 @@ router.get('/get/html', function (req, res) {
                 uri: clientUrl //.host+clientUrl.path
                 ,json: true
             }, function (error, response, body) {
-
+                var htmlJson
                 if (!error && response.statusCode === 200) {
+
                     var serverMessage = { status: 'SUCCESS', message: "URL read successfully", data: getTagsForBooster(body, clientUrl) }
                     sendMessageToServer(serverMessage, callback, res);
                 }//if (!error && response.statusCode === 200) {
@@ -627,18 +649,20 @@ router.get('/facebook/read/posts', function (req, res) {
     //res.render('index', { title: 'Angular, Node and Twitter API' });
 });
 var getTagsForBooster = function (body,url) {
+//    var tagsArray = ['title', 'imageId', 'paragraphs'];
     var tagsArray = ['h1', 'img', 'p'];
     var attribArray = [null, 'src', null];
     var returnValue = {}
     for (var counter = 0; counter < tagsArray.length; counter++){
         var tagResult = getTagsFromHTML(tagsArray[counter], attribArray[counter], body,url);
-        returnValue[tagsArray[counter]+'Tags'] = tagResult;
+            returnValue[tagsArray[counter]+'Tags'] = tagResult;
     }//for (var counter = 0; counter < tagsArray.length; counter++){
     return returnValue;
 } //var getTagsForBooster = function () {
 var getTagsFromHTML = function (tag, attrib, html, page_url) {
     var returnValue = [];
     var $ = cheerio.load(html);
+    var temp = $(tag);
     $(tag).each(function (i, item) {
         if (attrib != 'src') {
             returnValue.push($(item).text());
@@ -648,7 +672,7 @@ var getTagsFromHTML = function (tag, attrib, html, page_url) {
                 url.parse(page_url);
                 var host = url.parse(page_url).protocol + "//" + url.parse(page_url).hostname;
                 if (relativePath) {
-                    if (($(item).attr('height') > 450) && ($(item).attr('height')>230) )
+                    if (($(item).attr('width') > 230) && ($(item).attr('height')>230) )
                         returnValue.push(url.resolve(host, $(item).attr('src')));
                 }
 

@@ -1,27 +1,57 @@
 ﻿var fbScope = "manage_pages, user_managed_groups";
-var boostingProfile;
+var boostingProfile, fbAccessToken, selectVignette;
 var getConnectedSocialMedia;
 var twitterScope, googlePlusScope, linkedInScope, instagramScope 
 var iconUrl = ['../img/social/facebook-64.png', '../img/social/twitter-64.png', '../img/social/google-plus-64.png', '../img/social/instagram-64.png', '../img/social/linkedin-64.png', '../img/social/tumblr-64.png'];// Array
 var iconValue = ['facebook', 'twitter', 'googlePlusUser', 'instagram', 'linkedin', 'tumblr'];
 var selectedSocialMediaList = $('#selectedSocialMediaList');
 var boostingResources = [];    
-var slideIndex = 1;
+var slideIndex = -1;
 var imageList=[];
 var originalUrl, shortUrlForServer, imageUrlForServer, headingForServer, textForServer
 $(window).load(function (e) {
     $('#currentImg').height(250).width(470);
     //$('#boosterPreview').left();
     $('#boosterPreview').height('auto');
+    $nectorrFacebookLogin('publish_actions, publish_stream, user_photos, user_photo_video_tags, user_posts', null, function (fbResponse) {
+        fbAccessToken = fbResponse.authResponse.accessToken;
+    });//$nectorrFacebookLogin(['user_posts', 'manage_pages'], null, function (fbResponse) {
 
-    $('#boosterPreview').hide();
 
     //$('#imageHolder').append();
     //ShowAvailableSocialMediaIcons();//
 }); //$(window).load(function () { 
-
+window.closeSelectModal = function () {
+    $('#selectVignette').modal('hide');
+};
+window.closeManageModal = function () {
+    $('#manageVignette').modal('hide');
+};
 $(document).ready(function () {
     //createBoostingProfile();
+    $('#boosterPreview').hide();
+    $('#buttonPanel').hide();
+    selectVignette = $("#selectVignette").animatedModal({
+        modalTarget: 'selectVignetteModal',
+        animatedIn: 'fadeIn',
+        animatedOut: 'fadeOut',
+        animationDuration: '0.7s',
+        color: 'rgba(51,51,51,0.9)',
+        //color:'#3498db',
+        // Callbacks
+        beforeOpen: function () {
+            console.log("The selectVignetteModal animation before open was called");
+        },
+        afterOpen: function () {
+            console.log("The animat selectVignetteModal ion after open is completed");
+        },
+        beforeClose: function () {
+            console.log("The selectVignetteModal animation before close was called");
+        },
+        afterClose: function () {
+            console.log("The selectVignetteModal animation after close is completed");
+        }
+    });
     $("#manageVignette").animatedModal({
         modalTarget: 'manageVignetteModal',
         animatedIn: 'fadeIn',
@@ -47,6 +77,7 @@ $(document).ready(function () {
         // get Url, get imgUrl, get Caption, get Text
         //var originalUrl, shortUrlForServer, imageUrlForServer, headingForServer, textForServer
         $nectorrFacebookLogin('publish_actions, publish_stream, user_photos, user_photo_video_tags, user_posts', null, function (fbResponse) {
+            fbAccessToken = fbResponse.authResponse.accessToken;
             var dataForPost = { url: shortUrlForServer, imgUrl: (!imageUrlForServer) ? null : imageUrlForServer, caption: headingForServer, text: textForServer, sm_names: ['facebook', 'twitter'], accessToken: fbResponse.authResponse.accessToken }
             boostNow(dataForPost, function (serverMessage) {
                 manageServerResponse(serverMessage);
@@ -78,20 +109,26 @@ $(document).ready(function () {
                 headingForServer = h1Data[0];
 
                 var paras = html.pTags;
+
                 var para = paras[0], strLen;
-                if (paras[0] || paras[0] == "") para = paras[1];
-                if (para.length > 97) { strLen = 97 } else { strLen = para.length - 1 }
-                para = para.substr(0, strLen);
-                para += '...';
-                $('#paraText').text(para);
-                textForServer = para;
-            
+                if (para) {
+                    if (paras[0] || paras[0] == "") para = paras[1];
+                    if (para.length > 97) { strLen = 97 } else { strLen = para.length - 1 }
+                    para = para.substr(0, strLen);
+                    para += '...';
+                    $('#paraText').text(para);
+                    textForServer = para;
+                    $('#buttonPanel').show();
+                }
                 slideIndex = 0;
                 imageList = html.imgTags;
                 //imageList = cleanImageList(imageList);
                 //imageList = $(parentDiv).children('img').map(function () { return $(this) }).get();
-                plusDivs(slideIndex);// display images
-                $('#boosterPreview').show();
+                if (imageList) {
+                    plusDivs(slideIndex);// display images
+                    $('#boosterPreview').show();
+
+                }
                 //addImageListToDiv("", imageList);
                 //showDivs(slideIndex);
             });//getElementsFromUrl(pastedData, 'h1', function (h1Data) {
@@ -134,7 +171,6 @@ var plusDivs= function (index) {
         slideIndex=slideIndex+index;
     }
 }//function plusDivs(n) {
-
 
 var getElementsFromHTML = function (html, element) {
     // expects a HTML DOM Object
@@ -436,8 +472,6 @@ var getJSONNode = function (jsonClass, fieldName, value) {
         ); //return jsonClass.filter(
 }//var getJSONNode = function (getConnectedSocialMedia, value) {
 
-
-
 var removeBaseUrl= function (url) {
     var returnValue = "";
     if (url) {
@@ -468,7 +502,6 @@ var getBaseUrl = function (url) {
 //getPermsFromServer('facebook', function (creds) {
 //    var a = creds;
 //});//getPermsFromServer('facebook', function (creds) {
-
 
 var getPermsFromServer = function (sm_name, callback) {
     var signInId = $getClientEmail();

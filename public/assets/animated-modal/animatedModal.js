@@ -10,7 +10,7 @@
  
     $.fn.animatedModal = function(options) {
         var modal = $(this);
-        
+        //var methods =
         //Defaults
         var settings = $.extend({
             modalTarget:'animatedModal', 
@@ -88,24 +88,25 @@
             } 
         });
 
-
-
-        closeBt.click(function(event) {
-            event.preventDefault();
-            $('body, html').css({'overflow':'auto'});
+        function close() {
+            $('body, html').css({ 'overflow': 'auto' });
 
             settings.beforeClose(); //beforeClose
-            if (id.hasClass(settings.modalTarget+'-on')) {
-                id.removeClass(settings.modalTarget+'-on');
-                id.addClass(settings.modalTarget+'-off');
-            } 
+            if (id.hasClass(settings.modalTarget + '-on')) {
+                id.removeClass(settings.modalTarget + '-on');
+                id.addClass(settings.modalTarget + '-off');
+            }
 
-            if (id.hasClass(settings.modalTarget+'-off')) {
+            if (id.hasClass(settings.modalTarget + '-off')) {
                 id.removeClass(settings.animatedIn);
                 id.addClass(settings.animatedOut);
                 id.one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', afterClose);
             };
+        }
 
+        closeBt.click(function(event) {
+            event.preventDefault();
+            close();
         });
 
         function afterClose () {       
@@ -118,6 +119,11 @@
         }
 
     }; // End animatedModal.js
+    return {
+        closeModal: function () {
+            close();
+        }
+    }
 
 }(jQuery));
 

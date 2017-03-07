@@ -1,7 +1,7 @@
 /* remove nectorr styles and reset the whole thing */
 
 @import url('../../../css/fonts.css');
-#container_demo, divSetCalendar{
+#container_demo, divSetCalendar,manage-timelines{
 	 text-align: left;
 	 margin: 0;
 	 padding: 0;

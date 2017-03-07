@@ -9,6 +9,9 @@ var Twitter = require('twitter');
 var config = require('../config/config');
 var request = require('request');
 var schedule = [];
+var dbConfig = require('../config/database');
+var Agenda = require('agenda');
+var agenda = new Agenda({ db: { address: dbConfig.url, collection:  'agenda-scheduler'}});
 // passport
 // agenda
 //vignettes
@@ -29,15 +32,46 @@ router.get('/send/post/now', function (req, res) {
             switch (sm_name) {
                 case 'facebook':
                     postToFacebook(dataToPost, function (serverResponse) {
-                        sendMessageToServer(serverResponse, callback, res);
+                        var post = new userPosts();
+                        post.email = email;
+                        post.postData = dataToPost;
+                        post.save(function (err, savedPost, numRows) {
+                            if (!err){
+                                sendMessageToServer(serverResponse, callback, res);
+                            } else {
+                                sendMessageToServer({ status: "ERROR", message: "Unable to save facebook post on nectorr. "+JSON.stringify(err)}, callback, res);
+                            }
+                        });//post.save(function (err, savedPost, numRows) {
+                        
                     });//postToFacebook(dataToPost, function (serverResponse) {
                     break;
                 case 'twitter':
                     postToTwitter(dataToPost, function (message) {
-                        sendMessageToServer(message, callback, res);
+                        var post = new userPosts();
+                        post.email = email;
+                        post.postData = dataToPost;
+                        post.save(function (err, savedPost, numRows) {
+                            if (!err) {
+                                sendMessageToServer(serverResponse, callback, res);
+                            } else {
+                                sendMessageToServer({ status: "ERROR", message: "Unable to save facebook post on nectorr. " + JSON.stringify(err) }, callback, res);
+                            }
+                        });//post.save(function (err, savedPost, numRows) {
+
                     });
                     break;
                 case 'google':
+                    var post = new userPosts();
+                    post.email = email;
+                    post.postData = dataToPost;
+                    post.save(function (err, savedPost, numRows) {
+                        if (!err) {
+                            sendMessageToServer(serverResponse, callback, res);
+                        } else {
+                            sendMessageToServer({ status: "ERROR", message: "Unable to save facebook post on nectorr. " + JSON.stringify(err) }, callback, res);
+                        }
+                    });//post.save(function (err, savedPost, numRows) {
+
                     break;
             }//switch (sm_name) {
         }//for (var smCounter = 0; smCounter < dataToPost.sm_names.length; smCounter++){
@@ -46,6 +80,26 @@ router.get('/send/post/now', function (req, res) {
 });//router.get('/google/profile', function (req, res) {
 
 router.post('/send/post/vignette', function (req, res) {
+    var callback = req.body.callback;
+    if (callback) {
+        var email = req.body.email;
+        if (email) {
+            var vignettes = JSON.parse(req.body.vignettes);
+            var dataToPost = JSON.parse(req.body.dataToPost);
+            var vignetteTimelines = JSON.parse(req.body.timelines);
+
+            if (vignettes) {
+                for (var timeLineCounter = 0; timeLineCounter < vignetteTimelines.length; timeLineCounter++) {
+                    var postDateTime = JSON.parse(vignetteTimelines[counter]).start;
+                    var postDate = postDateTime.split('T')[0];
+                    var postTime = postDateTime.split('T')[1];
+                    var postTime = postTime.substring(0, postTime.length - 2);
+                    var dataForScheduler = { "email": email, dataToPost: dataToPost }
+                    agenda.schedule(postDate + " " + postTime, email + '~' + Date.now, dataForScheduler, finishPosting);
+                }//for (var timeLineCounter = 0; timeLineCounter < vignetteTimelines.length; timeLineCounter++) {
+            }//if (vignette) {
+        }//if (email) {
+    }//if (callback) {
     // get vignette info
     //set agenda
         // get access token
@@ -54,6 +108,16 @@ router.post('/send/post/vignette', function (req, res) {
     // 
 });//router.get('/google/profile', function (req, res) {
 
+var finishPosting = function (job, err) {
+    var dataToPost = job.attrs.data.dataToPost
+    var email = job.attrs.data.email;
+
+    postNow(email, dataToPost, function (data) {
+        var userPost = new userPost();
+        
+    });
+
+}
 var postToTwitter = function (dataToPost, callback) {//dataToPost. postToString, caption, link, pictureLink, headerOptions
     getBearerCode(function (twitterLoginData) {
         var twitter = new Twitter({
@@ -343,4 +407,57 @@ var escapeSpecialChars    = function (param) {
         .replace(/\\b/g, "\\b")
         .replace(/\\f/g, "\\f");
 };
+
+var postNow = function (email,dataToPost, callback) {
+    for (var smCounter = 0; smCounter < dataToPost.sm_names.length; smCounter++) {
+        var sm_name = dataToPost.sm_names[smCounter];
+        //var dataToPost;////dataToPost. postToString, caption, link, pictureLink
+        switch (sm_name) {
+            case 'facebook':
+                postToFacebook(dataToPost, function (serverResponse) {
+                    var post = new userPosts();
+                    post.email = email;
+                    post.postData = dataToPost;
+                    post.save(function (err, savedPost, numRows) {
+                        if (!err) {
+                            callback({ status: "SUCCESS", data: serverResponse });
+                        } else {
+                            callback({ status: "ERROR", message: "Unable to save facebook post on nectorr. " + JSON.stringify(err) });
+                        }
+                    });//post.save(function (err, savedPost, numRows) {
+
+                });//postToFacebook(dataToPost, function (serverResponse) {
+                break;
+            case 'twitter':
+                postToTwitter(dataToPost, function (message) {
+                    var post = new userPosts();
+                    post.email = email;
+                    post.postData = dataToPost;
+                    post.save(function (err, savedPost, numRows) {
+                        if (!err) {
+                            callback({ status: "SUCCESS", message: "Posted successfully on twitter." });
+                        } else {
+                            callback({ status: "ERROR", message: "Unable to save twitter post on nectorr. " + JSON.stringify(err) });
+                        }
+                    });//post.save(function (err, savedPost, numRows) {
+
+                });
+                break;
+            case 'google':
+                var post = new userPosts();
+                post.email = email;
+                post.postData = dataToPost;
+                post.save(function (err, savedPost, numRows) {
+                    if (!err) {
+                        callback({ status: "SUCCESS", message: "Posted successfully on Google+" });
+                    } else {
+                        sendMessageToServer({ status: "ERROR", message: "Unable to save facebook post on nectorr. " + JSON.stringify(err) }, callback, res);
+                    }
+                });//post.save(function (err, savedPost, numRows) {
+
+                break;
+        }//switch (sm_name) {
+    }//for (var smCounter = 0; smCounter < dataToPost.sm_names.length; smCounter++){
+}
+
 module.exports = router;
