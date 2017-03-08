@@ -12,10 +12,14 @@ var schedule = [];
 var dbConfig = require('../config/database');
 var Agenda = require('agenda');
 var agenda = new Agenda({ db: { address: dbConfig.url, collection:  'agenda-scheduler'}});
-// passport
+agenda.on('ready', function () {
+    console.log("Agenda ready to start");
+    agenda.start();
+});// passport
 // agenda
 //vignettes
 var userModel = require('../models/user');
+var vignetteModel = require('../models/vignette');
 var userUtils = require('../utils/userUtils');
 var userPosts = require('../models/userposts');
 var config = require('../config/config');
@@ -84,18 +88,42 @@ router.post('/send/post/vignette', function (req, res) {
     if (callback) {
         var email = req.body.email;
         if (email) {
-            var vignettes = JSON.parse(req.body.vignettes);
+            var vignettes = JSON.parse(req.body.vignettes).vignettes;
             var dataToPost = JSON.parse(req.body.dataToPost);
+            dataToPost['vignettes'] = vignettes;
             var vignetteTimelines = JSON.parse(req.body.timelines);
 
             if (vignettes) {
-                for (var timeLineCounter = 0; timeLineCounter < vignetteTimelines.length; timeLineCounter++) {
-                    var postDateTime = JSON.parse(vignetteTimelines[counter]).start;
-                    var postDate = postDateTime.split('T')[0];
-                    var postTime = postDateTime.split('T')[1];
-                    var postTime = postTime.substring(0, postTime.length - 2);
+                var postDateTimeArray = vignetteTimelines.timeline;
+                for (var timeLineCounter = 0; timeLineCounter < vignetteTimelines.timeline.length; timeLineCounter++) {
+                    var postDateTime = postDateTimeArray[timeLineCounter];
+                    //postDateTime = JSON.parse(postDateTime);
+                    postDateTime = postDateTime.start;
+                    var dateTimeForPosting = new Date(postDateTime);
+                    //var postDate = postDateTime.split('T')[0];
+                    //var postTime = postDateTime.split('T')[1];
+                    //var postTime = postTime.substring(0, postTime.length - 2);
                     var dataForScheduler = { "email": email, dataToPost: dataToPost }
-                    agenda.schedule(postDate + " " + postTime, email + '~' + Date.now, dataForScheduler, finishPosting);
+                    agenda.schedule(dateTimeForPosting, email + '~' + Date.now, dataForScheduler, function (err,job) {
+                        var a = job;
+                        if (err) {
+                            a = err;
+                        }
+                        if (job) {
+                            var dataToPost = job.attrs.data.dataToPost
+                            var email = job.attrs.data.email;
+                            dataToPost["email"] = email;
+                            evaluateVignetteAndPost(dataToPost, function (data) {
+                                var userPost = new userPosts();
+                                userPost.email = email, PostData = dataToPost;
+                                userPost.save(function (err, doc, rowsEffected) {
+
+                                });
+
+                            });
+                        }
+                    });
+                    agenda.start();
                 }//for (var timeLineCounter = 0; timeLineCounter < vignetteTimelines.length; timeLineCounter++) {
             }//if (vignette) {
         }//if (email) {
@@ -108,16 +136,6 @@ router.post('/send/post/vignette', function (req, res) {
     // 
 });//router.get('/google/profile', function (req, res) {
 
-var finishPosting = function (job, err) {
-    var dataToPost = job.attrs.data.dataToPost
-    var email = job.attrs.data.email;
-
-    postNow(email, dataToPost, function (data) {
-        var userPost = new userPost();
-        
-    });
-
-}
 var postToTwitter = function (dataToPost, callback) {//dataToPost. postToString, caption, link, pictureLink, headerOptions
     getBearerCode(function (twitterLoginData) {
         var twitter = new Twitter({
@@ -459,5 +477,51 @@ var postNow = function (email,dataToPost, callback) {
         }//switch (sm_name) {
     }//for (var smCounter = 0; smCounter < dataToPost.sm_names.length; smCounter++){
 }
+
+var evaluateVignetteAndPost = function (dataToPost, callback) {
+    for (var vignetteCounter = 0; vignetteCounter < dataToPost.vignettes.length; vignetteCounter++) {
+        var vignetteId = dataToPost.vignettes[vignetteCounter].id
+        var condition = { _id = vignetteId }
+        vignetteModel.findOne(condition, function (err, doc) {
+            if (err) {
+                return;
+            } else if (doc) {
+                //get social media names
+                var socialMediaInfo = doc.data.locs;
+                for (var socialMediaCounter = 0; socialMediaCounter < socialMediaInfo.length; socialMediaCounter++) {
+                    var socialMediaPostDetails = socialMediaInfo[socialMediaCounter];
+                    var urlToPost = getPostableUrl(socialMediaPostDetails);
+                    dataToPost["urlToPost"] = urlToPost;
+                    postNow(dataToPost.email, dataToPost, callback);
+                }//for (var socialMediaCounter = 0; socialMediaCounter < socialMediaInfo.length; socialMediaCounter++) {
+                //post
+            }//} else if (doc) {
+        });
+
+    }//for (var vignetteCounter = 0; vignetteCounter < dataToPost.vignettes.length; vignetteCounter++) {
+    var getPostableUrl = function (smPostDetails) {
+        var returnValue;
+        switch (smPostDetails.sm_name) {
+            case "facebook":
+                if (smPostDetails.type == 'page') {
+                    returnValue = "/" + smPostDetails.postableLocId.sm_id
+                } else if (smPostDetails.type == 'groups') {
+                    returnValue = "/groups/" + smPostDetails.postableLocId.sm_id
+                }//if (smPostDetails.type == 'page') {
+                break;
+            case "twitter":
+
+                break;
+            case "google":
+                break;
+            case "instagram":
+                break;
+            case "linkedIn":
+                break;
+            default:
+
+        }//switch (smPostDetails.sm_name) {
+    }//var getPostableUrl = function (smPostDetails) {
+}//var EvaluateVignetteAndPost = function (dataToPost) {
 
 module.exports = router;

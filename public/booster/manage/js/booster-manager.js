@@ -1,7 +1,7 @@
 ﻿var selectedOptions = [];
 var autoCompleteList = [];
 var timeLines = [];
-var tempSocialMediaNames = ['facebook', 'twitter'];//'google'];//, 'linkedin','instagram','youtube', blogger','tumblr'];
+var tempSocialMediaNames = ['facebook', 'twitter','google'];//, 'linkedin','instagram','youtube', blogger','tumblr'];
 //refer https://developers.google.com/+/domains/api/circles
 var plusDomain = {
     getCircleList: 'https://www.googleapis.com/plusDomains/v1/people/userId/circles' //get
@@ -242,7 +242,7 @@ var SocialMediaGroupsAndPages = {
                 setTimeout(
                     getLoggedInUserDetails(function (userData) {
                         if (userData.status == "SUCCESS") {
-                            getGoogleCircles(function (circleResponse) {
+                            initializeGoogleToGetGapi(true, function(googleResponse){
                                 //process the list
 
                                 postableLocs["circles"] = circleResponse;

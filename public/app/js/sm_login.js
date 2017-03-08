@@ -609,24 +609,22 @@ var pushArray = function (pushTo, getFrom) {
 
 var googleUserScope = googlePlusDefaults.scopes.plusMe;//+ " " +
 var googleCircleScope = googlePlusDefaults.scopes.plusCirclesRead + " " + googlePlusDefaults.scopes.plusCirclesWrite;//googlePlusDefaults.scopes.plusMe,
-var initializeGoogle = function (getAuthResponse = false, callback) {
+var initializeGoogle = function (getAuthResponse = false, callback, scope) {
     var auth2, authInstance;
-
-
     if (!nvCookie) {
         gapi.load('auth2', function () {
             //plusDomains.Circles.List
             auth2 = gapi.auth2.init({
                 client_id: googlePlusDefaults.clientId
                 , fetch_basic_profile: false
-                , scope: googleUserScope
+                , scope: (!scope) ? googleUserScope : scope
             }).then(function () {
                 gapi.load('client', function () {
 
                     gapi.client.init({
                         apiKey: googlePlusDefaults.apiKey
                         , clientId: googlePlusDefaults.clientId
-                        , scope: googleUserScope
+                        , scope: (!scope) ? googleUserScope : scope
                     })
 
                     gapi.client.load('plus', 'v1', function () {
@@ -686,6 +684,7 @@ var getGoogleCircles = function (callback, loggedInUserId,getAuthResponse = "") 
     } else {
         getGapiInfo(callback);
     }
+
 }//var getGoogleCircles = function (callback
 var getLinkedInUserDetails = function () {
     //,"group-memberships:(group:(id,name),membership-state)
@@ -996,7 +995,7 @@ var postUsingVignette = function (vignetteInfo,callback) {
         headers: { "Accept": "application/json" }
         , type: 'post'
         , url: '/send/post/vignette'
-        , data: "email=" + $getClientEmail() + "&dataToPost=" + JSON.stringify(vignetteInfo.dataToPost + "&vignettes=" + vignetteInfo.vignettes + "&timelines=" + JSON.parse(vignetteInfo.timelines))//+ "&vignetteInfo=" + JSON.stringify(vignetteData) + "&vignette_name=" + vignetteName
+        , data: "email=" + $getClientEmail() + "&dataToPost=" + JSON.stringify(vignetteInfo.dataToPost) + "&vignettes=" + JSON.stringify(vignetteInfo.vignettes) + "&timelines=" + JSON.stringify(vignetteInfo.timelines)//+ "&vignetteInfo=" + JSON.stringify(vignetteData) + "&vignette_name=" + vignetteName
         , dataType: "jsonp"
         , jsonp: "callback"
         , crossDomain: true
@@ -1065,3 +1064,88 @@ var boostNow = function (dataToPost, callback) {
         }
     }); //$.ajax({
 }//var getLoggedInUserDetails = function (callback) {
+var getGoogleConnections = function (userId,callback) {
+    if (userId) {
+        initializeGoogleToGetGapi(true, function (googleResponse) {
+            if (googleResponse) {
+                var gapi = googleResponse.gapi;
+                gapi.client.people.people.connections.list({
+                    'resourceName': 'people/' + userId,
+                    'pageSize': 10,
+                }).then(function (response) {
+                    var connections = response.result.connections;
+                    if (callback) {
+                        callback(connections)
+                    }
+                });
+
+            } else {
+
+            }
+        }, googlePlusDefaults.scopes.plusCirclesRead);//initializeGoogle(true
+    }//if (userId) {
+}//var getGoogleCircles = function (userId) {
+var initializeGoogleToGetGapi = function (getAuthResponse = false, callback, scope) {
+    var auth2, authInstance;
+    if (!nvCookie) {
+        gapi.load('auth2', function () {
+            //plusDomains.Circles.List
+            auth2 = gapi.auth2.init({
+                client_id: googlePlusDefaults.clientId
+                , fetch_basic_profile: false
+                , scope: (!scope) ? googleUserScope : scope
+            }).then(function () {
+                gapi.load('client', function () {
+
+                    gapi.client.init({
+                        apiKey: googlePlusDefaults.apiKey
+                        , clientId: googlePlusDefaults.clientId
+                        , scope: (!scope) ? googleUserScope : scope
+                    })
+
+                    gapi.client.load('plus', 'v1', function () {
+                        authInstance = gapi.auth2.getAuthInstance();
+                        if (!authInstance.isSignedIn.get()) {
+                            authInstance.signIn();
+                        } else if (authInstance.isSignedIn.get()) {
+
+                            authInstance = gapi.auth2.getAuthInstance();
+                            var request = gapi.client.plus.people.get({
+                                'userId': 'me'
+                            });
+                            request.execute(function (resp) {
+                                console.log('Retrieved profile for:' + resp.displayName);
+                                if (!resp.error) {
+                                    var returnValue
+                                    if (getAuthResponse) {
+                                        returnValue = authInstance;
+                                    } else {
+                                        returnValue = resp;
+                                    }
+
+                                    if (callback) {
+
+                                        callback({ profile: returnValue, "gapi": gapi });
+                                    } else {
+                                        saveGoogleProfileData(resp);
+                                    }
+                                    // save cookie
+                                    //userLoginTo
+                                } else {
+                                    //error
+
+                                    callback({ status: "ERROR", message: "Unable to connect with Google+ at the moment." });
+                                }
+                                //    });
+                            });
+                        }
+                    });
+
+                });
+            });
+            //authInstance.signIn();
+        });
+    } else {
+        //userLoginTo = set to Google
+    }
+}//var initializeGoogleToGetGapi = function (callback) {

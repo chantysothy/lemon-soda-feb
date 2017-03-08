@@ -2,7 +2,7 @@
     var googleAuthObject, facebookAuthObject, twitterAuthObject, instagramAuthObject, pinterestAuthObject, bloggerAuthObject;
     if (!$isLoggedIn()) {
         $('#invite').hide();
-        $('#logout').hide();
+        $('#logout').hide();   
         window.location.href = '/signup/local';
     } else {
         $('#invite').show();

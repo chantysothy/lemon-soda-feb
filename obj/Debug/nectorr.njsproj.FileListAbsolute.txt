@@ -4,4 +4,5 @@ E:\nectorr\v1.9\bin\Microsoft.NodejsTools.WebRole.dll
 E:\nectorr\v1.10\bin\Microsoft.NodejsTools.WebRole.dll
 E:\nectorr\lemon-soda\bin\Microsoft.NodejsTools.WebRole.dll
 E:\nectorr\lemon-soda\obj\Debug\nectorr.njsprojResolveAssemblyReference.cache
+E:\nectorr\lemon-soda-jan\obj\Debug\nectorr.njsprojResolveAssemblyReference.cache
 E:\nectorr\lemon-soda-jan\bin\Microsoft.NodejsTools.WebRole.dll

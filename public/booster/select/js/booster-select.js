@@ -40,24 +40,49 @@ window.closeModal = function () {
     $('#iframeModal').modal('hide');
 };
 $(document).ready(function () {
-    $("#manage-timelines").hide();
-    $('#time-line').datetimepicker({
-        i18n: {
-            de: {
-                months: [
-                    'January', 'February', 'Märch', 'April',
-                    'May', 'June', 'July', 'August',
-                    'September', 'October', 'November', 'December',
-                ],
-                dayOfWeek: [
-                    "Sunday.", "Monday", "Tuesday", "Wednesday",
-                    "Thursday", "Friday", "Saturday",
-                ]
+    $('#vignette-timeline').weekCalendar({
+        timeslotsPerHour: 4,
+        height: function ($calendar) {
+            return 240//$(window).height() - $("h1").outerHeight();
+        },
+        eventRender: function (calEvent, $event) {
+            if (calEvent.end.getTime() < new Date().getTime()) {
+                $event.css("backgroundColor", "#aaa");
+                $event.find(".time").css({ "backgroundColor": "#999", "border": "1px solid #888" });
             }
         },
-        timepicker: truee,
-        format: 'm.d.Y'
+        eventNew: function (calEvent, $event) {
+            var id = Date.now().toString();
+            calEvent["nectorr-id"] = id;
+            timeLines.push(calEvent);
+        },
+        eventDrop: function (calEvent, $event) {
+            //displayMessage("<strong>Moved Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
+            var a = calEvent;
+            //findReplaceEvent(calEvent);
+        },
+        eventResize: function (calEvent, $event) {
+            //set the font sizes here
+            displayMessage("<strong>Resized Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
+        },
+        eventClick: function (calEvent, $event) {
+            var id = Date.now().toString();
+            calEvent[nectorr - id] = id;
+            timeLines.push(calEvent);
+        },
+        eventMouseover: function (calEvent, $event) {
+            displayMessage("<strong>Mouseover Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
+        },
+        eventMouseout: function (calEvent, $event) {
+            displayMessage("<strong>Mouseout Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
+        },
+        noEvents: function () {
+            displayMessage("There are no events for this week");
+        },
+        data: eventData
     });
+
+    $("#manage-timelines").hide();
 
     getVignetteFromDb(function (data) {
         if (data.status = "SUCCESS") {
@@ -84,33 +109,39 @@ $(document).ready(function () {
                 noResult: 'no such vignette found.'
             });
             //$("#vignette-name").attr('id, desc');
-
+            $("#vignette-name").attr('data-id', 'id, desc');
         } else {
             //display error message
         }//if (data.status = "SUCCESS") {
 
     });//getVignetteFromDb(function (data) {
 }); //$(document).ready(function () {
-$("schedule-now").click(function (e) {
+$("#set-time").click(function (e) {
     e.preventDefault();
-    $("#divSetCalendar").hide();
-    $("#container_demo").toggle("slide");
+    $("#container_demo").hide();
+    $("#manage-timelines").toggle("slide");
 
 });
 
-$('#set-time').click(function (e) {
+$('#go-back').click(function (e) {
     e.preventDefault();
+    $("#manage-timelines").hide();
     $("#container_demo").toggle("slide");
-    $("#divSetCalendar").effect("slide");
 
 });//$('#set-time').click(function (e) {
 
 $('#schedule-now').click(function (e) {
     selectedVignettes = [];
-    selectedVignettes = $window.parent.jQuery("#vignette-name").val();
-    var selectModal = window.parent.jQuery('#selectVignette');//$.fn.animatedModal;//window.parent.jQuery('#selectVignetteModal');//.dialog('close');
-    var dataForPost = { url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken}}
-    return false;
+    selectedVignettes = getSelectedVignettes();
+    var dataForPost = { url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
+    var itemsToPost = { "vignettes": { vignettes: selectedVignettes }, "dataToPost": dataForPost, "timelines": { timeline: timeLines } }
+    postUsingVignette(itemsToPost, function (data) {
+        if (data.status == "SUCCESS") {
+
+        } else {
+
+        }
+    });
 });//$('#btnPostNow').click(function (e) {
 
 var curateVignetteList = function (listFromDB) {
@@ -150,3 +181,21 @@ var manageServerResponse = function (data, multipleRecords = false) {
         });//$.each(errorList, function (element) {
     }//if (!multipleRecords) {
 }//var manageServerResponse = function(data) {
+var getSelectedVignettes = function () {
+    var returnValue= []
+    var multiItems = $(".multi-item").map(function () {
+        return "'" + this.outerHTML + "'";
+    }).get().join().split(',');
+    for (var divCounter = 0; divCounter < multiItems.length; divCounter++) {
+        var childItem = $(multiItems[divCounter]);
+        var childText = childItem.attr('title');
+        var childItemArray = childText.split('·');
+
+        var elementId = childItem.attr('data-id');
+
+        var vignette = { id: elementId, desc: childText };//, type: childItemArray[1], sm_name: childItemArray[0] };
+        returnValue.push(vignette);
+
+    }//for (var divCounter = 0; divCounter < childCounter; divCounter++){
+    return returnValue;
+}
