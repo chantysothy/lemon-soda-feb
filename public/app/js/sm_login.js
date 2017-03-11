@@ -1,4 +1,5 @@
-﻿
+﻿var nectorrFacebookId, nectorrTwitterId, nectorrGoogleId,nectorrInstgramId, nectorrLinkedInId
+
 var $smPermissionSet = { email: "", sm_name: "", neverAsk: false };
 var loggedInUserId
 var googleCallback
@@ -63,10 +64,13 @@ var googlePlusDefaults = {
         , plusUserInfoProfile: 'https://www.googleapis.com/auth/userinfo.profile' 
     }
 }
+
 var facebookDefaults = {
     appId: '582000448664812'
     , appSecret: '9b089aff5785a8b74f64ed3530f3d6f6'
-    , token : ''
+    , token: ''
+    , scope: "email,public_profile,publish_actions, user_managed_groups, manage_pages, publish_pages, pages_show_list,publish_stream,user_photos, user_photo_video_tags, user_posts"
+    
 }
 
 var initFacebookAPI = function () {
@@ -115,12 +119,16 @@ $nectorrFacebookLogin = function (fbLoginScope, event, callback) {
 
         FB.getLoginStatus(function (response) {
             if (response.status === 'connected') {
+                fbAccessToken = response.authResponse.accessToken;
+                nectorrFacebookId = response.authResponse.userID; 
                 callback(response);
             } else {
                 FB.login(function (response) {
                     if (response && !response.error) {
-                        var accessToken = response.authResponse.accessToken;
-                        if (accessToken) {
+                        fbAccessToken = response.authResponse.accessToken;
+                        //var accessToken = response.authResponse.accessToken;
+                        nectorrFacebookId = response.authResponse.userID;
+                        if (fbAccessToken) {
                             //extending access token
                             var oAuthParams = {};
                             oAuthParams['client_id'] = facebookDefaults.appId;
@@ -470,6 +478,8 @@ var $executeFacebookCommand = function (scope, command, callback) {
 
         FB.getLoginStatus(function (response) {
             if (response.status === 'connected') {
+                nectorrFacebookId = response.authResponse.userID;
+                fbAccessToken = response.authResponse.accessToken;
                 FB.api(command, function (res, err) {
                     if (!err) {
                         if (callback)
@@ -484,6 +494,8 @@ var $executeFacebookCommand = function (scope, command, callback) {
                         var error = err;
                         var response = res;
                         if (!err) {
+                            nectorrFacebookId = res.userID;
+                            fbAccessToken = res.accessToken;
                             if (callback)
                                 callback(res);
                         } else {
@@ -879,7 +891,7 @@ var setPublishCredentials = function (userObject,  callback) {
             }
         }
 
-        $nectorrFacebookLogin('user_posts,read_insights,read_audience_network_insights', null, function (data) {
+        $nectorrFacebookLogin1('user_posts,read_insights,read_audience_network_insights', null, function (data) {
             publishCredentials.facebook.access_token = data.authResponse.accessToken;
             publishCredentials.twitter.consumer_key = authCreds.twitter.consumer_key;
             publishCredentials.twitter.consumer_secret = authCreds.twitter.consumer_secret;
@@ -896,7 +908,7 @@ var setPublishCredentials = function (userObject,  callback) {
             publishCredentials.youtube.accounts = queryTags;
             if (callback)
                 callback(publishCredentials);
-        });//$nectorrFacebookLogin(function (data) {
+        });//$nectorrFacebookLogin1(function (data) {
     });//getQueryTags(function (queryObject) {
 }//var setPublishCredentials = function (publishCreds) {
 //

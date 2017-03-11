@@ -33,6 +33,7 @@
     <Compile Include="public\assets\animated-modal\animatedModal.js" />
     <Compile Include="public\assets\animated-modal\animatedModal.min.js" />
     <Compile Include="public\assets\date-time-picker\jquery.datetimepicker.full.min.js" />
+    <Compile Include="public\assets\dropzone\dropzone.js" />
     <Compile Include="public\assets\fast-select\fastselect.js" />
     <Compile Include="public\assets\fast-select\fastselect.min.js" />
     <Compile Include="public\assets\fast-select\fastselect.standalone.js" />
@@ -1952,6 +1953,7 @@
     <Folder Include="public\assets\doT\examples\" />
     <Folder Include="public\assets\doT\examples\views\" />
     <Folder Include="public\assets\doT\test\" />
+    <Folder Include="public\assets\dropzone\" />
     <Folder Include="public\assets\fast-select\" />
     <Folder Include="public\assets\font-awesome\" />
     <Folder Include="public\assets\font-awesome\css\" />

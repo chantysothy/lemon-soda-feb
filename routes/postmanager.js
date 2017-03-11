@@ -6,6 +6,7 @@ var TwitterStrategy = require('passport-twitter').Strategy;
 var GoogleStrategy = require('passport-google-oauth').Strategy;
 var fbGraph = require('fbgraph');
 var Twitter = require('twitter');
+var google = require('googleapis');
 var config = require('../config/config');
 var request = require('request');
 var schedule = [];
@@ -19,7 +20,7 @@ agenda.on('ready', function () {
 // agenda
 //vignettes
 var userModel = require('../models/user');
-var vignetteModel = require('../models/vignette');
+var vignetteModel = require('../models/vignettes');
 var userUtils = require('../utils/userUtils');
 var userPosts = require('../models/userposts');
 var config = require('../config/config');
@@ -108,6 +109,7 @@ router.post('/send/post/vignette', function (req, res) {
                         var a = job;
                         if (err) {
                             a = err;
+                            return
                         }
                         if (job) {
                             var dataToPost = job.attrs.data.dataToPost
@@ -115,7 +117,7 @@ router.post('/send/post/vignette', function (req, res) {
                             dataToPost["email"] = email;
                             evaluateVignetteAndPost(dataToPost, function (data) {
                                 var userPost = new userPosts();
-                                userPost.email = email, PostData = dataToPost;
+                                userPost.email = email, userPost.postData = dataToPost;
                                 userPost.save(function (err, doc, rowsEffected) {
 
                                 });
@@ -244,7 +246,7 @@ var postToFacebook = function (dataToPost, callback) { //dataToPost. postToStrin
         params['caption'] = dataToPost.caption;
         params['me_id'] = dataToPost.me_Id;
         params['me_type'] = dataToPost.me_type;
-        var path = '/me';
+        var path = (dataToPost.urlToPost) ? dataToPost.urlToPost: '/me';
         uploadMediaToFacebook(dataToPost, function (mediaResponse) {
             // set params value
             if (mediaResponse.error) {
@@ -433,17 +435,21 @@ var postNow = function (email,dataToPost, callback) {
         switch (sm_name) {
             case 'facebook':
                 postToFacebook(dataToPost, function (serverResponse) {
-                    var post = new userPosts();
-                    post.email = email;
-                    post.postData = dataToPost;
-                    post.save(function (err, savedPost, numRows) {
-                        if (!err) {
-                            callback({ status: "SUCCESS", data: serverResponse });
-                        } else {
-                            callback({ status: "ERROR", message: "Unable to save facebook post on nectorr. " + JSON.stringify(err) });
-                        }
-                    });//post.save(function (err, savedPost, numRows) {
-
+                    if (serverResponse.status == "SUCCESS") {
+                        var post = new userPosts();
+                        //fbGraph.post(dataToPost.urlToPost,
+                        post.email = email;
+                        post.postData = dataToPost;
+                        post.save(function (err, savedPost, numRows) {
+                            if (!err) {
+                                callback({ status: "SUCCESS", data: serverResponse });
+                            } else {
+                                callback({ status: "ERROR", message: "Unable to save facebook post on nectorr. " + JSON.stringify(err) });
+                            }
+                        });//post.save(function (err, savedPost, numRows) {
+                    } else {
+                        callback({ status: "ERROR", message: "Unable to post on facebook. " + JSON.stringify(err) });
+                    }//if (serverResponse.status == "SUCCESS") {
                 });//postToFacebook(dataToPost, function (serverResponse) {
                 break;
             case 'twitter':
@@ -474,14 +480,14 @@ var postNow = function (email,dataToPost, callback) {
                 });//post.save(function (err, savedPost, numRows) {
 
                 break;
-        }//switch (sm_name) {
+        }//switch (sm_name) {"
     }//for (var smCounter = 0; smCounter < dataToPost.sm_names.length; smCounter++){
 }
 
 var evaluateVignetteAndPost = function (dataToPost, callback) {
     for (var vignetteCounter = 0; vignetteCounter < dataToPost.vignettes.length; vignetteCounter++) {
-        var vignetteId = dataToPost.vignettes[vignetteCounter].id
-        var condition = { _id = vignetteId }
+        var vignetteId = dataToPost.vignettes[vignetteCounter].id;
+        var condition = { _id : vignetteId };
         vignetteModel.findOne(condition, function (err, doc) {
             if (err) {
                 return;
@@ -490,7 +496,7 @@ var evaluateVignetteAndPost = function (dataToPost, callback) {
                 var socialMediaInfo = doc.data.locs;
                 for (var socialMediaCounter = 0; socialMediaCounter < socialMediaInfo.length; socialMediaCounter++) {
                     var socialMediaPostDetails = socialMediaInfo[socialMediaCounter];
-                    var urlToPost = getPostableUrl(socialMediaPostDetails);
+                    var urlToPost = getPostableUrl(socialMediaPostDetails.postableLocId);
                     dataToPost["urlToPost"] = urlToPost;
                     postNow(dataToPost.email, dataToPost, callback);
                 }//for (var socialMediaCounter = 0; socialMediaCounter < socialMediaInfo.length; socialMediaCounter++) {
@@ -503,10 +509,14 @@ var evaluateVignetteAndPost = function (dataToPost, callback) {
         var returnValue;
         switch (smPostDetails.sm_name) {
             case "facebook":
+                //var others = smPostDetails.
                 if (smPostDetails.type == 'page') {
-                    returnValue = "/" + smPostDetails.postableLocId.sm_id
-                } else if (smPostDetails.type == 'groups') {
-                    returnValue = "/groups/" + smPostDetails.postableLocId.sm_id
+                    var otherInfo = JSON.parse(smPostDetails.otherInfo);
+                    //fbGraph.setAccessToken(otherInfo.access_token);
+                    returnValue = "/" + smPostDetails.sm_id;
+                    smPostDetails["accessToken"] = smPostDetails.otherInfo.access_token;
+                } else if (smPostDetails.type == 'group') {
+                    returnValue = "/groups/" + smPostDetails.sm_id
                 }//if (smPostDetails.type == 'page') {
                 break;
             case "twitter":
@@ -521,6 +531,7 @@ var evaluateVignetteAndPost = function (dataToPost, callback) {
             default:
 
         }//switch (smPostDetails.sm_name) {
+        return returnValue;
     }//var getPostableUrl = function (smPostDetails) {
 }//var EvaluateVignetteAndPost = function (dataToPost) {
 

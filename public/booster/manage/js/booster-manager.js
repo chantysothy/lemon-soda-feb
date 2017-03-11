@@ -175,7 +175,7 @@ var SocialMediaGroupsAndPages = {
         getPostableLocs: function (callback) {
             var returnValue = []; // calling function needs to look at returnValue.length>0 to proceed. This method shall run asynchronously.
             // get relevant scopes and login
-            $nectorrFacebookLogin("user_managed_groups", null, function (data) {
+            $nectorrFacebookLogin(facebookDefaults.scope, null, function (data) {
                 var returnValue = []
                 var user_id = data.authResponse.userID;
                 FB.api("/" + user_id + "/groups",
@@ -383,54 +383,58 @@ var setupAutoCompleteList = function (valArr, smName) {
 
 var getElementsFromLocObj = function (type, locArr,smName= "not-set") {
     returnValue = [];
-    for (var counter = 0; counter < locArr.length; counter++) {
-        var element = {};
-        if (smName == 'facebook') {
-            var currentElement = locArr[counter];
-            if (type == 'pages') {
+    if (locArr) {
+        for (var counter = 0; counter < locArr.length; counter++) {
+            var element = {};
+            if (smName == 'facebook') {
+                var currentElement = locArr[counter];
+                if (type == 'pages') {
+                    element['id'] = currentElement.id;
+                    element['type'] = 'page';
+                    element['sm_name'] = smName;
+                    element['sm_id'] = currentElement.id;
+                    element['desc'] = currentElement.name;
+                    element['otherInfo'] = JSON.stringify({
+                        'category': currentElement.category
+                        , 'access_token': currentElement.access_token
+                        , 'categoryList': currentElement.category.category_list
+                        , 'permissions': currentElement.perms
+
+                    });//element['otherInfo'] = {
+                    returnValue.push(element);
+
+                } else {
+
+                    element['id'] = returnValue.length;
+                    element['type'] = 'group';
+                    element['sm_name'] = smName;
+                    element['sm_id'] = currentElement.id;
+                    element['desc'] = currentElement.name;
+                    element['otherInfo'] = JSON.stringify({
+                        'privacy': currentElement.privacy
+                    });//element['otherInfo'] = {
+                    returnValue.push(element);
+                }//        if (type == 'pages') {
+            } else if (smName == 'twitter') {
+                var currentElement = locArr[counter];
+
                 element['id'] = returnValue.length;
-                element['type'] = 'page';
+                element['type'] = 'list';
                 element['sm_name'] = smName;
                 element['sm_id'] = currentElement.id;
                 element['desc'] = currentElement.name;
-                element['otherInfo'] = JSON.stringify({
-                    'category': currentElement.category
-                    , 'access_token': currentElement.access_token
-                    , 'categoryList': currentElement.category.category_list
-                    , 'permissions': currentElement.perms
-
-                });//element['otherInfo'] = {
+                element['otherInfo'] = JSON.stringify(currentElement);
                 returnValue.push(element);
+            }
+            else if (smName == 'google') {
 
-            } else {
-
-                element['id'] = returnValue.length;
-                element['type'] = 'group';
-                element['sm_name'] = smName;
-                element['sm_id'] = currentElement.id;
-                element['desc'] = currentElement.name;
-                element['otherInfo'] = JSON.stringify({
-                    'privacy': currentElement.privacy
-                });//element['otherInfo'] = {
-                returnValue.push(element);
-            }//        if (type == 'pages') {
-        } else if (smName =='twitter'){
-            var currentElement = locArr[counter];
-
-            element['id'] = returnValue.length;
-            element['type'] = 'list';
-            element['sm_name'] = smName;
-            element['sm_id'] = currentElement.id;
-            element['desc'] = currentElement.name;
-            element['otherInfo'] = JSON.stringify(currentElement);
-            returnValue.push(element);
-        }
-        else if (smName == 'google') {
-
-        }
-    }//for (var counter = 0; counter < locObj.length; counter++) {
-    valArr = returnValue;
-    return returnValue;
+            }
+        }//for (var counter = 0; counter < locObj.length; counter++) {
+        valArr = returnValue;
+        return returnValue;
+    } else {
+        return returnValue
+    }
 }//var getElementsFromLocObj = function (type, locObj) {
 
 var fillCombo = function (comboId, dataList) {
@@ -567,4 +571,14 @@ var setsmDetailsForVignetteSave = function (masterList, selectedItems) {
         });//return _.some(this, function (val2) {
     }, selectedItems);//return
 }//var setsmDetailsForVignetteSave = function (list, selectedItems) {
-
+var formatGroupData = function (groupData) {
+    var returnValue = [];
+    for (var groupCounter = 0; groupCounter < groupData.length; groupCounter++) {
+        var groupInfo = groupData[groupCounter];
+        groupInfo['desc'] = groupInfo.name;
+        groupInfo['type'] = 'group';
+        //groupInfo['id'] = groupInfo.sm_id;
+        returnValue.push(groupInfo);
+    }//for (var groupCounter = 0; groupCounter < groupData.length; groupCounter++) {
+    return returnValue;
+}

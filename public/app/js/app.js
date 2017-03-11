@@ -84,7 +84,7 @@
                 template_html: '../template.html'
                 //update_period : 300
             }
-            $nectorrFacebookLogin("publish_actions, user_managed_groups, manage_pages, publish_pages, pages_show_list",null,function (response) {
+            $nectorrFacebookLogin(facebookDefaults.scope, null, function (response) {
                 if (response) {
                     facebookAuthObject = response;
                     publishCredentials.facebook.access_token = response.authResponse.accessToken;
@@ -204,7 +204,8 @@ $(document).ready(function () {
     }); //$('#icon_twitter').click(function (e) { 
 
     $('#icon_fb').click(function (e) {
-        $nectorrFacebookLogin('email,public_profile', e, function (data) {
+        
+        $nectorrFacebookLogin(facebookDefaults.scope, e, function (data) {
             if (data) {
                 VerifyResultAndProcessForFacebook(data, e);
             } //if (data) { 

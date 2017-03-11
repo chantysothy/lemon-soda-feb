@@ -71,10 +71,10 @@ $(document).ready(function () {
             timeLines.push(calEvent);
         },
         eventMouseover: function (calEvent, $event) {
-            displayMessage("<strong>Mouseover Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
+            //displayMessage("<strong>Mouseover Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
         },
         eventMouseout: function (calEvent, $event) {
-            displayMessage("<strong>Mouseout Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
+            //displayMessage("<strong>Mouseout Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
         },
         noEvents: function () {
             displayMessage("There are no events for this week");
@@ -115,6 +115,9 @@ $(document).ready(function () {
         }//if (data.status = "SUCCESS") {
 
     });//getVignetteFromDb(function (data) {
+    $nectorrFacebookLogin("user_managed_groups,publish_pages", null, function (fbResponse) {
+        var a = response;
+    });
 }); //$(document).ready(function () {
 $("#set-time").click(function (e) {
     e.preventDefault();
@@ -133,7 +136,7 @@ $('#go-back').click(function (e) {
 $('#schedule-now').click(function (e) {
     selectedVignettes = [];
     selectedVignettes = getSelectedVignettes();
-    var dataForPost = { url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
+    var dataForPost = { userId: { facebook: nectorrFacebookId }, url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
     var itemsToPost = { "vignettes": { vignettes: selectedVignettes }, "dataToPost": dataForPost, "timelines": { timeline: timeLines } }
     postUsingVignette(itemsToPost, function (data) {
         if (data.status == "SUCCESS") {

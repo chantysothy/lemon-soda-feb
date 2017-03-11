@@ -1,5 +1,5 @@
 ﻿var fbScope = "manage_pages, user_managed_groups";
-var boostingProfile, fbAccessToken, selectVignette;
+var boostingProfile,  selectVignette;
 var getConnectedSocialMedia;
 var twitterScope, googlePlusScope, linkedInScope, instagramScope 
 var iconUrl = ['../img/social/facebook-64.png', '../img/social/twitter-64.png', '../img/social/google-plus-64.png', '../img/social/instagram-64.png', '../img/social/linkedin-64.png', '../img/social/tumblr-64.png'];// Array
@@ -13,8 +13,8 @@ $(window).load(function (e) {
     $('#currentImg').height(250).width(470);
     //$('#boosterPreview').left();
     $('#boosterPreview').height('auto');
-    $nectorrFacebookLogin('publish_actions, publish_stream, user_photos, user_photo_video_tags, user_posts', null, function (fbResponse) {
-        fbAccessToken = fbResponse.authResponse.accessToken;
+    $nectorrFacebookLogin(null, function (fbResponse) {
+        
     });//$nectorrFacebookLogin(['user_posts', 'manage_pages'], null, function (fbResponse) {
 
 
@@ -76,9 +76,9 @@ $(document).ready(function () {
     $('#postNow').click(function (e) {
         // get Url, get imgUrl, get Caption, get Text
         //var originalUrl, shortUrlForServer, imageUrlForServer, headingForServer, textForServer
-        $nectorrFacebookLogin('publish_actions, publish_stream, user_photos, user_photo_video_tags, user_posts', null, function (fbResponse) {
+        $nectorrFacebookLogin(facebookDefaults.scope, null, function (fbResponse) {
             fbAccessToken = fbResponse.authResponse.accessToken;
-            var dataForPost = { url: shortUrlForServer, imgUrl: (!imageUrlForServer) ? null : imageUrlForServer, caption: headingForServer, text: textForServer, sm_names: ['facebook', 'twitter'], accessToken: fbResponse.authResponse.accessToken }
+            var dataForPost = { userId: { facebook: nectorrFacebookId }, url: shortUrlForServer, imgUrl: (!imageUrlForServer) ? null : imageUrlForServer, caption: headingForServer, text: textForServer, sm_names: ['facebook', 'twitter'], accessToken: fbResponse.authResponse.accessToken }
             boostNow(dataForPost, function (serverMessage) {
                 manageServerResponse(serverMessage);
             });//boostNow(dataForPost, function (data) {
@@ -152,6 +152,7 @@ var addImageListToDiv = function (divName, imgList) {
         $('#' + divName).prepend($('<img>', { id: 'Img' + counter, src: currentImage.src, class: 'boosterImages' }))
     }//for (var counter = 0; counter < imgList.length; counter++) {
 } //var addImageListToDiv = function (divName, imgList) {
+
 var cleanImageList = function (imgList) {
     var returnValue = [];
     for (var counter = 0; counter < imgList.length; counter++) {
