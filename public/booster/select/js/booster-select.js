@@ -67,7 +67,7 @@ $(document).ready(function () {
         },
         eventClick: function (calEvent, $event) {
             var id = Date.now().toString();
-            calEvent[nectorr - id] = id;
+            calEvent['nectorr-id'] = id;
             timeLines.push(calEvent);
         },
         eventMouseover: function (calEvent, $event) {
@@ -115,9 +115,6 @@ $(document).ready(function () {
         }//if (data.status = "SUCCESS") {
 
     });//getVignetteFromDb(function (data) {
-    $nectorrFacebookLogin("user_managed_groups,publish_pages", null, function (fbResponse) {
-        var a = response;
-    });
 }); //$(document).ready(function () {
 $("#set-time").click(function (e) {
     e.preventDefault();

@@ -100,10 +100,12 @@ router.post('/send/post/vignette', function (req, res) {
                     var postDateTime = postDateTimeArray[timeLineCounter];
                     //postDateTime = JSON.parse(postDateTime);
                     postDateTime = postDateTime.start;
-                    var dateTimeForPosting = new Date(postDateTime);
-                    //var postDate = postDateTime.split('T')[0];
-                    //var postTime = postDateTime.split('T')[1];
-                    //var postTime = postTime.substring(0, postTime.length - 2);
+                    var postDate = postDateTime.split('T')[0];
+                    var postTime = postDateTime.split('T')[1];
+                    var postTime = postTime.substring(0, postTime.length - 1);
+
+                    var dateTimeForPosting = new Date(postDate + " " + postTime);//new Date(postDateTime);
+                    
                     var dataForScheduler = { "email": email, dataToPost: dataToPost }
                     agenda.schedule(dateTimeForPosting, email + '~' + Date.now, dataForScheduler, function (err,job) {
                         var a = job;
@@ -115,13 +117,16 @@ router.post('/send/post/vignette', function (req, res) {
                             var dataToPost = job.attrs.data.dataToPost
                             var email = job.attrs.data.email;
                             dataToPost["email"] = email;
-                            evaluateVignetteAndPost(dataToPost, function (data) {
-                                var userPost = new userPosts();
-                                userPost.email = email, userPost.postData = dataToPost;
-                                userPost.save(function (err, doc, rowsEffected) {
+                            evaluateVignetteAndPost(dataToPost, function (smStatus) {
+                                if (smStatus.status == 'ERROR') {
+                                    var userPost = new userPosts();
+                                    userPost.email = email, userPost.postData = dataToPost;
+                                    userPost.save(function (err, doc, rowsEffected) {
 
-                                });
-
+                                    });
+                                } else {
+                                    sendMessageToServer(smStatus, callback, res);
+                                }
                             });
                         }
                     });
@@ -247,31 +252,31 @@ var postToFacebook = function (dataToPost, callback) { //dataToPost. postToStrin
         params['me_id'] = dataToPost.me_Id;
         params['me_type'] = dataToPost.me_type;
         var path = (dataToPost.urlToPost) ? dataToPost.urlToPost: '/me';
-        uploadMediaToFacebook(dataToPost, function (mediaResponse) {
-            // set params value
-            if (mediaResponse.error) {
-                callback({ 'status': 'ERROR', data: mediaResponse.error });
-            } else {
-                //params.picture = mediaResponse.fbImageInfo.id;
-                fbGraph.post(path+'/feed', params, function (err, res) {
-                    if (err) {
-                        message['status'] = "ERROR";
-                        message['message'] = "An error occured while posting to facebook. Code - " + err.code;
-                        callback(message);
-                        return;
-                    }//if (err) {
-                    if (!res.error) {
-                        message['status'] = "SUCCESS";
-                        message['message'] = "Successfully posted to facebook."
-                        callback(message);
-                        return;
-                    }//if (res) {
-                });//fbGraph.post(dataToPost.postToString, post, function (err, res) {
+        fbGraph.post(path + '/feed', params, function (err, res) {
+                if (err) {
+                message['status'] = "ERROR";
+                message['message'] = "An error occured while posting to facebook. Code - " + err.code;
+                callback(message);
+                return;
+            }//if (err) {
+            if (!res.error) {
+                message['status'] = "SUCCESS";
+                message['message'] = "Successfully posted to facebook."
+                callback(message);
+                return;
+            }//if (res) {
+        });//fbGraph.post(dataToPost.postToString, post, function (err, res) {
+        //uploadMediaToFacebook(dataToPost, function (mediaResponse) {
+        //    // set params value
+        //    if (mediaResponse.error) {
+        //        callback({ 'status': 'ERROR', data: mediaResponse.error });
+        //    } else {
+        //        //params.picture = mediaResponse.fbImageInfo.id;
 
 
-            }//if (mediaResponse.error) { } else {
-        });//uploadMediaToFacebook(uploadOptions, function (mediaResponse) {
-        //console.log(facebookRes);
+        //    }//if (mediaResponse.error) { } else {
+        //});//uploadMediaToFacebook(uploadOptions, function (mediaResponse) {
+        ////console.log(facebookRes);
         })//fbGraph.extendAccessToken({;
 }//var postToFacebook = function (options, accessToken) {
 
@@ -429,10 +434,8 @@ var escapeSpecialChars    = function (param) {
 };
 
 var postNow = function (email,dataToPost, callback) {
-    for (var smCounter = 0; smCounter < dataToPost.sm_names.length; smCounter++) {
-        var sm_name = dataToPost.sm_names[smCounter];
         //var dataToPost;////dataToPost. postToString, caption, link, pictureLink
-        switch (sm_name) {
+    switch (dataToPost.sm_name) {
             case 'facebook':
                 postToFacebook(dataToPost, function (serverResponse) {
                     if (serverResponse.status == "SUCCESS") {
@@ -448,7 +451,7 @@ var postNow = function (email,dataToPost, callback) {
                             }
                         });//post.save(function (err, savedPost, numRows) {
                     } else {
-                        callback({ status: "ERROR", message: "Unable to post on facebook. " + JSON.stringify(err) });
+                        callback({ status: "ERROR", message: "Unable to post on facebook. " + serverResponse.message });
                     }//if (serverResponse.status == "SUCCESS") {
                 });//postToFacebook(dataToPost, function (serverResponse) {
                 break;
@@ -481,7 +484,6 @@ var postNow = function (email,dataToPost, callback) {
 
                 break;
         }//switch (sm_name) {"
-    }//for (var smCounter = 0; smCounter < dataToPost.sm_names.length; smCounter++){
 }
 
 var evaluateVignetteAndPost = function (dataToPost, callback) {
@@ -494,10 +496,12 @@ var evaluateVignetteAndPost = function (dataToPost, callback) {
             } else if (doc) {
                 //get social media names
                 var socialMediaInfo = doc.data.locs;
+                dataToPost['accessToken'] = (dataToPost.tokens) ? dataToPost.tokens.fbAccessToken : undefined;
                 for (var socialMediaCounter = 0; socialMediaCounter < socialMediaInfo.length; socialMediaCounter++) {
                     var socialMediaPostDetails = socialMediaInfo[socialMediaCounter];
-                    var urlToPost = getPostableUrl(socialMediaPostDetails.postableLocId);
+                    var urlToPost = getPostableUrl(socialMediaPostDetails);
                     dataToPost["urlToPost"] = urlToPost;
+                    dataToPost["sm_name"] = socialMediaPostDetails.sm_name.trim();
                     postNow(dataToPost.email, dataToPost, callback);
                 }//for (var socialMediaCounter = 0; socialMediaCounter < socialMediaInfo.length; socialMediaCounter++) {
                 //post
@@ -507,16 +511,16 @@ var evaluateVignetteAndPost = function (dataToPost, callback) {
     }//for (var vignetteCounter = 0; vignetteCounter < dataToPost.vignettes.length; vignetteCounter++) {
     var getPostableUrl = function (smPostDetails) {
         var returnValue;
-        switch (smPostDetails.sm_name) {
+        switch (smPostDetails.sm_name.trim()) {
             case "facebook":
                 //var others = smPostDetails.
-                if (smPostDetails.type == 'page') {
-                    var otherInfo = JSON.parse(smPostDetails.otherInfo);
+                if (smPostDetails.type.trim() == 'page') {
+                    //var otherInfo = JSON.parse(smPostDetails.otherInfo);
                     //fbGraph.setAccessToken(otherInfo.access_token);
-                    returnValue = "/" + smPostDetails.sm_id;
-                    smPostDetails["accessToken"] = smPostDetails.otherInfo.access_token;
-                } else if (smPostDetails.type == 'group') {
-                    returnValue = "/groups/" + smPostDetails.sm_id
+                    returnValue = "/" + smPostDetails.postableLocId;
+                    //(!smPostDetails.accessToken)?  smPostDetails["accessToken"] = otherInfo.access_token : true ;
+                } else if (smPostDetails.type.trim() == 'group') {
+                    returnValue = "/groups/" + smPostDetails.postableLocId
                 }//if (smPostDetails.type == 'page') {
                 break;
             case "twitter":

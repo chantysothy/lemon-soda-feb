@@ -52,6 +52,9 @@ $(document).ready(function () {
             console.log("The selectVignetteModal animation after close is completed");
         }
     });
+    $nectorrFacebookLogin(facebookDefaults.scope, null, function (fbResponse) {
+        console.log(fbResponse);    
+    });
     $("#manageVignette").animatedModal({
         modalTarget: 'manageVignetteModal',
         animatedIn: 'fadeIn',

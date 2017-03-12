@@ -109,12 +109,7 @@ router.get('/vignette/get/min', function (req, res) {
     }//    if (callback) {
 });//router.get('/vignette/save', function (req, res) {
 
-var getMinVignetes = function (doc) {
-    var returnValue = { vignettes_min: []};
-    // get id and description and return is as returnValue
-    //for each  (vignette in docs)
-} //var getMinVignetes= function(doc){
-var sendMessageToServer = function (msg, callback, res, post = false) {
+var sendMessageToServer = function (msg, callback, res, post) {
     // msg has to be a valid json object
     var payload = JSON.stringify(msg);
     payload = payload.replace(/\\n/g, "\\n")
@@ -129,14 +124,9 @@ var sendMessageToServer = function (msg, callback, res, post = false) {
     payload = payload.replace(/[\u0000-\u0019]+/g, "");
     var response = JSON.stringify(msg);
     //res.writeHead(200, { 'Content-Type': 'text/plain', 'Content-Length': +response.length + '' });
-    if (!post) {
         var returnValue = callback + '(' + response + ')';
         res.send(returnValue);
         res.end();
-    } else {
-        res.write(returnValue);
-        res.end();
-    }
 }
 
 var findVignetteInArray = function (name, array) {

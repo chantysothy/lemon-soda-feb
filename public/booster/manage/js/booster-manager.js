@@ -1,7 +1,7 @@
 ﻿var selectedOptions = [];
 var autoCompleteList = [];
 var timeLines = [];
-var tempSocialMediaNames = ['facebook', 'twitter','google'];//, 'linkedin','instagram','youtube', blogger','tumblr'];
+var tempSocialMediaNames = ['facebook', 'twitter']//,'google'];//, 'linkedin','instagram','youtube', blogger','tumblr'];
 //refer https://developers.google.com/+/domains/api/circles
 var plusDomain = {
     getCircleList: 'https://www.googleapis.com/plusDomains/v1/people/userId/circles' //get
@@ -186,7 +186,8 @@ var SocialMediaGroupsAndPages = {
                                 , pages: []
 
                             }
-                            pushIntoArray(postableLocs.groups, response.data);
+                            
+                            pushIntoArray(postableLocs.groups, formatGroupData(response.data));
 
                             /* get pages*/
                             $executeFacebookCommand('manage_pages', '/' + user_id + '/accounts', function (pageData) {
@@ -405,7 +406,7 @@ var getElementsFromLocObj = function (type, locArr,smName= "not-set") {
 
                 } else {
 
-                    element['id'] = returnValue.length;
+                    element['id'] = currentElement.id;
                     element['type'] = 'group';
                     element['sm_name'] = smName;
                     element['sm_id'] = currentElement.id;
@@ -418,7 +419,7 @@ var getElementsFromLocObj = function (type, locArr,smName= "not-set") {
             } else if (smName == 'twitter') {
                 var currentElement = locArr[counter];
 
-                element['id'] = returnValue.length;
+                element['id'] = currentElement.id;
                 element['type'] = 'list';
                 element['sm_name'] = smName;
                 element['sm_id'] = currentElement.id;
@@ -473,8 +474,8 @@ var getPostableLocsForDB = function () {
         var childItemArray = childText.split('·');
 
         var elementId = childItem.attr('data-id');
-
-        var vignettePostableLoc = { postableLocId: autoCompleteList[elementId], postableLocName: childItemArray[2], type: childItemArray[1], sm_name:childItemArray[0] };
+        var locDetails = getPostableLocIdInArray(elementId, autoCompleteList);
+        var vignettePostableLoc = { postableLocId: elementId, postableLocName: childItemArray[2].trim(), type: childItemArray[1].trim(), sm_name:childItemArray[0].trim() };
         returnValue.push(vignettePostableLoc);
 
     }//for (var divCounter = 0; divCounter < childCounter; divCounter++){
@@ -487,7 +488,7 @@ var getPostableElement = function (id) {
 
 var saveVignette = function (callback) {
     var vignetteToSave = getVignette();
-    setsmDetailsForVignetteSave(autoCompleteList, vignetteToSave.locs);
+    //setsmDetailsForVignetteSave(autoCompleteList, vignetteToSave.locs);
     saveVignetteToDB(vignetteToSave.vignette_name, vignetteToSave, callback);
 }//var saveVignette = function (callback) {
 
@@ -515,12 +516,12 @@ var validateForm = function () {
         returnValue.success[1] = { status: "SUCCESS", message: "Postable locations validated successfully." }
     }//if (!postableLocsValue || postableLocsValue == "") {
 
-    if (!timeLines || timeLines.length <= 0) {
-        if (!returnValue.error) returnValue['error'] = {}
-        returnValue.error[2] = { status: "ERROR", message:"A vignette is for automated post on behalf of you. Click on the calendar to set time." }
-    } else {
-        returnValue.success[2] = { status: "SUCCESS", message: "Timelines validated successfully." }
-    }//if (!postableLocsValue || postableLocsValue == "") {
+    //if (!timeLines || timeLines.length <= 0) {
+    //    if (!returnValue.error) returnValue['error'] = {}
+    //    returnValue.error[2] = { status: "ERROR", message:"A vignette is for automated post on behalf of you. Click on the calendar to set time." }
+    //} else {
+    //    returnValue.success[2] = { status: "SUCCESS", message: "Timelines validated successfully." }
+    //}//if (!postableLocsValue || postableLocsValue == "") {
 
     return returnValue;
 }//var validateForm = function () {
@@ -571,6 +572,7 @@ var setsmDetailsForVignetteSave = function (masterList, selectedItems) {
         });//return _.some(this, function (val2) {
     }, selectedItems);//return
 }//var setsmDetailsForVignetteSave = function (list, selectedItems) {
+
 var formatGroupData = function (groupData) {
     var returnValue = [];
     for (var groupCounter = 0; groupCounter < groupData.length; groupCounter++) {
@@ -578,7 +580,17 @@ var formatGroupData = function (groupData) {
         groupInfo['desc'] = groupInfo.name;
         groupInfo['type'] = 'group';
         //groupInfo['id'] = groupInfo.sm_id;
+        //groupInfo['id'] = groupInfo.sm_id;
         returnValue.push(groupInfo);
     }//for (var groupCounter = 0; groupCounter < groupData.length; groupCounter++) {
     return returnValue;
 }
+
+var getPostableLocIdInArray = function (id, array) {
+    var returnValue = false
+    array.filter(function (item) {
+        if (item.id === id)
+            return item;
+    });
+
+}//var getPostableLocIdInArray = function (id, array) {
