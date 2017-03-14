@@ -4,7 +4,8 @@ var postsSchema = mongoose.Schema({
     , postData: Object
     , detailedPostData: Object
     , schedule: Object
-    , repostInfo : Object
+    , repostInfo: Object
+    , postIdOnSocialMedia : Object
 });
 
 module.exports = mongoose.model('user-posts', postsSchema);

@@ -133,7 +133,7 @@ $('#go-back').click(function (e) {
 $('#schedule-now').click(function (e) {
     selectedVignettes = [];
     selectedVignettes = getSelectedVignettes();
-    var dataForPost = { userId: { facebook: nectorrFacebookId }, url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
+    var dataForPost = { url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
     var itemsToPost = { "vignettes": { vignettes: selectedVignettes }, "dataToPost": dataForPost, "timelines": { timeline: timeLines } }
     postUsingVignette(itemsToPost, function (data) {
         if (data.status == "SUCCESS") {

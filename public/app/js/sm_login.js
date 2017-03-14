@@ -1,5 +1,5 @@
 ﻿var nectorrFacebookId, nectorrTwitterId, nectorrGoogleId,nectorrInstgramId, nectorrLinkedInId
-
+var fbUserLoggedIn = false;
 var $smPermissionSet = { email: "", sm_name: "", neverAsk: false };
 var loggedInUserId
 var googleCallback
@@ -66,8 +66,8 @@ var googlePlusDefaults = {
 }
 
 var facebookDefaults = {
-    appId: '582000448664812'
-    , appSecret: '9b089aff5785a8b74f64ed3530f3d6f6'
+    appId: '334582780223007'
+    , appSecret: '85f5abe5d8390c9134c9dd84befa26ed'
     , token: ''
     , scope: "email,public_profile,publish_actions, user_managed_groups, manage_pages, publish_pages, pages_show_list,publish_stream,user_photos, user_photo_video_tags, user_posts"
     
@@ -104,51 +104,79 @@ $nectorrLinkedInLogin = function (linkedInLoginScope, event, callback) {
     //getLinkedInUserDetails();
 }//$nectorrLinkedInLogin = function (linkedInLoginScope, event, callback) {
 
-$nectorrFacebookLogin = function (fbLoginScope, event, callback) {
+$nectorrFacebookLogin = function (fbScope, event, callback) {
+    FB.init({
+        appId: facebookDefaults.appId,  // Change appId 409742669131720 with your Facebook Application ID
+        status: true,
+        xfbml: true,
+        cookie: true,
+        version: 'v2.8' // use version 2.7
 
-    if (fbLoginScope) {
+    });
 
-        FB.init({
-            appId: facebookDefaults.appId,  // Change appId 409742669131720 with your Facebook Application ID
-            status: true,
-            xfbml: true,
-            cookie: true,
-            version: 'v2.8' // use version 2.7
+    if (fbScope) {
 
-        });
-
-        FB.getLoginStatus(function (response) {
-            if (response.status === 'connected') {
-                fbAccessToken = response.authResponse.accessToken;
-                nectorrFacebookId = response.authResponse.userID; 
-                callback(response);
-            } else {
-                FB.login(function (response) {
-                    if (response && !response.error) {
-                        fbAccessToken = response.authResponse.accessToken;
-                        //var accessToken = response.authResponse.accessToken;
-                        nectorrFacebookId = response.authResponse.userID;
-                        if (fbAccessToken) {
-                            //extending access token
-                            var oAuthParams = {};
-                            oAuthParams['client_id'] = facebookDefaults.appId;
-                            oAuthParams['client_secret'] = facebookDefaults.appSecret;
-                            oAuthParams['grant_type'] = 'fb_exchange_token';
-                            oAuthParams['fb_exchange_token'] = 'accessToken';
-                            oAuthParams['response_type'] = 'token';
-                            FB.api('/oauth/access_token', 'post', oAuthParams, function (response) {
-                                callback(response)
-                            });//FB.api('/oauth/access_token', 'post', OauthParams, function (response) {
+        if (fbUserLoggedIn) {
+            FB.getLoginStatus(function (response) {
+                if (response.status === 'connected') {
+                    fbAccessToken = response.authResponse.accessToken;
+                    callback(response);
+                } else {
+                    FB.login(function (response) {
+                        if (response && !response.error) {
+                            fbAccessToken = response.authResponse.accessToken;
+                            //var accessToken = response.authResponse.accessToken;
+                            nectorrFacebookId = response.authResponse.userID;
+                            //nectorrFacebookId = response.authResponse.
+                            if (fbAccessToken) {
+                                //extending access token
+                                var oAuthParams = {};
+                                oAuthParams['client_id'] = facebookDefaults.appId;
+                                oAuthParams['client_secret'] = facebookDefaults.appSecret;
+                                oAuthParams['grant_type'] = 'fb_exchange_token';
+                                oAuthParams['fb_exchange_token'] = 'accessToken';
+                                oAuthParams['response_type'] = 'token';
+                                FB.api('/oauth/access_token', 'post', oAuthParams, function (response) {
+                                    callback(response)
+                                });//FB.api('/oauth/access_token', 'post', OauthParams, function (response) {
+                                callback(response);
+                            } else {
+                                alert("We are experiencing difficulties in extending your access token. Please try after sometime.");
+                            }
                         } else {
-                            alert("We are experiencing difficulties in extending your access token. Please try after sometime.");
+                            alert("There was an error in connecting with facebook. The  message nectorr recieved is : " + error)
                         }
+                    }, fbScope);//FB.login(function () {
+                }//if (response.status === 'connected') {
+            });//FB.getLoginStatus(function (response) {
+        }
+        else {
+            FB.login(function (response) {
+                if (response && !response.error) {
+                    fbAccessToken = response.authResponse.accessToken;
+                    //var accessToken = response.authResponse.accessToken;
+                    nectorrFacebookId = response.authResponse.userID;
+                    //nectorrFacebookId = response.authResponse.
+                    if (fbAccessToken) {
+                        //extending access token
+                        var oAuthParams = {};
+                        oAuthParams['client_id'] = facebookDefaults.appId;
+                        oAuthParams['client_secret'] = facebookDefaults.appSecret;
+                        oAuthParams['grant_type'] = 'fb_exchange_token';
+                        oAuthParams['fb_exchange_token'] = 'accessToken';
+                        oAuthParams['response_type'] = 'token';
+                        FB.api('/oauth/access_token', 'post', oAuthParams, function (response) {
+                            callback(response)
+                        });//FB.api('/oauth/access_token', 'post', OauthParams, function (response) {
+                        callback(response);
                     } else {
-                        alert("There was an error in connecting with facebook. The  message nectorr recieved is : "+ error)
+                        alert("We are experiencing difficulties in extending your access token. Please try after sometime.");
                     }
-                }, fbLoginScope);//FB.login(function () {
-            }//if (response.status === 'connected') {
-        });//FB.getLoginStatus(function (response) {
-
+                } else {
+                    alert("There was an error in connecting with facebook. The  message nectorr recieved is : " + error)
+                }
+            }, fbScope);//FB.login(function () {
+        }
     }//if (scope) { 
 }; //$facebookLogin = function (scope) {
 
@@ -539,7 +567,7 @@ var getFacebookPermsFromClient = function (e, callback) {
 }
 var getFacebookAccessToPagesAndGroups = function (ev) {
     if (getSocialMediaDetails.facebook) {
-        $nectorrFacebookLogin('manage_pages, user_managed_groups', e, function (data) {
+        $nectorrFacebookLogin(facebookDefaults.scope, e, function (data) {
             saveFacebookLoginInfo(data, ev, function (data) {
                 if (data.status == 'SUCCESS') { 
                                 //show message
@@ -891,24 +919,24 @@ var setPublishCredentials = function (userObject,  callback) {
             }
         }
 
-        $nectorrFacebookLogin1('user_posts,read_insights,read_audience_network_insights', null, function (data) {
-            publishCredentials.facebook.access_token = data.authResponse.accessToken;
-            publishCredentials.twitter.consumer_key = authCreds.twitter.consumer_key;
-            publishCredentials.twitter.consumer_secret = authCreds.twitter.consumer_secret;
-            publishCredentials.instagram.client_id = authCreds.instagram.client_id;
-            publishCredentials.pinterest.client_id = authCreds.pinterest.client_id;
-            publishCredentials.google.client_id = authCreds.google.client_id;
-            publishCredentials.facebook.accounts = queryTags;
-            publishCredentials.google.accounts = queryTags;
-            publishCredentials.twitter.accounts = queryTags;
-            publishCredentials.instagram.accounts = queryTags;
-            publishCredentials.delicious.accounts = queryTags;
-            publishCredentials.blogger.accounts = queryTags;
-            publishCredentials.dribbble.accounts = queryTags; 
-            publishCredentials.youtube.accounts = queryTags;
-            if (callback)
-                callback(publishCredentials);
-        });//$nectorrFacebookLogin1(function (data) {
+        //$nectorrFacebookLogin1('user_posts,read_insights,read_audience_network_insights', null, function (data) {
+        //    publishCredentials.facebook.access_token = data.authResponse.accessToken;
+        //    publishCredentials.twitter.consumer_key = authCreds.twitter.consumer_key;
+        //    publishCredentials.twitter.consumer_secret = authCreds.twitter.consumer_secret;
+        //    publishCredentials.instagram.client_id = authCreds.instagram.client_id;
+        //    publishCredentials.pinterest.client_id = authCreds.pinterest.client_id;
+        //    publishCredentials.google.client_id = authCreds.google.client_id;
+        //    publishCredentials.facebook.accounts = queryTags;
+        //    publishCredentials.google.accounts = queryTags;
+        //    publishCredentials.twitter.accounts = queryTags;
+        //    publishCredentials.instagram.accounts = queryTags;
+        //    publishCredentials.delicious.accounts = queryTags;
+        //    publishCredentials.blogger.accounts = queryTags;
+        //    publishCredentials.dribbble.accounts = queryTags; 
+        //    publishCredentials.youtube.accounts = queryTags;
+        //    if (callback)
+        //        callback(publishCredentials);
+        //});//$nectorrFacebookLogin1(function (data) {
     });//getQueryTags(function (queryObject) {
 }//var setPublishCredentials = function (publishCreds) {
 //

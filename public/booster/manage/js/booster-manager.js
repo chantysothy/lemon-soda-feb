@@ -474,8 +474,9 @@ var getPostableLocsForDB = function () {
         var childItemArray = childText.split('·');
 
         var elementId = childItem.attr('data-id');
-        var locDetails = getPostableLocIdInArray(elementId, autoCompleteList);
-        var vignettePostableLoc = { postableLocId: elementId, postableLocName: childItemArray[2].trim(), type: childItemArray[1].trim(), sm_name:childItemArray[0].trim() };
+        var locDetails = getElementFromArray(autoCompleteList, 'id', elementId); // (elementId, autoCompleteList);
+
+        var vignettePostableLoc = { postableLocId: elementId, postableLocName: childItemArray[2].trim(), type: childItemArray[1].trim(), sm_name: childItemArray[0].trim(), otherInfo: (locDetails) ? JSON.parse(locDetails.otherInfo): undefined };
         returnValue.push(vignettePostableLoc);
 
     }//for (var divCounter = 0; divCounter < childCounter; divCounter++){
@@ -589,8 +590,22 @@ var formatGroupData = function (groupData) {
 var getPostableLocIdInArray = function (id, array) {
     var returnValue = false
     array.filter(function (item) {
-        if (item.id === id)
+        if (item.id === id) {
             return item;
+            //break;
+        }
     });
 
 }//var getPostableLocIdInArray = function (id, array) {
+var getElementFromArray = function (valArray, field, value) {
+    var returnValue;
+    for (var arrCounter = 0; arrCounter < valArray.length; arrCounter++) {
+        var element = valArray[arrCounter];
+        if (element[field] === value) {
+            returnValue = element;
+            break;
+        }
+
+    }//for (var arrCounter = 0; arrCounter < valArray; arrCounter++) {
+    return returnValue;
+}//var getElementFromArray = function (valArray, field, value) {
