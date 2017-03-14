@@ -66,8 +66,8 @@ var googlePlusDefaults = {
 }
 
 var facebookDefaults = {
-    appId: '334582780223007'
-    , appSecret: '85f5abe5d8390c9134c9dd84befa26ed'
+    appId: '582000448664812'
+    , appSecret: '9b089aff5785a8b74f64ed3530f3d6f6'
     , token: ''
     , scope: "email,public_profile,publish_actions, user_managed_groups, manage_pages, publish_pages, pages_show_list,publish_stream,user_photos, user_photo_video_tags, user_posts"
     
@@ -115,8 +115,6 @@ $nectorrFacebookLogin = function (fbScope, event, callback) {
     });
 
     if (fbScope) {
-
-        if (fbUserLoggedIn) {
             FB.getLoginStatus(function (response) {
                 if (response.status === 'connected') {
                     fbAccessToken = response.authResponse.accessToken;
@@ -127,56 +125,30 @@ $nectorrFacebookLogin = function (fbScope, event, callback) {
                             fbAccessToken = response.authResponse.accessToken;
                             //var accessToken = response.authResponse.accessToken;
                             nectorrFacebookId = response.authResponse.userID;
-                            //nectorrFacebookId = response.authResponse.
-                            if (fbAccessToken) {
-                                //extending access token
-                                var oAuthParams = {};
-                                oAuthParams['client_id'] = facebookDefaults.appId;
-                                oAuthParams['client_secret'] = facebookDefaults.appSecret;
-                                oAuthParams['grant_type'] = 'fb_exchange_token';
-                                oAuthParams['fb_exchange_token'] = 'accessToken';
-                                oAuthParams['response_type'] = 'token';
-                                FB.api('/oauth/access_token', 'post', oAuthParams, function (response) {
-                                    callback(response)
-                                });//FB.api('/oauth/access_token', 'post', OauthParams, function (response) {
-                                callback(response);
-                            } else {
-                                alert("We are experiencing difficulties in extending your access token. Please try after sometime.");
-                            }
+                            callback(response);
+
+                            //extending facebook token from client side. Not to be used till  we are using server side extending of token
+                            //if (fbAccessToken) {
+                            //    //extending access token
+                            //    var oAuthParams = {};
+                            //    oAuthParams['client_id'] = facebookDefaults.appId;
+                            //    oAuthParams['client_secret'] = facebookDefaults.appSecret;
+                            //    oAuthParams['grant_type'] = 'fb_exchange_token';
+                            //    oAuthParams['fb_exchange_token'] = 'accessToken';
+                            //    oAuthParams['response_type'] = 'token';
+                            //    FB.api('/oauth/access_token', 'post', oAuthParams, function (response) {
+                            //        callback(response)
+                            //    });//FB.api('/oauth/access_token', 'post', OauthParams, function (response) {
+                            //    callback(response);
+                            //} else {
+                            //    alert("We are experiencing difficulties in extending your access token. Please try after sometime.");
+                            //}
                         } else {
                             alert("There was an error in connecting with facebook. The  message nectorr recieved is : " + error)
                         }
                     }, fbScope);//FB.login(function () {
                 }//if (response.status === 'connected') {
             });//FB.getLoginStatus(function (response) {
-        }
-        else {
-            FB.login(function (response) {
-                if (response && !response.error) {
-                    fbAccessToken = response.authResponse.accessToken;
-                    //var accessToken = response.authResponse.accessToken;
-                    nectorrFacebookId = response.authResponse.userID;
-                    //nectorrFacebookId = response.authResponse.
-                    if (fbAccessToken) {
-                        //extending access token
-                        var oAuthParams = {};
-                        oAuthParams['client_id'] = facebookDefaults.appId;
-                        oAuthParams['client_secret'] = facebookDefaults.appSecret;
-                        oAuthParams['grant_type'] = 'fb_exchange_token';
-                        oAuthParams['fb_exchange_token'] = 'accessToken';
-                        oAuthParams['response_type'] = 'token';
-                        FB.api('/oauth/access_token', 'post', oAuthParams, function (response) {
-                            callback(response)
-                        });//FB.api('/oauth/access_token', 'post', OauthParams, function (response) {
-                        callback(response);
-                    } else {
-                        alert("We are experiencing difficulties in extending your access token. Please try after sometime.");
-                    }
-                } else {
-                    alert("There was an error in connecting with facebook. The  message nectorr recieved is : " + error)
-                }
-            }, fbScope);//FB.login(function () {
-        }
     }//if (scope) { 
 }; //$facebookLogin = function (scope) {
 
