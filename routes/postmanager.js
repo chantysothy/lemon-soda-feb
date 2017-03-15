@@ -103,8 +103,17 @@ router.post('/send/post/vignette', function (req, res) {
                     var postDate = postDateTime.split('T')[0];
                     var postTime = postDateTime.split('T')[1];
                     var postTime = postTime.substring(0, postTime.length - 1);
+                    var postTimeArray = postTime.split(':');
+                    var hh = postTimeArray[0];
+                    var mm = postTimeArray[1];
+                    var ss = postTimeArray[2];
+                    var postDateArray = postDate.split('-');
+                    var yy = postDateArray[0];
+                    var mm = postDateArray[1];
+                    var dd = postDateArray[2];
 
-                    var dateTimeForPosting = new Date(postDate + " " + postTime);//new Date(postDateTime);
+//                    var dateTimeForPosting = new Date(postDate + " " + postTime);//new Date(postDateTime);
+                    var dateTimeForPosting = new Date(yy,mm,dd,hh,mm,ss);//new Date(postDateTime);
                     
                     var dataForScheduler = { "email": email, dataToPost: dataToPost }
                     agenda.schedule(dateTimeForPosting, email + '~' + Date.now, dataForScheduler, function (err,job) {
@@ -130,7 +139,8 @@ router.post('/send/post/vignette', function (req, res) {
                             });
                         }
                     });
-                    agenda.start();
+                    
+                    //agenda.start();
                 }//for (var timeLineCounter = 0; timeLineCounter < vignetteTimelines.length; timeLineCounter++) {
             }//if (vignette) {
         }//if (email) {
@@ -237,7 +247,7 @@ var postToFacebook = function (dataToPost, callback) { //dataToPost. postToStrin
     
     //var post = { caption: dataToPost.caption, link: dataToPost.link, picture: dataToPost.pictureLink, message: dataToPost.caption };
     var params = {};
-    fbGraph.setAccessToken(dataToPost.accessToken);
+   // fbGraph.setAccessToken(dataToPost.accessToken);
     //fbGraph.get("https://graph.facebook.com/debug_token?input_token=" + dataToPost.accessToken + "&access_token=" + config.facebookAuth.app_access_token, function (fbResponse) {
     //    if (fbResponse && !fbResponse.type == "OAuthException") {
     //        var fbCmd = "https://graph.facebook.com/oauth/access_token?client_id=" + config.facebookAuth.client_id + "&client_secret=" + config.facebookAuth.client_secret + "&grant_type=fb_exchange_token&fb_exchange_token=" + dataToPost.accessToken + "&redirect_uri="+"http://localhost:1337"
@@ -252,8 +262,8 @@ var postToFacebook = function (dataToPost, callback) { //dataToPost. postToStrin
         "access_token": dataToPost.accessToken
         , "client_id": config.facebookAuth.client_id
         , "client_secret": config.facebookAuth.client_secret
-    }, function (err, facebookRes) {
-        if (!err) {
+    }, function (extendAccessTokenError, facebookRes) {
+        if (!extendAccessTokenError) {
             fbGraph.setAccessToken(facebookRes.access_token);
 //            postToFacebook(dataToPost, callback);
             params['message'] = dataToPost.caption;
@@ -265,22 +275,25 @@ var postToFacebook = function (dataToPost, callback) { //dataToPost. postToStrin
 
             var path = (dataToPost.urlToPost) ? dataToPost.urlToPost : '/me';
 
-            fbGraph.post(path, params, function (err, res) {
-                if (err) {
+            fbGraph.post(path, params, function (postError, postResponse) {
+                if (postError) {
                     message['status'] = "ERROR";
-                    message['message'] = "An error occured while posting to facebook. Code - " + err.code + " from facebook.";
-                    //callback(message);
+                    message['message'] = "An error occured while posting to facebook. Code - " + postError.code + " from facebook.";
+                    callback(message);
+                    setTimeout(function () { }, 300)
                     return;
                 }//if (err) {
-                if (!res.error) {
+                if (!postResponse.error) {
                     message['status'] = "SUCCESS";
                     message['message'] = "Successfully posted to facebook."
                     message['data'] = { "postId": res, accessToken : facebookRes.access_token }
                     callback(message);
-                    return;
+                    setTimeout(function () { },300)
+                    //return;
                 }//if (res) {
             });//function (err, facebookRes) {
         } else {
+            callback({ status: "ERROR", message: "facebook error while obtaining access token " + extendAccessTokenError.code + ". " + extendAccessTokenError.message });
         }
     })//fbGraph.extendAccessToken({;
 }//var postToFacebook = function (options, accessToken) {
@@ -458,7 +471,8 @@ var postNow = function (email,dataToPost, callback) {
                             }
                         });//post.save(function (err, savedPost, numRows) {
                     } else {
-                        callback({ status: "ERROR", message: "Unable to post on facebook. " + serverResponse.message });
+                            callback({ status: "ERROR", message: "Unable to post on facebook. " + serverResponse.message });
+                            //log in errors
                     }//if (serverResponse.status == "SUCCESS") {
                 });//postToFacebook(dataToPost, function (serverResponse) {
                 break;
@@ -497,8 +511,8 @@ var evaluateVignetteAndPost = function (dataToPost, callback) {
     for (var vignetteCounter = 0; vignetteCounter < dataToPost.vignettes.length; vignetteCounter++) {
         var vignetteId = dataToPost.vignettes[vignetteCounter].id;
         var condition = { _id : vignetteId };
-        vignetteModel.findOne(condition, function (err, doc) {
-            if (err) {
+        vignetteModel.findOne(condition, function (findError, doc) {
+            if (findError) {
                 return;
             } else if (doc) {
                 //get social media names
@@ -528,7 +542,7 @@ var evaluateVignetteAndPost = function (dataToPost, callback) {
                 if (smPostDetails.type.trim() == 'page') {
                     //var otherInfo = JSON.parse(smPostDetails.otherInfo);
                     //fbGraph.setAccessToken(otherInfo.access_token);
-                    returnValue = "/" + smPostDetails.postableLocId + '/feed';
+                    returnValue = "/" + smPostDetails.postableLocId;//+ '/feed';
                     //(!smPostDetails.accessToken)?  smPostDetails["accessToken"] = otherInfo.access_token : true ;
                 } else if (smPostDetails.type.trim() == 'group') {
                     returnValue = "/groups/" + smPostDetails.postableLocId
@@ -549,5 +563,12 @@ var evaluateVignetteAndPost = function (dataToPost, callback) {
         return returnValue;
     }//var getPostableUrl = function (smPostDetails) {
 }//var EvaluateVignetteAndPost = function (dataToPost) {
-
+var validateToken = function (token, callback) {
+    var commandString = "graph.facebook.com/debug_token?input_token=" + token + "&accesstoken=" + config.facebookAuth.app_access_token
+    request.get(commandString).on('response', function (response) {
+        if (response.status==200) {
+            callback(response);
+        }//if (callback) {
+    });
+}//var validateToken = function(token, callback) {
 module.exports = router;
