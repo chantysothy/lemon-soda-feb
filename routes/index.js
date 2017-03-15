@@ -684,7 +684,9 @@ var getTagsFromHTML = function (tag, attrib, html, page_url) {
     return returnValue;
 }//var getTagsFromHTML = function (tag, html) {
 
+router.post('/post/twitter', function (req, res) {
 
+}); //router.post('/post / twitter', function (req, res) {
 router.get('/twitter/get/lists', function (req, res) {
     var callback = req.query.callback;
     if (callback) {

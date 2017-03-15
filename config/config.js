@@ -1,10 +1,10 @@
 module.exports = {
 
 	twitter: {
-        'consumer_key': 'zR30W1z6cTQfYKaeMMrUdbXKm'
-        , 'consumer_secret': 'W3k4tedpDKJ0hM6Hnn2I4hAHWag1INFw2ipaBOhgYBqt5zaxL2'
-        , 'access_token': '103259010-9AtPODqSaurMAOaIiIfnJrr14TloFKXgx9wElaop'
-        , 'access_token_secret': 'pJWeIvX69HhXr3f6WicjEbZfhWLDezcjUzcXbVBWsyEF5'
+        'consumer_key': 'wj888T3jlauiQIjcdu751AELB'
+        , 'consumer_secret': 'oFTPhjo0TN7myprULXrk4Wl1WtY2H9lYu9wrIrQkicXtljwwii'
+        , 'access_token': '103259010-UclsxWUAkcGd5qJfmyTYCjk0YP2374Yc5vFUkoJy'
+        , 'access_token_secret': 'VpBSnoXLxMqz3vZ9Xjnp5MaoQwkbbJPsx0uKtksyJWux5'
         , 'redirect_url': 'http://localhost:1337/auth/twitter/callback'
         // for updating to git once again and again
         //,

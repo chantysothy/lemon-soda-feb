@@ -160,22 +160,24 @@ var postToTwitter = function (dataToPost, callback) {//dataToPost. postToString,
             , consumer_secret: config.twitter.consumer_secret
             , bearer_token: twitterLoginData.access_token
         });//var twitter = new Twitter({
+
         var twitterPost = {
             media_ids: []
             , url: dataToPost.link
             , status: dataToPost.caption
         };
 
-        uploadMediaToTwitter(dataToPost.picturelink, function (media) {
+        uploadMediaToTwitter(dataToPost.imgUrl, function (media) {
+            var USER_TIMELINE_URL = 'statuses/user_timeline';
             twitterPost.media_ids = [media.media_id_string]
-            twitter.post(dataToPost.postToString, twitterPost, function (err, doc) {
-                if (err) {
+            twitter.post(USER_TIMELINE_URL, twitterPost, function (twitterPostError, doc) {
+                if (twitterPostError) {
                     message['status'] = "ERROR";
-                    message['message'] = "An error occured while posting to twitter."
+                    message['message'] = "An error occured while posting to twitter. " + JSON.stringify(twitterPostError);
                     callback(message);
                     return;
                 }//if (err) {
-                if (doc) {
+                if (doc && !doc.error) {
                     message['status'] = "SUCCESS";
                     message['message'] = "Successfully posted to twitter."
                     callback(message);
@@ -188,9 +190,10 @@ var postToTwitter = function (dataToPost, callback) {//dataToPost. postToString,
 
 var uploadMediaToTwitter = function (pathUri, callback) {
     if (callback) {
+        var client = new Twitter();
         request.get(pathUri, function (error, response, body) {
             if (!error && response.statusCode == 200) {
-                client.post('media/upload', { media: body }, function (error, media, response) {
+                twitter.post('media/upload', { media: body }, function (error, media, response) {
                     callback(response);
                 });//client.post('media/upload', { media: data }, function (error, media, response) {
                 // Continue with your processing here.
@@ -454,8 +457,7 @@ var escapeSpecialChars    = function (param) {
 var postNow = function (email,dataToPost, callback) {
         //var dataToPost;////dataToPost. postToString, caption, link, pictureLink
     switch (dataToPost.sm_name) {
-        case 'facebook':
-            
+        case 'facebook':            
                 postToFacebook(dataToPost, function (serverResponse) {
                         if (serverResponse.status == "SUCCESS") {
                         var post = new userPosts();
