@@ -158,90 +158,91 @@ $(document).ready(function () {
         $('#invite').hide();
         $('#logout').hide();
         window.location.href = '/signup/local';
-    }
+    } else {
 
-    initFacebookAPI();
-    var googleProfile, resourceName;
-    //setCookie();    
-    var linkedInProfile = {
-        key: String
-        , currentShare: Object
-        , distance: Number
-        , emailAddress: String
-        , firstName: String
-        , headline: String
-        , industry: String
-        , lastName: String
-        , location: Object
-        , numConnections: Number
-        , pictureUrl: String
-        , positions: Object
-        , publicProfileUrl: String
-        , summary: String
-    }
-    $("#icon_instagram").click(function (e) {
-        var instagramAccessDetails;
-        $getInstagramLogin(function (data) {
-            instagramAccessDetails = data;
-        });//$getInstagramLogin(function (data) 
-    });
-    $('#icon_twitter').click(function (e) {
-        var twitterLoginUrl = $twitterUrls.access_token_url;
-        e.preventDefault();
-
-        $twitterLogin(function (response) {
-            switch (response.status) {
-                case "SUCCESS":
-                    if (response.data) {
-                        window.open(response.data, "Ratting", "toolbar = 0, status = 0,")
-                        console.log('twitter windowis open or closed');
-                    } else {
-                        $showMessage('serverResponse', response.message, response.status, true, ev);
-                    }
-                    break;
-            }//switch (response.status) {
-        }); //$twitterLogin(function (redirectData) {
-    }); //$('#icon_twitter').click(function (e) { 
-
-    $('#icon_fb').click(function (e) {
-        
-        $nectorrFacebookLogin(facebookDefaults.scope, e, function (data) {
-            if (data) {
-                VerifyResultAndProcessForFacebook(data, e);
-            } //if (data) { 
+        initFacebookAPI();
+        var googleProfile, resourceName;
+        //setCookie();    
+        var linkedInProfile = {
+            key: String
+            , currentShare: Object
+            , distance: Number
+            , emailAddress: String
+            , firstName: String
+            , headline: String
+            , industry: String
+            , lastName: String
+            , location: Object
+            , numConnections: Number
+            , pictureUrl: String
+            , positions: Object
+            , publicProfileUrl: String
+            , summary: String
+        }
+        $("#icon_instagram").click(function (e) {
+            var instagramAccessDetails;
+            $getInstagramLogin(function (data) {
+                instagramAccessDetails = data;
+            });//$getInstagramLogin(function (data) 
         });
-        //var facebookLoginDetails = $nectorrFacebookLogin('email,public_profile',e);
-        //{ scope: 'email,public_profile, user_posts, manage_pages, user_managed_groups, user_location' });
-    }); //$('#icon_fb').click(function () {
-    
-    $('#icon_linkedin').click(function () {
-        $nectorrLinkedInLogin('', 'auth', function (data) {
-            linkedInProfileData = data.values[0];//g
-            var email = $getClientEmail();
-            var linkedInProfile = { registeredEmail: email, sm_name: 'linkedIn', loginInfo: linkedInProfileData };
-            $saveLoginInfo(linkedInProfile, event, function (res) {
-                $showMessage('serverResponse', res.message, res.status.toLowerCase(), true, ev);
-            });//$saveLoginInfo(linkedInProfile, event, function (res) {
-            //save profile data
-        });//$nectorrLinkedInLogin('', 'auth', function (data) {
-    }); //$('#icon_linkedIn').click(function () { 
+        $('#icon_twitter').click(function (e) {
+            var twitterLoginUrl = $twitterUrls.access_token_url;
+            e.preventDefault();
 
-    $('#icon_google_plus').click(function () {
-    //var profile;
-    console.log('loggin in to Google');
-    gapi.load('client:auth2', $initializeGoogleAuth2);
-        // Initialize google authorization
-        //initializeGoogleAuth2();
-        //initializeGoogleAuth2()
-        //googleLogin();
+            $twitterLogin(function (response) {
+                switch (response.status) {
+                    case "SUCCESS":
+                        if (response.data) {
+                            window.open(response.data, "Ratting", "toolbar = 0, status = 0,")
+                            console.log('twitter windowis open or closed');
+                        } else {
+                            $showMessage('serverResponse', response.message, response.status, true, ev);
+                        }
+                        break;
+                }//switch (response.status) {
+            }); //$twitterLogin(function (redirectData) {
+        }); //$('#icon_twitter').click(function (e) { 
 
-        //var auth2 = updateGoogleSignIn();
-    //    console.log('getting profile info from Google');
-        //var profile = authorizeAppForGplus(auth2);
-    //    console.log('Verifying and processing  profile');
-        //VerifyResultAndProcessForGooglePlus(profile);
-    }); //$('#icon_google_plus').click(function () {
-}); // pageload
+        $('#icon_fb').click(function (e) {
+
+            $nectorrFacebookLogin(facebookDefaults.scope, e, function (data) {
+                if (data) {
+                    VerifyResultAndProcessForFacebook(data, e);
+                } //if (data) { 
+            });
+            //var facebookLoginDetails = $nectorrFacebookLogin('email,public_profile',e);
+            //{ scope: 'email,public_profile, user_posts, manage_pages, user_managed_groups, user_location' });
+        }); //$('#icon_fb').click(function () {
+
+        $('#icon_linkedin').click(function () {
+            $nectorrLinkedInLogin('', 'auth', function (data) {
+                linkedInProfileData = data.values[0];//g
+                var email = $getClientEmail();
+                var linkedInProfile = { registeredEmail: email, sm_name: 'linkedIn', loginInfo: linkedInProfileData };
+                $saveLoginInfo(linkedInProfile, event, function (res) {
+                    $showMessage('serverResponse', res.message, res.status.toLowerCase(), true, ev);
+                });//$saveLoginInfo(linkedInProfile, event, function (res) {
+                //save profile data
+            });//$nectorrLinkedInLogin('', 'auth', function (data) {
+        }); //$('#icon_linkedIn').click(function () { 
+
+        $('#icon_google_plus').click(function () {
+            //var profile;
+            console.log('loggin in to Google');
+            gapi.load('client:auth2', $initializeGoogleAuth2);
+            // Initialize google authorization
+            //initializeGoogleAuth2();
+            //initializeGoogleAuth2()
+            //googleLogin();
+
+            //var auth2 = updateGoogleSignIn();
+            //    console.log('getting profile info from Google');
+            //var profile = authorizeAppForGplus(auth2);
+            //    console.log('Verifying and processing  profile');
+            //VerifyResultAndProcessForGooglePlus(profile);
+        }); //$('#icon_google_plus').click(function () {
+    }//if (!$isLoggedIn()) {
+}); //$(document).ready(function () {
 var VerifyResultAndProcessForGooglePlus= function (data,callback) {
     // read cookie information from request and response    
     if (!data.status.error) {

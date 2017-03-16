@@ -46,7 +46,7 @@ var twitterDefaults = {
         'Connection': 'close',
         'User-Agent': 'localhost:1337/' + appVersion
     }
-    , secure: false // force use of https for login/gatekeeper
+    , secure: false // force use of https for login/gatekeepern
 };
 
 var googlePlusDefaults = {

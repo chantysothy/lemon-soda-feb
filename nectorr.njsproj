@@ -1532,6 +1532,10 @@
     <Content Include="public\booster\select\images\icon-group.png" />
     <Content Include="public\booster\select\images\icon-page.png" />
     <Content Include="public\booster\select\index.html" />
+    <Content Include="certs\nectorr.crt" />
+    <Content Include="certs\gd_bundle-g2-g1.crt" />
+    <Content Include="certs\nectorr.com.zip" />
+    <Content Include="certs\nectorr.key" />
     <Content Include="public\configure\index.html" />
     <Content Include="public\app\template.html" />
     <Content Include="public\css\animate.css" />
@@ -2005,6 +2009,7 @@
     <Folder Include="public\booster\select\images\" />
     <Folder Include="public\booster\select\images\New folder\" />
     <Folder Include="public\booster\select\js\" />
+    <Folder Include="certs\" />
     <Folder Include="public\configure\js\" />
     <Folder Include="public\legal\" />
     <Folder Include="public\signup\" />
