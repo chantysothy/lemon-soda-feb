@@ -66,7 +66,7 @@ var googlePlusDefaults = {
 }
 
 var facebookDefaults = {
-    appId: '582000448664812'
+    appId: '334582780223007'
     , appSecret: '9b089aff5785a8b74f64ed3530f3d6f6'
     , token: ''
     , scope: "email,public_profile,publish_actions, user_managed_groups, manage_pages, publish_pages, pages_show_list,publish_stream,user_photos, user_photo_video_tags, user_posts"

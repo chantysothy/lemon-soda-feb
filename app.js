@@ -10,7 +10,7 @@ var streamer = require('./routes/streamer.js');
 var vignette = require('./routes/vignette.js');
 var scheduler = require('./routes/scheduler.js');
 var postManager = require('./routes/postmanager.js');
-
+var fs = require('fs');
 var mongodb = require('mongodb');
 var mongoose = require('mongoose');
 var passport = require('passport');
@@ -20,9 +20,28 @@ var userConfig = require('./routes/user-config');
 // configuration ===============================================================
 mongoose.connect(configDB.url); // connect to our database
 //require('./config/passport')(passport); // pass passport for configuration
-
+var sslCertInfo = {
+    key: fs.readFileSync('certs/nectorr.key')
+    , cert: fs.readFileSync('certs/nectorr.crt')
+    , ca: fs.readFileSync('certs/gd_bundle-g2-g1.crt')
+    , requestCert: false
+    , rejectUnauthorized : false
+}
+var httpApp = express();
+var httpServer = require('http').createServer(httpApp);
 var app = express();
-var server = require('http').createServer(app);
+var server = require('https').createServer(sslCertInfo, app);
+
+httpApp.all('*', ensureSecure);
+function ensureSecure(req, res, next) {
+    if (req.secure) {
+        // OK, continue
+        return next();
+    };
+    // handle port numbers if you need non defaults
+    // res.redirect('https://' + req.host + req.url); // express 3.x
+    res.redirect('https://' + req.hostname + req.url); // express 4.x
+}
 var bodyParser = require('body-parser');
 
 app.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }));
@@ -83,10 +102,13 @@ app.use(postManager);
 
 var port = 1337;//process.env.PORT || 5000;
 app.set('port', port);
-module.exports = app;
-
-app.listen(port, function() {
-  console.log('nectorr is listening on ' + port);
+//module.exports = app;
+module.exports = server;
+server.listen(8443, function() {
+  console.log('nectorr is listening on ' + 8443);
+});
+httpServer.listen(port, function () {
+    console.log('nectorr http is listening at ' + port);
 });
 //server.listen(80, '192.169.178.96', function () {
 //  console.log('localhost:1337 is listening on ' + port);
