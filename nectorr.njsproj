@@ -1702,6 +1702,7 @@
     <Content Include="public\img\works\item-7.jpg" />
     <Content Include="public\img\works\item-8.jpg" />
     <Content Include="public\index.html" />
+    <Content Include="public\legal\index.html" />
     <Content Include="public\LICENSE.txt" />
     <Content Include="public\logo.png" />
     <Content Include="public\old\images\Twitter_logo_white.png" />
@@ -1798,7 +1799,6 @@
     <Content Include="public\signup\local\images\ImageAttribution.txt" />
     <Content Include="public\signup\local\index.html" />
     <Content Include="public\signup\local\index_old.html" />
-    <Content Include="public\team\index.html" />
     <Content Include="screenshot.png" />
     <Content Include="README.md" />
     <Compile Include="app.js" />
@@ -2335,7 +2335,6 @@
     <Folder Include="public\old\javascripts\" />
     <Folder Include="public\old\stylesheets\" />
     <Folder Include="public\stylesheets" />
-    <Folder Include="public\team\" />
     <Folder Include="routes" />
     <Folder Include="views" />
   </ItemGroup>

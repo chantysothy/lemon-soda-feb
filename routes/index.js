@@ -419,7 +419,7 @@ router.get('/signup/invitation/manage', function (req, res) {
                         emailText += '\n\n';
                         emailText += 'You should register it by clicking the link below.';
                         emailText += '\n\n';
-                        emailText += 'http://localhost:1337/signup?inv_code=' + invitation_code;
+                        emailText += 'https://nectorr.com/signup?inv_code=' + invitation_code;
                         emailText += '\n\n';
                         emailText += 'Wishing you the best of social media.'
                         emailText += '\n\n';

@@ -341,12 +341,12 @@ var menuTmp
 
 				});
 
-            $('#learnMore').click(function (e) {
-                $menu._show();
+            $('#learnMore1').click(function (e) {
+                $menu._toggle();
             });
-            $('#knowMore').click(function (e) {
+            $('#knowMore1').click(function (e) {
                 //var $menu = $('#menu')
-                $menu._show();
+                $menu._toggle();
             });
 	});
 })(jQuery);

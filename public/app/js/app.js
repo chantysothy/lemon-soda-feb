@@ -375,7 +375,7 @@ var authCreds = {
         , 'consumer_secret': 'W3k4tedpDKJ0hM6Hnn2I4hAHWag1INFw2ipaBOhgYBqt5zaxL2'
         , 'access_token': '103259010-9AtPODqSaurMAOaIiIfnJrr14TloFKXgx9wElaop'
         , 'access_token_secret': 'pJWeIvX69HhXr3f6WicjEbZfhWLDezcjUzcXbVBWsyEF5'
-        , 'redirect_url': 'http://localhost:1337/auth/twitter/callback'
+        , 'redirect_url': 'https://nectorr.com/auth/twitter/callback'
         // for updating to git once again and again
         //,
         //bearer_token:''

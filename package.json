@@ -1,5 +1,5 @@
 {
-  "name": "localhost:1337-app",
+  "name": "NECTORR-APP",
   "main": "app.js",
   "dependencies": {
     "agenda": "^0.9.0",
@@ -52,4 +52,5 @@
     ]
   },
   "author": "Edward Varghese"
+    , "license": "MIT"
 }

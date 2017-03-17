@@ -19,9 +19,9 @@ var googleScope = ['    '
 
 $activeSocialMedia = null;
 var $instagramUrls = {
-    loginUrl: 'https://www.instagram.com/oauth/authorize/?client_id=f3a4940affd34bd7aaabebde1a685846&redirect_uri=http://localhost:1337/auth/callback/instagram&response_type=token'
+    loginUrl: 'https://www.instagram.com/oauth/authorize/?client_id=f3a4940affd34bd7aaabebde1a685846&redirect_uri=https://nectorr.com/auth/callback/instagram&response_type=token'
     , clientId: 'f3a4940affd34bd7aaabebde1a685846'
-    , callback: 'http://localhost:1337/auth/instagram/callback/'
+    , callback: 'https://nectorr.com/auth/instagram/callback/'
 }//var $instagramUrls{
 var $twitterUrls = {
     'request_token_url': '//api.twitter.com/oauth/request_token'
@@ -29,7 +29,7 @@ var $twitterUrls = {
     , 'authenticate_url': 'https://api.twitter.com/oauth/authenticate'
     , 'authorize_url': 'https://api.twitter.com/oauth/authorize'
     , 'rest_base': 'https://api.twitter.com/1.1'
-    , 'search_base': 'http://search.twitter.com'
+    , 'search_base': 'https://search.twitter.com'
     , 'stream_base': 'https://stream.twitter.com/1.1'
     , 'user_stream_base': 'https://userstream.twitter.com/1.1'
     , 'site_stream_base': 'https://sitestream.twitter.com/1.1'

@@ -253,7 +253,7 @@ var postToFacebook = function (dataToPost, callback) { //dataToPost. postToStrin
    // fbGraph.setAccessToken(dataToPost.accessToken);
     //fbGraph.get("https://graph.facebook.com/debug_token?input_token=" + dataToPost.accessToken + "&access_token=" + config.facebookAuth.app_access_token, function (fbResponse) {
     //    if (fbResponse && !fbResponse.type == "OAuthException") {
-    //        var fbCmd = "https://graph.facebook.com/oauth/access_token?client_id=" + config.facebookAuth.client_id + "&client_secret=" + config.facebookAuth.client_secret + "&grant_type=fb_exchange_token&fb_exchange_token=" + dataToPost.accessToken + "&redirect_uri="+"http://localhost:1337"
+    //        var fbCmd = "https://graph.facebook.com/oauth/access_token?client_id=" + config.facebookAuth.client_id + "&client_secret=" + config.facebookAuth.client_secret + "&grant_type=fb_exchange_token&fb_exchange_token=" + dataToPost.accessToken + "&redirect_uri="+"https://nectorr.com"
     //        //fbGraph.get(fbCmd, function (cmdData) { // exchange token
     //        //    var a = cmdData;
     //        //});//fbGraph.get("https://graph.facebook.com/debug_token?input_token=INPUT_TOKEN&access_token=" + dataToPost.accessToken, function (fbResponse) {
