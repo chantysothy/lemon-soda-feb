@@ -179,6 +179,35 @@ $(document).ready(function () {
             , publicProfileUrl: String
             , summary: String
         }
+        $("#tab2").click(function (e) {
+            //src="../configure/index.html"
+            var src = $("#iFrameSettings").attr('src');
+            if (!src) {
+                $("#iFrameSettings").attr('src', "../configure/index.html") ;
+            }
+        });
+        $("#tab3").click(function (e) {
+            //src="../configure/index.html"
+            var src = $("#iFrameAnalytics").attr('src');
+            if (!src) {
+                $("#iFrameAnalytics").attr('src', "../analytics/show/index.html") ;
+            }
+        });
+        $("#tab4").click(function (e) {
+            //src="../configure/index.html"
+            var src = $("#iFrameDashboard").attr('src');
+            if (!src) {
+                $("#iFrameDashboard").attr('src', "../dashboard/index.html") ;
+            }
+        });
+        $("#tab5").click(function (e) {
+            //src="../configure/index.html"
+            var src = $("#iFrameBooster").attr('src');
+            if (!src) {
+                $("#iFrameBooster").attr('src', "../booster/index.html") ;
+            }
+        });
+
         $("#icon_instagram").click(function (e) {
             var instagramAccessDetails;
             $getInstagramLogin(function (data) {

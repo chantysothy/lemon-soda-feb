@@ -50,9 +50,9 @@ var twitterDefaults = {
 };
 
 var googlePlusDefaults = {
-    clientId: '74079086779-p78eqegijmojsedbtl42f9ih9viu47ku.apps.googleusercontent.com'
-    , clientSecret: 'PITf1zAhFCKSFlQBociujERc'
-    , apiKey: 'AIzaSyCBed17n_6NdGO8PfHGYTByfKi0q-tmvaQ'
+    clientId: '909374797832-f1c2micujrjjjm078tkpjfmg8i02mmd8.apps.googleusercontent.com'
+    , clientSecret: 'Ep19nGJbDmuXn8_vpVdrTSQN'
+    , apiKey: 'AIzaSyC1huIp0GGPPedx0dZFFpAyGeGN9bnZTOY'
     , scopes: {
         plusMe: 'https://www.googleapis.com/auth/plus.me'
         , plusLogin: 'https://www.googleapis.com/auth/plus.login'
@@ -67,7 +67,7 @@ var googlePlusDefaults = {
 
 var facebookDefaults = {
     appId: '334582780223007'
-    , appSecret: '9b089aff5785a8b74f64ed3530f3d6f6'
+    , appSecret: '85f5abe5d8390c9134c9dd84befa26ed'
     , token: ''
     , scope: "email,public_profile,publish_actions, user_managed_groups, manage_pages, publish_pages, pages_show_list,publish_stream,user_photos, user_photo_video_tags, user_posts"
     
@@ -75,13 +75,13 @@ var facebookDefaults = {
 
 var initFacebookAPI = function () {
     window.fbAsyncInit = function () {
-        version = 'v2.8'
+        version = 'v2.7'
         FB.init({
             appId: facebookDefaults.appId,  
             status: true,
             xfbml: true,
             cookie: true,
-            version: 'v2.8' // use version 2.7
+            version: 'v2.7' // use version 2.7
 
         });
 
@@ -110,7 +110,7 @@ $nectorrFacebookLogin = function (fbScope, event, callback) {
         status: true,
         xfbml: true,
         cookie: true,
-        version: 'v2.8' // use version 2.7
+        version: 'v2.7' // use version 2.7
 
     });
 
@@ -472,7 +472,7 @@ var $executeFacebookCommand = function (scope, command, callback) {
             status: true,
             xfbml: true,
             cookie: true,
-            version: 'v2.8' // use version 2.7
+            version: 'v2.7' // use version 2.7
 
         });
 

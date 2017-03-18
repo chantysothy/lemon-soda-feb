@@ -264,6 +264,14 @@
 			<script src="assets/js/util.js"></script>
 			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
 			<script src="assets/js/main.js"></script>
-
+        <script src="app/js/cookie.js"></script>
+        <script src="app/js/sm_login.js"></script>
+            <script>
+                if (!$isLoggedIn()) {
+                    //window.location.href = '/signup/local';
+                } else {
+                    window.location.href = '/app/';
+                }
+            </script>
 	</body>
 </html>

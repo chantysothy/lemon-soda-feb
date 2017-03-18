@@ -118,26 +118,25 @@ $(document).ready(function(){
 	
     // portfolio filtering
 
-    $(".project-wrapper").mixItUp();
+    //$(".project-wrapper").mixItUp();
 	
 	
-	$(".fancybox").fancybox({
-		padding: 0,
+	//$(".fancybox").fancybox({
+	//	padding: 0,
 
-		openEffect : 'elastic',
-		openSpeed  : 650,
+	//	openEffect : 'elastic',
+	//	openSpeed  : 650,
 
-		closeEffect : 'elastic',
-		closeSpeed  : 550,
+	//	closeEffect : 'elastic',
+	//	closeSpeed  : 550,
 
-		closeClick : true,
-	});
+	//	closeClick : true,
+	//});
 	
 	/* ========================================================================= */
 	/*	Parallax
 	/* ========================================================================= */	
 	
-	$('#facts').parallax("50%", 0.3);
 	
 	/* ========================================================================= */
 	/*	Timer count
@@ -207,5 +206,5 @@ function initialize() {
 
 }
 
-google.maps.event.addDomListener(window, "load", initialize);
+//google.maps.event.addDomListener(window, "load", initialize);
 // ========== END GOOGLE MAP ========== //

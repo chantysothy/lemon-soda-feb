@@ -40,6 +40,7 @@
     <Compile Include="public\assets\fast-select\fastselect.standalone.min.js" />
     <Compile Include="public\assets\full-calendar\fullcalendar.min.js" />
     <Compile Include="public\assets\full-calendar\moment.min.js" />
+    <Compile Include="public\assets\jquery-3.1.1.min.js" />
     <Compile Include="public\assets\jquery.weekcalendar\jquery.weekcalendar.js" />
     <Compile Include="public\assets\jquery.weekcalendar\jquery.weekcalendar.js.min.js" />
     <Compile Include="public\assets\magic-search\jquery.magicsearch.js" />
