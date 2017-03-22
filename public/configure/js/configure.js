@@ -15,6 +15,8 @@ $(document).ready(function () {
             if (data.status == 'SUCCESS') {
                 manageServerResponse(data); //addeed for uploadding to git
                 updatePreferences(data.StreamObject);
+            } else {
+                manageServerResponse(data); //addeed for uploadding to git
             }//if (data.status == 'SUCCESS') {
         });
     });//$('#submitListenTo').click(function (e) {
@@ -24,7 +26,9 @@ $(document).ready(function () {
         submitConfiguration(params, function (data) {
             if (data.status == 'SUCCESS') {
                 updatePreferences(data.StreamObject);
-            }//if (data.status == 'SUCCESS') {
+            } else {
+                manageServerResponse(data); //addeed for uploadding to git
+            }//if (data.status == 'SUCCESS') {//if (data.status == 'SUCCESS') {
         });
     });//$('#btnSaveTrending').click(function (e) {
 
@@ -33,7 +37,9 @@ $(document).ready(function () {
         submitConfiguration(params, function (data) {
             if (data.status == 'SUCCESS') {
                 updatePreferences(data.StreamObject);
-            }//if (data.status == 'SUCCESS') {
+            } else {
+                manageServerResponse(data); //addeed for uploadding to git
+            }//if (data.status == 'SUCCESS') {//if (data.status == 'SUCCESS') {
         });
     });//$('#btnSaveTracking').click(function (e) {
 
@@ -42,7 +48,9 @@ $(document).ready(function () {
         submitConfiguration(params, function (data) {
             if (data.status == 'SUCCESS') {
                 updatePreferences(data.StreamObject);
-            }//if (data.status == 'SUCCESS') {
+            } else {
+                manageServerResponse(data); //addeed for uploadding to git
+            }//if (data.status == 'SUCCESS') {//if (data.status == 'SUCCESS') {
         });
     });//$('#btnSaveMonitor').click(function (e) {
 
@@ -170,6 +178,7 @@ $(document).ready(function () {
         $('#searchMonitor').text(data.Monitor);
         $('#searchTraffic').text(data.Traffic);
         $('#searchEngagements').text(data.Engagement);
+        //animate tabs
     } //var updatePreferences = function (data) {
 
     var getFeed = function (callback) {

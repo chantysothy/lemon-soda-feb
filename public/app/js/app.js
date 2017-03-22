@@ -181,30 +181,35 @@ $(document).ready(function () {
         }
         $("#tab2").click(function (e) {
             //src="../configure/index.html"
+            //setTimeout(setIframeSrc("#iFrameSettings", "../configure/index.html"), 5);
             var src = $("#iFrameSettings").attr('src');
             if (!src) {
-                $("#iFrameSettings").attr('src', "../configure/index.html") ;
+                setTimeout(setIframeSrc("#iFrameSettings", "../configure/index.html"), 5);
             }
         });
         $("#tab3").click(function (e) {
             //src="../configure/index.html"
             var src = $("#iFrameAnalytics").attr('src');
             if (!src) {
-                $("#iFrameAnalytics").attr('src', "../analytics/show/index.html") ;
+                setTimeout(setIframeSrc("#iFrameAnalytics", "../analytics/show/index.html"), 5);
+                //$("#iFrameAnalytics").attr('src', "../analytics/show/index.html");
             }
         });
         $("#tab4").click(function (e) {
             //src="../configure/index.html"
             var src = $("#iFrameDashboard").attr('src');
             if (!src) {
-                $("#iFrameDashboard").attr('src', "../dashboard/index.html") ;
+                setTimeout(setIframeSrc("#iFrameDashboard", "../dashboard/index.html"), 5);
+                //$("#iFrameDashboard").attr('src', "../dashboard/index.html");
+
             }
         });
         $("#tab5").click(function (e) {
             //src="../configure/index.html"
             var src = $("#iFrameBooster").attr('src');
             if (!src) {
-                $("#iFrameBooster").attr('src', "../booster/index.html") ;
+                setTimeout(setIframeSrc("#iFrameBooster", "../booster/index.html"), 5);
+                //$("#iFrameBooster").attr('src', "../booster/index.html") ;
             }
         });
 
@@ -414,4 +419,14 @@ var authCreds = {
     "pinterest": { client_id: "4880455741651043731" },
     "google": { client_id: "102046510109174994539" }
 
+}
+var setIframeSrc= function(iframe,fileName) {
+    var s = fileName;
+    //var iframe1 = document.getElementById('iframe1');
+    if (-1 == navigator.userAgent.indexOf("MSIE")) {
+        iframe.src = s;
+    }
+    else {
+        iframe.location = s;
+    }
 }
