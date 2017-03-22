@@ -4041,7 +4041,7 @@
     display: -ms-flex;
     display: flex;
     padding: 6em 0 2em 0;
-    background-attachment: fixed;
+    /*background-attachment: fixed;*/
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -4194,7 +4194,7 @@
     display: -ms-flex;
     display: flex;
     padding: 6em 0 2em 0;
-    background-attachment: fixed;
+    /*background-attachment: fixed;*/
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -4441,15 +4441,45 @@ color:#ffffff;
 		}
 
 .about-us-inspiration {
-background-color:#ec8d81
+    /*background-color:#ec8d81*/
+	background-image: url("../../images/about-us-banner-final.jpg");
+	background-color: rgba(6,32,51,.8);
+	/*background-attachment: fixed !important;*/
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	padding: 0;
+
 }
 .about-us-enterprise {
-background-color:#87c5a4
+	background-image: url("../../images/your-struggle-final.jpg");
+	background-color: rgba(6,32,51,.8);
+	/*background-attachment: fixed !important;*/
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	padding: 0;
 }
 .about-us-team {
-background-color:#8ea9e8;
+	background-image: url("../../images/banner-one-final.jpg");
+	background-color: rgba(6,32,51,.8);
+	/*background-attachment: fixed !important;*/
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	padding: 0;
 }
 
 #legal-banner {
     background:url("../../images/legal.jpg")
+}
+
+.wildWorld {
+	background-image: url("../../images/about-us-hands.jpg");
+	background-color: rgba(6,32,51,.8);
+	/*background-attachment: fixed !important;*/
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	padding: 0;
 }

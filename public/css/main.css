@@ -557,6 +557,15 @@ top: -8px;
   width: 42px;
 }
 
+.wildWorld {
+	background-image: url("../images/about-us-end.jpg");
+	background-color: rgba(6,32,51,.8);
+	background-attachment: fixed !important;
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	padding: 0;
+}
 
 /*=========================================
 	Some fun facts

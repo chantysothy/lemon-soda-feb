@@ -1,7 +1,9 @@
 ﻿$.ajaxSetup({ dataType: "jsonp" });
 $(document).ready(function () {
     //$nectorrFacebookLogin("publish_actions, user_managed_groups, manage_pages, publish_pages, pages_show_list", null, function (data) {
-
+    getConfiguration(function (data) {
+        updatePreferences(data.StreamObject);
+    });//getConfiguration(function (data) {
     //});//$nectorrFacebookLogin("user_posts", null, function (data) {
 
     $('#options-add-to-list').click(function (e) {

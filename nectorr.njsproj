@@ -1612,8 +1612,15 @@
     <Content Include="public\fonts\linecons.svg" />
     <Content Include="public\fonts\linecons.ttf" />
     <Content Include="public\fonts\linecons.woff" />
+    <Content Include="public\images\about-us-banner-final.jpg" />
+    <Content Include="public\images\about-us-end.jpg" />
+    <Content Include="public\images\about-us-ends.jpg" />
+    <Content Include="public\images\about-us-hands.jpg" />
+    <Content Include="public\images\about-us-more.jpg" />
     <Content Include="public\images\about-us-new.jpg" />
+    <Content Include="public\images\about-us-top.jpg" />
     <Content Include="public\images\about-us.jpg" />
+    <Content Include="public\images\banner-one-final.jpg" />
     <Content Include="public\images\banner.jpg" />
     <Content Include="public\images\contact-us.jpg" />
     <Content Include="public\images\edward.png" />
@@ -1630,6 +1637,7 @@
     <Content Include="public\images\portfolio-4.jpg" />
     <Content Include="public\images\portfolio-5.jpg" />
     <Content Include="public\images\portfolio-6.jpg" />
+    <Content Include="public\images\your-struggle-final.jpg" />
     <Content Include="public\img\1.jpg" />
     <Content Include="public\img\10.jpg" />
     <Content Include="public\img\11.jpg" />

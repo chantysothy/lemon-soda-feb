@@ -420,13 +420,14 @@ var authCreds = {
     "google": { client_id: "102046510109174994539" }
 
 }
-var setIframeSrc= function(iframe,fileName) {
+var setIframeSrc = function (iframeName, fileName) {
+    var iframe = $(iframeName);
     var s = fileName;
     //var iframe1 = document.getElementById('iframe1');
     if (-1 == navigator.userAgent.indexOf("MSIE")) {
-        iframe.src = s;
+        iframe.attr("src", s);
     }
     else {
-        iframe.location = s;
+        iframe.attr("location", s);
     }
 }
