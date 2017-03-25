@@ -104,8 +104,10 @@ $(document).ready(function () {
         }//var getInvitation = function(request) { 
         $("#btnLogin").click(function (e) {
             e.preventDefault();
+            $("#preloader").fadeIn("fast");
             var loginInfo = getLoginDetails();
             validateLogin(loginInfo);
+            $("#preloader").fadeOut("fast");
         }); //$("#signThemUp").click(function () { 
 
 }); //$(document).ready(function () {

@@ -98,10 +98,10 @@
         if (data) {
             var cookieValue = removeExpiry(data);
             deleteCookie(cookieName);
-            window.location.href = '/signup/local';
+            window.location.href = '../';
                 //createCookie(cookieName, JSON.stringify(data), cookieValidity);
         } else {
-            window.location.href = '/signup/local';
+            window.location.href = '../';
         } //if (data) { 
     }//$logOut = function () {
     

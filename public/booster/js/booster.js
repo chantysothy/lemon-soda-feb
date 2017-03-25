@@ -16,6 +16,7 @@ $(window).load(function (e) {
     $nectorrFacebookLogin(null, function (fbResponse) {
         
     });//$nectorrFacebookLogin(['user_posts', 'manage_pages'], null, function (fbResponse) {
+    $("#preloader").fadeOut("fast");
 
 
     //$('#imageHolder').append();
@@ -84,7 +85,7 @@ $(document).ready(function () {
             var dataForPost = { userId: { facebook: nectorrFacebookId }, url: shortUrlForServer, imgUrl: (!imageUrlForServer) ? null : imageUrlForServer, caption: headingForServer, text: textForServer, sm_names: ['facebook', 'twitter'], accessToken: fbResponse.authResponse.accessToken }
             boostNow(dataForPost, function (serverMessage) {
                 manageServerResponse(serverMessage);
-            });//boostNow(dataForPost, function (data) {
+              });//boostNow(dataForPost, function (data) {
         });//$nectorrFacebookLogin(['user_posts', 'manage_pages'], null, function (fbResponse) {
         e.preventDefault();
     });//$('#postNow').click(function (e) {

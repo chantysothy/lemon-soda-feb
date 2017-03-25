@@ -128,20 +128,6 @@ body > section,
     padding-bottom: 50px;
 }
 
-#preloader {
-  background-color: #fff;
-  height: 100%;
-  position: fixed;
-  width: 100%;
-  z-index: 1100;
-}
-
-#preloader > img {
-  left: 47%;
-  position: absolute;
-  top: 48%;
-}
-
 
 /*=========================================
 	Header
@@ -1330,3 +1316,16 @@ input:checked + label {
 				}
 
 			}
+#preloader {
+  background-color: #fff;
+  height: 100%;
+  position: fixed;
+  width: 100%;
+  z-index: 1100;
+}
+
+#preloader > img {
+  left: 47%;
+  position: absolute;
+  top: 48%;
+}

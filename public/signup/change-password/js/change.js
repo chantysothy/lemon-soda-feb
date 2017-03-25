@@ -54,6 +54,7 @@ $(document).ready(function () {
             return req.query.creds
         }//var getInvitation = function(request) { 
         $("#changePwd").click(function (e) {
+            $("#preloader").fadeIn("fast");
             e.preventDefault();
             //var loginInfo = getLoginDetails();
             //validateLogin(loginInfo);
@@ -64,12 +65,15 @@ $(document).ready(function () {
                         if (userData.local.password == $('#oldPassword').val()) {
                             userData.local.password = $('#newPassword').val();
                             setLoginDetails(userData, function (serverStatus) {
+                                $("#preloader").fadeOut("fast");
                                 manageServerResponse(serverStatus);
                             });//setPublishCredentials(userData, function (credsInfo) {
                         } else {
+                            $("#preloader").fadeOut("fast");
                             manageServerResponse({ status: "ERROR", message: "The password entered by you does not match our records." });
                         }
                     } else {
+                        $("#preloader").fadeOut("fast");
                         manageServerResponse(userCreds);
                     }
                 });//$getCredsFromServer(userId, function (userCreds){

@@ -20,55 +20,75 @@ $(document).ready(function () {
     });//$('#options-add-to-list').click(function (e) {
 
     $('#btnSaveListenTo').click(function (e) {
+        $("#preloader").fadeIn("fast");
         var params = getParams();
         submitConfiguration(params, function (data) {
             if (data.status == 'SUCCESS') {
                 manageServerResponse(data); //addeed for uploadding to git
+                $("#preloader").fadeOut("fast");
                 updatePreferences(data.StreamObject);
             } else {
+                $("#preloader").fadeOut("fast");
                 manageServerResponse(data); //addeed for uploadding to git
             }//if (data.status == 'SUCCESS') {
         });
+        $("#preloader").fadeOut("fast");// to be removed
     });//$('#submitListenTo').click(function (e) {
 
     $('#btnSaveTrending').click(function (e) {
         var params = getParams();
+        $("#preloader").fadeIn("fast");
+
         submitConfiguration(params, function (data) {
             if (data.status == 'SUCCESS') {
+                $("#preloader").fadeOut("fast");
                 updatePreferences(data.StreamObject);
             } else {
+                $("#preloader").fadeOut("fast");
                 manageServerResponse(data); //addeed for uploadding to git
             }//if (data.status == 'SUCCESS') {//if (data.status == 'SUCCESS') {
+            $("#preloader").fadeOut("fast");// to be removed
         });
     });//$('#btnSaveTrending').click(function (e) {
 
     $('#btnSaveTracking').click(function (e) {
+        $("#preloader").fadeIn("fast");
         var params = getParams();
         submitConfiguration(params, function (data) {
             if (data.status == 'SUCCESS') {
+                $("#preloader").fadeOut("fast");
                 updatePreferences(data.StreamObject);
             } else {
+                $("#preloader").fadeOut("fast");
                 manageServerResponse(data); //addeed for uploadding to git
             }//if (data.status == 'SUCCESS') {//if (data.status == 'SUCCESS') {
         });
     });//$('#btnSaveTracking').click(function (e) {
 
     $('#btnSaveMonitor').click(function (e) {
+        $("#preloader").fadeIn("fast");
         var params = getParams();
         submitConfiguration(params, function (data) {
             if (data.status == 'SUCCESS') {
+                $("#preloader").fadeOut("fast");
                 updatePreferences(data.StreamObject);
             } else {
+                $("#preloader").fadeOut("fast");
                 manageServerResponse(data); //addeed for uploadding to git
             }//if (data.status == 'SUCCESS') {//if (data.status == 'SUCCESS') {
         });
     });//$('#btnSaveMonitor').click(function (e) {
 
     $('#btnSaveNotifications').click(function (e) {
+        $("#preloader").fadeIn("fast");
         var params = getParams();
         submitConfiguration(params, function (data) {
             if (data.status == 'SUCCESS') {
+                $("#preloader").fadeOut("fast");
                 updatePreferences(data.StreamObject);
+            } else {
+                $("#preloader").fadeOut("fast");
+                manageServerResponse(data);
             }//if (data.status == 'SUCCESS') {
         });
     });//$('#btnSaveNotifications').click(function (e) {
