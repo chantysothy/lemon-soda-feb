@@ -1,8 +1,16 @@
 ﻿$.ajaxSetup({ dataType: "jsonp" });
+jQuery(window).load(function () {
+    $("#preloader").fadeOut("slow");
+});
+
 $(document).ready(function () {
     //$nectorrFacebookLogin("publish_actions, user_managed_groups, manage_pages, publish_pages, pages_show_list", null, function (data) {
     getConfiguration(function (data) {
-        updatePreferences(data.StreamObject);
+        if (data.status == "SUCCESS") {
+            updatePreferences(data.StreamObject);
+        } else {
+            manageServerResponse(data);
+        }
     });//getConfiguration(function (data) {
     //});//$nectorrFacebookLogin("user_posts", null, function (data) {
 
@@ -65,33 +73,6 @@ $(document).ready(function () {
         });
     });//$('#btnSaveNotifications').click(function (e) {
 
-    var submitConfiguration = function (params, callback) {
-        $.ajax({
-            headers: { "Accept": "application/json" }
-            , type: 'GET'
-            //        , url: twitterUrls.request_token_url
-            , url: '/user-config/set'
-            , data: "email=" + $getClientEmail() + "&StreamObject=" + JSON.stringify(params)
-            , dataType: "jsonp"
-            , jsonp: "callback"
-            , crossDomain: true
-            , beforeSend: function (xhr) {
-                xhr.withCredentials = true;
-                //xhr.setRequestHeader(JSON.stringify(twitterDefaults.headers));
-            }
-            , jsonPCallback: "jsonpCallback"
-            , success: function (data) {
-                if (callback)
-                    callback(data);
-
-                //$("#feeds").children().show();
-            }
-            , error: function (jqXHR, textStatus, errorThrown) {
-                alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
-            }
-        });
-
-    }//var submitConfigure = function (location, parametere, callback) {
 
     var getTwitterStream = function (params, callback) {
         $.ajax({
@@ -121,33 +102,6 @@ $(document).ready(function () {
 
     }//var submitConfigure = function (location, parametere, callback) {
 
-    var getConfiguration = function (callback) {
-        $.ajax({
-            headers: { "Accept": "application/json" }
-            , type: 'GET'
-            //        , url: twitterUrls.request_token_url
-            , url: '/user-config/get'
-            , data: "email=" + $getClientEmail()
-            , dataType: "jsonp"
-            , jsonp: "callback"
-            , crossDomain: true
-            , beforeSend: function (xhr) {
-                xhr.withCredentials = true;
-                //xhr.setRequestHeader(JSON.stringify(twitterDefaults.headers));
-            }
-            , jsonPCallback: "jsonpCallback"
-            , success: function (data) {
-                if (callback)
-                    callback(data);
-
-                //$("#feeds").children().show();
-            }
-            , error: function (jqXHR, textStatus, errorThrown) {
-                alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
-            }
-        });
-
-    }//var getConfiguration = function (callback) {
 
     var getParams = function () {
         var returnValue;
@@ -211,4 +165,31 @@ $(document).ready(function () {
 
     }//var getFeed = function(callback){
 }); // page_load
+var getConfiguration = function (callback) {
+    $.ajax({
+        headers: { "Accept": "application/json" }
+        , type: 'GET'
+        //        , url: twitterUrls.request_token_url
+        , url: '/user-config/get'
+        , data: "email=" + $getClientEmail()
+        , dataType: "jsonp"
+        , jsonp: "callback"
+        , crossDomain: true
+        , beforeSend: function (xhr) {
+            xhr.withCredentials = true;
+            //xhr.setRequestHeader(JSON.stringify(twitterDefaults.headers));
+        }
+        , jsonPCallback: "jsonpCallback"
+        , success: function (data) {
+            if (callback)
+                callback(data);
+
+            //$("#feeds").children().show();
+        }
+        , error: function (jqXHR, textStatus, errorThrown) {
+            alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
+        }
+    });
+
+}//var getConfiguration = function (callback) {
 

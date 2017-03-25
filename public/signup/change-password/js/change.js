@@ -3,6 +3,8 @@
 $(window).load(function () {
     //var verified_code = req.query.verified_code;
     //validateInvitation(verified_code);
+        $("#preloader").fadeOut("slow");
+
 });
 $(document).ready(function () {
     $('#username').val(($getClientEmail()) ? $getClientEmail():"");   

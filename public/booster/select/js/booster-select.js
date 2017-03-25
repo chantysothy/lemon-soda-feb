@@ -1,4 +1,8 @@
-﻿var vignetteList = [];
+﻿jQuery(window).load(function () {
+    $("#preloader").fadeOut("slow");
+});
+
+var vignetteList = [];
 var selectedOptions = [];
 var selectedVignettes = [];
 var timeLines = [];

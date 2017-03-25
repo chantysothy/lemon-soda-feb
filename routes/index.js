@@ -7,7 +7,8 @@ var http = require('http');
 var request = require('request');
 var url = require('url');
 var fbCallback;
-var Twitter = require('twitter');
+var TwitterBase = require('twitter');
+var Twitter = require('node-twitter-api');
 var fbGraph = require('fbgraph');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
@@ -278,10 +279,9 @@ router.get('/signup/login', function (req, res) {
                 userModel.findOne({ 'local.email': email }, function (err, data) {
                     if (data) {
                         if (data.local.password == password) {
-                            var message = { status : 'SUCCESS', message : 'emali and password validated successfully.' , data: data}
+                            var message = { status : 'SUCCESS', message : 'email and password validated successfully.' , data: data}
                             sendMessageToServer(message, callback, res);
                             return;
-
                         }
                         else {
                             var message = { status : 'ERROR', message : 'Invalid password.' }
@@ -353,7 +353,7 @@ router.get('/perms/get', function (req, res) {
                     if (permsData) {
                     var permissionData = { perm_email: email, facebook: permsData.facebook._doc.facebook, twitter: permsData.twitter._doc.twitter, linkedIn: permsData._doc.linkedin, google : permsData._doc.googlePlusUser };//googlePlusUser: permsData.googlePlusUser._doc.googlePlusUser, 
                     var message = { status: 'SUCCESS', message: 'requested data was found.', 'data': JSON.stringify(permissionData) }
-                    sendMessageToServer(message, callback, res);
+                    sendMessageToServer(message, callback, res,false);
                     return;
 
                 } //if (data) { 
@@ -497,53 +497,48 @@ router.post('/postable-loc/set', function (req, res) {
     }//if (callback) {
 });//router.get('', function (req, res) {
 
-router.get('/profile/save', function (req, res) { 
-    var callback = req.query.callback;
+router.post('/profile/save', function (req, res) { 
+    var callback = req.body.callback;
 if (callback) {
-        var smProfileData = req.query.smProfile;
-        
-        if (smProfileData) {
-            var profileData = JSON.parse(smProfileData);//.fbLoginInfo;
-            
-            var fbId = profileData.loginInfo.id;
-            var userName = profileData.loginInfo.name;
-            var smName = profileData.sm_name;
-            var login = new userModel();
-            userModel.findOne({ 'local.email': profileData.registeredEmail }, function (err, data) {
-                if (err) {
-                    var message = { status : 'ERROR', message : err.Message }
-                    sendMessageToServer(message, callback, res);
-                    return;
+    var smProfileData = req.body.smProfile;
+    var email = req.body.email;
+        if (email) {
+            if (smProfileData) {
+                var profileData = JSON.parse(smProfileData);//.fbLoginInfo;
 
-                }//if (err) {
-                if (data) {
-                    //update profile
-                    switch (smName) {
-                        case 'facebook':
-                            setfbProfile(data, profileData, function (data) {
-                                sendMessageToServer(data, callback, res);
-                            });
-                            break;
-                        case 'twitter':
-                            setTwitterProfileData(data, profileData, function(data) {
-                            });
-                            break;
-                        case 'linkedIn':
-                            setLinkedInProfileData(data, profileData, function (message) {
+                //var fbId = profileData.loginInfo.id;
+                //var userName = profileData.loginInfo.name;
+                var smName = req.body.sm_name;
+                var login = new userModel();
+                userModel.findOne({ 'local.email': email }, function (err, data) {
+                    if (err) {
+                        var message = { status: 'ERROR', message: err.Message }
+                        sendMessageToServer(message, callback, res);
+                        return;
+                    }//if (err) {
+                    if (data) {
+                        //update profile
+                        var smInfo = data[smName];
+                        data[smName]['profileInfo'] = smProfileData;
+                        data.save(function (err, doc, rows) {
+                            if (err) {
+                                var message = { status: 'ERROR', message: 'Unable to locate your nectorr id.' };
                                 sendMessageToServer(message, callback, res);
+                                return;
+                            }
+                            if (doc) {
+                                var message = { status: 'SUCCESS', message: 'Information updated at nectorr.' };
+                                sendMessageToServer(message, callback, res);
+                            }
+                        });
 
-                            });
-                            break;
-                        case 'instagram':
-                            break;
-                    }
-                    
-                } else {
-                    var message = { status : 'ERROR', message : 'Unable to locate your nectorr id.' };
-                    sendMessageToServer(message, callback, res);
-                }//if (data)
-            }); //userModel.findOne({ 'local.email': email }, function (err, data) { 
-        }//if (profileData) { 
+                    } else {
+                        var message = { status: 'ERROR', message: 'Unable to locate your nectorr id.' };
+                        sendMessageToServer(message, callback, res);
+                    }//if (data)
+                }); //userModel.findOne({ 'local.email': email }, function (err, data) { 
+            }//if (profileData) { 
+        } //if (email)
     } //if (callback) { 
 });//router.get('', function (req, res) { 
 
@@ -700,7 +695,7 @@ router.get('/twitter/get/lists', function (req, res) {
                     getBearer(function (bearer) {
                         if (bearer) {
                             var token = JSON.parse(bearer).access_token; // set for breakpoint... TBR
-                            var client = new Twitter({
+                            var client = new TwitterBase({
                                 consumer_key: config.twitter.consumer_key,
                                 consumer_secret: config.twitter.consumer_secret,
                                 bearer_token: token
@@ -732,25 +727,28 @@ router.get('/twitter/get/lists', function (req, res) {
 router.get('/auth/twitter', function (req, res) {
     var callback = req.query.callback;
     if (callback) {
-        var twitterAPI = new Twitter({
-            consumerKey: config.twitter.consumer_key
-            , consumerSecret: config.twitter.consumer_secret
-            , callback: config.twitter.redirect_url
-        });//var twitterAPI = new Twitter(
-        twitterAPI.getRequestToken(function (error, requestToken, requestTokenSecret, results) {
-            if (error) {
-                var message = { status: 'ERROR', message: 'Unable to reach twitter at the moment. Please try after some time.' }
-                sendMessageToServer(message, callback, res);
-            } else {
-                twitterToken1 = requestToken;
-                twitterToken2 = requestTokenSecret;
-                twitterEmail = req.query.email;
-                var twitterAuthURL = twitterAPI.getAuthUrl(requestToken);
-                var message = { status: "SUCCESS", message: "Get a child window with params in data.", data: twitterAuthURL }
-                sendMessageToServer(message, callback, res);
-            }
-        });//twitterAPIgetRequestToken(function (error, requestToken, requestTokenSecret, results) {
-    }//if (callback){
+        twitterEmail = rea.query.email;
+        if (twitterEmail) {
+            var twitterAPI = new Twitter({
+                consumerKey: config.twitter.consumer_key
+                , consumerSecret: config.twitter.consumer_secret
+                , callback: config.twitter.redirect_url
+            });//var twitterAPI = new Twitter(
+            twitterAPI.getRequestToken(function (error, requestToken, requestTokenSecret, results) {
+                if (error) {
+                    var message = { status: 'ERROR', message: 'Unable to reach twitter at the moment. Please try after some time.' }
+                    sendMessageToServer(message, callback, res);
+                } else {
+                    twitterToken1 = requestToken;
+                    twitterToken2 = requestTokenSecret;
+                    twitterEmail = req.query.email;
+                    var twitterAuthURL = twitterAPI.getAuthUrl(requestToken);
+                    var message = { status: "SUCCESS", message: "Get a child window with params in data.", data: twitterAuthURL }
+                    sendMessageToServer(message, callback, res);
+                }
+            });//twitterAPIgetRequestToken(function (error, requestToken, requestTokenSecret, results) {
+        }//if (twitterEmail
+   }//if (callback){
 }); //router.get('/auth/twitter',
 
 router.get('/auth/twitter/callback', function (req, res) {
@@ -847,7 +845,7 @@ router.get('/auth/twitter/callback', function (req, res) {
 
 });//router.get('auth/twitter/callback', function (req, res) {
 
-router.post('/user/get', function (req, res) {
+router.get('/user/get', function (req, res) {
     var callback = req.query.callback;
     if (callback) {
         var email = req.query.email;
@@ -856,21 +854,18 @@ router.post('/user/get', function (req, res) {
             userModel.findOne(condition, function (err, userData) {
                 if (!err) {
                     var message = { status: "SUCCESS", message: "User data found.", data: userData._doc }
-                    sendMessageToServer(message, callback, res);
+                    sendMessageToServer(message, callback, res,false);
                 } else {
                     var message = { status: "ERROR", message: "there was an error in locating your profile info."}
-                    sendMessageToServer(message, callback, res);
+                    sendMessageToServer(message, callback, res,false);
 
                 }
 
-            });
+            });//userModel.findOne(condition, function (err, userData) {
         }
     }//if (callback) {
 
-
-
-    res.end();
-});
+});//router.get('/user/get', function (req, res) {
 
 router.get('/postable-locs/set', function (req, res) {
     var callback = req.query.callback;
@@ -1068,10 +1063,10 @@ var sendMessageToServer = function(msg, callback, res, post ){//= false) {
         .replace(/\\f/g, "\\f");
     // remove non-printable and other non-valid JSON chars
     payload = payload.replace(/[\u0000-\u0019]+/g, "");
-    var response = JSON.stringify(msg);
+    var response = JSON.stringify(payload);
     //res.writeHead(200, { 'Content-Type': 'text/plain', 'Content-Length': +response.length + '' });
+    var returnValue = callback + '(' + response + ')';
     if (!post) {
-        var returnValue = callback + '(' + response + ')';
         res.send(returnValue);
         res.end();
     } else {

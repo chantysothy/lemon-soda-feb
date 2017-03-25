@@ -127,22 +127,6 @@ $nectorrFacebookLogin = function (fbScope, event, callback) {
                             nectorrFacebookId = response.authResponse.userID;
                             callback(response);
 
-                            //extending facebook token from client side. Not to be used till  we are using server side extending of token
-                            //if (fbAccessToken) {
-                            //    //extending access token
-                            //    var oAuthParams = {};
-                            //    oAuthParams['client_id'] = facebookDefaults.appId;
-                            //    oAuthParams['client_secret'] = facebookDefaults.appSecret;
-                            //    oAuthParams['grant_type'] = 'fb_exchange_token';
-                            //    oAuthParams['fb_exchange_token'] = 'accessToken';
-                            //    oAuthParams['response_type'] = 'token';
-                            //    FB.api('/oauth/access_token', 'post', oAuthParams, function (response) {
-                            //        callback(response)
-                            //    });//FB.api('/oauth/access_token', 'post', OauthParams, function (response) {
-                            //    callback(response);
-                            //} else {
-                            //    alert("We are experiencing difficulties in extending your access token. Please try after sometime.");
-                            //}
                         } else {
                             alert("There was an error in connecting with facebook. The  message nectorr recieved is : " + error)
                         }
@@ -151,6 +135,7 @@ $nectorrFacebookLogin = function (fbScope, event, callback) {
             });//FB.getLoginStatus(function (response) {
     }//if (scope) { 
 }; //$facebookLogin = function (scope) {
+
 
 (function (d, s, id) {
         var js, fjs = d.getElementsByTagName(s)[0];
@@ -224,7 +209,7 @@ var getLoggedInUserDetails = function (callback) {//'/user/get'
     } else {
         $.ajax({
             headers: { "Accept": "application/json" }
-            , type: 'post'
+            , type: 'get'
             , url: '/user/get'
             , data: "email=" + $getClientEmail()
             , dataType: "jsonp"
@@ -261,7 +246,8 @@ var $twitterLogin = function (callback) {
             }
             , jsonPCallback: "jsonpCallback"
             , success: function (data) {
-                    if (callback) {
+                if (callback) {
+
                         callback(data);
                     } //if (callback) { 
             }
@@ -274,7 +260,12 @@ var $twitterLogin = function (callback) {
 } //allback){
 
 $initializeGoogleAuth2 = function () {
-    initializeGoogle();
+    initializeGoogle(false, function (data) {
+        $saveLoginInfo('googlePlus', data, null, function (nectorrResponse) {
+            manageServerResponse(nectorrResponse);
+        });//$saveLoginInfo(linkedInProfile, event, function (res) {
+
+    }, googlePlusDefaults.scopes);
 } // Google signIn
 
 $initializeGooglewithCallback = function (callback) {
@@ -342,12 +333,12 @@ var $getTwitterLists = function (callback) {
     }); //$.ajax({
 }//var saveFacebookData = function (data) { 
 
-var $saveLoginInfo = function (loginInfo, event, callback) {
+var $saveLoginInfo = function (smName, loginInfo, event, callback) {
     $.ajax({
         headers: { "Accept": "application/json" }
-        , type: 'GET'
+        , type: 'POST'
         , url: '/profile/save'
-        , data: "smProfile=" + JSON.stringify(loginInfo)
+        , data: "smProfile=" + JSON.stringify(loginInfo) + "&email=" + $getClientEmail()+"&sm_name="+smName
         ,dataType: "jsonp"
         , jsonp: "callback"
         , crossDomain: true
@@ -483,6 +474,7 @@ var $executeFacebookCommand = function (scope, command, callback) {
                 FB.api(command, function (res, err) {
                     if (!err) {
                         if (callback)
+
                             callback(res);
                     } else {
                         callback({ status: 'ERROR', message: JSON.stringify(err) });
@@ -623,7 +615,6 @@ var googleUserScope = googlePlusDefaults.scopes.plusMe;//+ " " +
 var googleCircleScope = googlePlusDefaults.scopes.plusCirclesRead + " " + googlePlusDefaults.scopes.plusCirclesWrite;//googlePlusDefaults.scopes.plusMe,
 var initializeGoogle = function (getAuthResponse = false, callback, scope) {
     var auth2, authInstance;
-    if (!nvCookie) {
         gapi.load('auth2', function () {
             //plusDomains.Circles.List
             auth2 = gapi.auth2.init({
@@ -681,9 +672,6 @@ var initializeGoogle = function (getAuthResponse = false, callback, scope) {
             });
                 //authInstance.signIn();
         });
-    } else {
-        //userLoginTo = set to Google
-    }
 }//var initializeGoogle = function (callback) {
 
 var getGoogleCircles = function (callback, loggedInUserId,getAuthResponse = "") {
@@ -963,10 +951,11 @@ var getGapiInfo = function (callback) {
                                 })
                                 circleResponse.execute(function (circleResponse) {
                                     console.log('Retrieved circles for:' + resp.displayName + ":-- " + JSON.stringify(circleResponse)); callback(circleResponse);
-                                    callback(circleResponse);
+                                    callback({ status: "SUCCESS", message:"Google circles retrieved for your profile.",data: circleResponse });
                                 });
                             } else {
                                 //                         callback(resp);
+                                callback({ status: "ERROR", message: "There was an error in retriving google Circles for your profile."});
                             } //if (getAuthResponse != "") {
                         }//if callback
                     }// else if
@@ -1161,3 +1150,49 @@ var initializeGoogleToGetGapi = function (getAuthResponse = false, callback, sco
         //userLoginTo = set to Google
     }
 }//var initializeGoogleToGetGapi = function (callback) {
+var extendFBAccessToken = function (fbAccessToken, callback) {
+    //extending facebook token from client side. Not to be used till  we are using server side extending of token
+    if (fbAccessToken) {
+        //extending access token
+        var oAuthParams = {};
+        oAuthParams['client_id'] = facebookDefaults.appId;
+        oAuthParams['client_secret'] = facebookDefaults.appSecret;
+        oAuthParams['grant_type'] = 'fb_exchange_token';
+        oAuthParams['fb_exchange_token'] = 'accessToken';
+        oAuthParams['response_type'] = 'token';
+        FB.api('/oauth/access_token', 'post', oAuthParams, function (response) {
+            if (callback) {
+                callback(response);
+            }
+        });//FB.api('/oauth/access_token', 'post', OauthParams, function (response) {
+        //                                callback(response);
+    } else {
+        alert("We are experiencing difficulties in extending your access token. Please try after sometime.");
+    } //if (fbAccessToken) {
+
+}//var extendFBAccessToken = function (fbAccessToken, callback) {
+
+var submitConfiguration = function (params, callback) {
+    $.ajax({
+        headers: { "Accept": "text/x-json", "Content-Type": "text/x-json" }
+        , type: 'post'
+        , url: '/config/set'
+        , data: "{email:" +'"'+$getClientEmail() +'"'+ ", StreamObject:" + JSON.stringify(params) + "}" //+ "&vignette_name=" + vignetteName
+        , dataType: "jsonp"
+        , jsonp: "callback"
+        , crossDomain: true
+        , beforeSend: function (xhr) {
+            xhr.withCredentials = true;
+        }
+        , jsonPCallback: "jsonpCallback"
+        , success: function (data) {
+            if (callback) {
+                callback(data);
+            } //if (callback) { 
+        }
+        , error: function (jqXHR, textStatus, errorThrown) {
+            alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
+        }
+    }); //$.ajax({
+
+}//var submitConfigure = function (location, parametere, callback) {

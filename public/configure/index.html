@@ -18,7 +18,7 @@
     <meta name="description" content="Website of nectorr.com    ">
     <!-- Mobile Specific Meta -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="../images/logo.png" type="image/x-icon">
+    <link rel="shortcut icon" href="../favicon-1024.png" type="image/x-icon">
 
     <!-- Google Font -->
 
@@ -38,7 +38,10 @@
     <link rel="stylesheet" href="../css/main.css">
     <!-- media-queries -->
     <link rel="stylesheet" href="../css/media-queries.css">
-
+    <link href="css/demo.css" rel="stylesheet" />
+    <!--<link href="css/style.css" rel="stylesheet" />-->
+    <link href="css/style2.css" rel="stylesheet" />
+    <!--<link href="css/style3.css" rel="stylesheet" />-->
     <!-- Modernizer Script for old Browsers -->
     <script src="../js/modernizr-2.6.2.min.js"></script>
 
@@ -56,6 +59,10 @@
 <body id="body">
 
     <!-- preloader -->
+    <div id="preloader">
+        <img src="../img/preloader.gif" alt="Preloader">
+    </div>
+    <!-- end preloader -->
     <!--
     End Fixed Navigation
     ==================================== -->
@@ -63,66 +70,92 @@
         <div class="container">
             <div class="row">
                 <div>
+                    <br />
                     <h1>Let us configure the selected social medium.</h1>
+                    <br />
                     <div></div>
                     <div id="serverResponse"></div>
                     <br />
-                    <div id="config-databox" class="col-md-12 col-lg-12">
-                        <h3>Listen to</h3>
-                        <p>Select the social medium and start keying in terms you would like to listen to.</p>
-                        <p class="tags col-md-4 col-lg-4">startup</p>
-                        <p class="tags col-md-4 col-lg-4">tech india</p>
-                        <p class="tags col-md-4 col-lg-4">New Delhi</p>
+                    <div id="container_demo" class="col-md-6 col-lg-6">
+                        <div id="wrapper">
+                            <div id="login" class="animate form nectorr-body-dark-text">
+                                <form autocomplete="on">
+                                    <h1>LISTEN TO</h1>
+                                    <br /><br />                                    
+                                    <textarea id="searchListenTo" style="width:100% ;color:#000000" placeholder="use '@' with user name, # with tags and ! with pages " ></textarea>
+                                    <!--<input type="text" name="searchtag" style="width:100%;visibility:visible" />-->
+                                    <!--<input id="submitListenTo" type="submit" value="Add to list" />-->
+                                    <a id="btnSaveListenTo" href="#" class="smoothScroll btn btn-default">Save</a>
+                                </form>
+</div>
+                        </div>
+                            <!--<h3>Listen to</h3>
+                            <p>Select the social medium and start keying in terms you would like to listen to.</p>
+                            <p class="tags col-md-4 col-lg-4">startup</p>
+                            <p class="tags col-md-4 col-lg-4">tech india</p>
+                            <p class="tags col-md-4 col-lg-4">New Delhi</p>-->
 
-                        <textarea id="searchListenTo" style="width:100%" placeholder="enter text separeted with a comma "></textarea>
-                        <!--<input type="text" name="searchtag" style="width:100%;visibility:visible" />-->
-                        <input id="submitListenTo" type="submit" value="Add to list" />
-                                                <a id="btnSaveListenTo" href="#" class="smoothScroll btn btn-default">Save</a>
 
-                    </div>
-                    <div id="config-databox" class="col-md-12 col-lg-12">
-                        <h3>Trending</h3>
+                        </div>
+                    <div id="container_demo" class="col-md-6 col-lg-6">
+                        <div id="wrapper">
+                            <div id="login" class="animate form nectorr-body-dark-text">
+                                <form autocomplete="on">
+                                    <h1>TRENDING</h1>
+                                    <br /><br />                                    
+                                    <textarea id="searchTrending" style="width:100% ;color:#000000" placeholder="use '@' with user name, # with tags and ! with pages "></textarea>
+                                    <!--<input type="text" name="searchtag" style="width:100%;visibility:visible" />-->
+                                    <!--<input id="submitListenTo" type="submit" value="Add to list" />-->
+                                    <a id="btnSaveListenTo" href="#" class="smoothScroll btn btn-default">Save</a>
+                                </form>
+                            </div>
+                        </div>
+                        <!--<h3>Trending</h3>
                         <p>Add a new topic here</p>
                         <textarea id="searchTrending" style="width:100%" placeholder="enter text separeted with a comma "></textarea>
-                        <!--<input type="text" name="searchtag" style="width:100%;visibility:visible" />-->
-                        <a id ="btnSaveTrending" href="#" class="smoothScroll btn btn-default">Save</a>
+                        <input type="text" name="searchtag" style="width:100%;visibility:visible" />
+                        <a id ="btnSaveTrending" href="#" class="smoothScroll btn btn-default">Save</a>-->
                     </div>
-                    <div id="config-databox" class="col-md-12 col-lg-12">
-                        <h3>Track</h3>
-                        <p>Add points you want to track.</p>
-                        <textarea id="searchTracking" style="width:100%" placeholder="enter text separeted with a comma "></textarea>
-                        <!--<input type="text" name="searchtag" style="width:100%;visibility:visible" />-->
-                        <a id="btnSaveTracking" href="#" class="smoothScroll btn btn-default">Save</a>
+                    <div id="container_demo" class="col-md-6 col-lg-6">
+                        <div id="wrapper">
+                            <div id="login" class="animate form nectorr-body-dark-text">
+                                <form autocomplete="on">
+                                    <h1>TRACK</h1>
+                                    <br /><br />
+                                    <textarea id="searchTracking" style="width:100% ;color:#000000" placeholder="use '@' with user name, # with tags and ! with pages "></textarea>
+                                    <!--<input type="text" name="searchtag" style="width:100%;visibility:visible" />-->
+                                    <!--<input id="submitListenTo" type="submit" value="Add to list" />-->
+                                    <a id="btnSaveTracking" href="#" class="smoothScroll btn btn-default">Save</a>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!--<div id="config-databox" class="col-md-12 col-lg-12">
+
+                            <h3>Track</h3>
+                            <p>Add points you want to track.</p>
+                            <textarea id="searchTracking" style="width:100%" placeholder="enter text separeted with a comma "></textarea>
+                            <input type="text" name="searchtag" style="width:100%;visibility:visible" />
+                            <a id="btnSaveTracking" href="#" class="smoothScroll btn btn-default">Save</a>-->
+
+                        </div>
+
+                    <div id="container_demo" class="col-md-6 col-lg-6">
+                        <div id="wrapper">
+                            <div id="login" class="animate form nectorr-body-dark-text">
+                                <form autocomplete="on">
+                                    <h1>MONITOR</h1>
+                                    <br /><br />
+                                    <textarea id="searchTracking" style="width:100% ;color:#000000" placeholder="use '@' with user name, # with tags and ! with pages "></textarea>
+                                    <!--<input type="text" name="searchtag" style="width:100%;visibility:visible" />-->
+                                    <!--<input id="submitListenTo" type="submit" value="Add to list" />-->
+                                    <a id="btnSaveMonitor" href="#" class="smoothScroll btn btn-default">Save</a>
+                                </form>
+                            </div>
+                        </div>
 
                     </div>
 
-                    <div id="config-databox" class="col-md-12 col-lg-12">
-                        <h3>Monitor</h3>
-                        <p>Likes, pages, groups</p>
-                        <textarea id="searchMonitor" style="width:100%" placeholder="enter text separeted with space"></textarea>
-                        <!--<input type="text" name="searchtag" style="width:100%;visibility:visible" />-->
-                        <a id="btnSaveMonitor" href="#" class="smoothScroll btn btn-default">Save</a>
-
-                    </div>
-                    <div id="config-databox" class="col-md-12 col-lg-12">
-                        <h3>Traffic</h3>
-                        <p>Views, Insights, Notifications</p>
-                        <textarea id="searchTraffic" style="width:100%" placeholder="enter text separeted with space"></textarea>
-                        <!--<input type="text" name="searchtag" style="width:100%;visibility:visible" />-->
-                        <a id="btnSaveNotifications" href="#" class="smoothScroll btn btn-default">Save</a>
-
-                    </div>
-                    <div id="config-databox" class="col-md-12 col-lg-12">
-                        <h3>Engagements</h3>
-                        <p>Marketing, Sales, Others</p>
-                        <textarea id="searchEngagements" style="width:100%" placeholder="enter pages group names separeted by space."></textarea>
-                        <!--<input type="text" name="searchtag" style="width:100%;visibility:visible" />-->
-                        <a id="btnSaveEngagements" href="#" class="smoothScroll btn btn-default">Save</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    <br /><br />
 
 
     <!-- Essential jQuery Plugins
@@ -134,9 +167,9 @@
     <!-- jquery easing -->
     
     <!-- jquery easing -->
-    <script src="../js/wow.min.js"></script>
+    <!--<script src="../js/wow.min.js"></script>-->
     <!-- Custom Functions -->
-    <script src="../assets/codebird-js/codebird.js"></script>
+    <!--<script src="../assets/codebird-js/codebird.js"></script>-->
     <!--<script src="../js/custom.js"></script>-->
     <script src="../app/js/cookie.js"></script>
     <script src="../app/js/sm_login.js"></script>

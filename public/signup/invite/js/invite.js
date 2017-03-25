@@ -1,4 +1,7 @@
 ﻿var invitationCode;
+jQuery(window).load(function () {
+    $("#preloader").fadeOut("slow");
+});
 $(document).ready(function () {
     $("#signThemUp").click(function (e) {
         e.preventDefault();

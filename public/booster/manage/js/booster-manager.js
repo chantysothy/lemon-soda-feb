@@ -1,4 +1,7 @@
-﻿var selectedOptions = [];
+﻿jQuery(window).load(function () {
+    $("#preloader").fadeOut("slow");
+});
+var selectedOptions = [];
 var autoCompleteList = [];
 var timeLines = [];
 var tempSocialMediaNames = ['facebook', 'twitter']//,'google'];//, 'linkedin','instagram','youtube', blogger','tumblr'];

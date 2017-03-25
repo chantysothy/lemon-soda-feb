@@ -3,6 +3,7 @@ $(window).load(function () {
     //var verified_code = req.query.verified_code;
     //validateInvitation(verified_code);
     $isLoggedIn();
+        $("#preloader").fadeOut("slow");
 });
 $(document).ready(function () {
         var validateLogin = function (loginDetails) {
@@ -19,14 +20,17 @@ $(document).ready(function () {
                 }
                 ,jsonPCallback: "jsonpCallback"
                 , success: function (data) {
-                if (data.status == 'SUCCESS') {
-                    var cookieValue = JSON.stringify({ e: loginDetails.user_name, s: 1 });
-                    manageServerResponse(data);
-                    $manageCookies(cookieValue);
-                    if ($isLoggedIn) { window.location.href = '/app/' }
-                } else { // show error
-                    manageServerResponse(data);
-                } //if (data.status == 'SUCCESS') {
+                    if (data) {
+                        data = JSON.parse(data);
+                        if (data.status == 'SUCCESS') {
+                            var cookieValue = JSON.stringify({ e: loginDetails.user_name, s: 1 });
+                            manageServerResponse(data);
+                            $manageCookies(cookieValue);
+                            if ($isLoggedIn) { window.location.href = '/app/' }
+                        } else { // show error
+                            manageServerResponse(data);
+                        } //if (data.status == 'SUCCESS') {
+                    }//if (data) {
                 }
                 , error: function (jqXHR, textStatus, errorThrown) {
                     alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);

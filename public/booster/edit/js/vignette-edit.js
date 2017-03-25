@@ -96,7 +96,7 @@ var validateLogin = function () {
             window.location.href = '/signup/local';
         }//if (signInId) {
     } else {
-        window.location.href = '/signup/local';
+        window.location.href = '../../';
     }//if($isLoggedIn()){
 }//var validateLogin = function () {
 
