@@ -159,7 +159,7 @@ var manageServerResponse = function (data, multipleRecords = false) {
     if (!multipleRecords) {
         if (data) {
             if (data.status == 'ERROR') {
-                $('#serverResponse').css('background-color', 'rgba(224, 0, 0, 0.6)');
+                $('#serverResponse').css('background-color', 'rgba(243, 0, 0, 0.6)');
                 $('#serverResponse').css('color', '#ffffff');
             } else if (data.status == 'SUCCESS') {
                 $('#serverResponse').css('background-color', 'rgba(10, 185, 5, 0.6)');

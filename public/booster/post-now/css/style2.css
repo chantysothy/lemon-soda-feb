@@ -42,10 +42,9 @@ a.hiddenanchor{
 #wrapper{
 	width: 90%;
 	right: 0px;
-	min-height: 340px;	
-	margin: 5px ;	
-	width: 500px;
-	height: 340px;	
+	min-height: 500px;	
+	margin: 5px auto;	
+	/*width: 500px;*/
 	position: relative;	
 }
 /**** Styling the form elements **/
@@ -53,25 +52,18 @@ a.hiddenanchor{
 /**** general text styling ****/
 #wrapper a{
 	color: rgb(95, 155, 198);
-	/*text-decoration: underline;*/
+	text-decoration: underline;
 }
 
 #wrapper h1{
-	font-size: 20px;
+	font-size: 48px;
 	color: #ffffff;
 	padding: 2px 0 10px 0;
-    font-family:'GothamRounded-Medium';
+	font-family: 'FranchiseRegular','Arial Narrow',Arial,sans-serif;
 	font-weight: bold;
 	text-align: center;
 	padding-bottom: 7px;
 }
-#wrapper textarea{
-	font-size: 13px;
-	color: #000000;
-    font-family:'GothamRoundedLight';
-    background-color:#ffffff
-}
-
 /** For the moment only webkit supports the background-clip:text; */
 /*#wrapper h1{
     background: -webkit-repeating-linear-gradient(-45deg, 

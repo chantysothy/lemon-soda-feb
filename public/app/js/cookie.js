@@ -117,10 +117,12 @@
                 returnValue = true
             } 
             else {
-                window.location.href = '/signup/local'
+//                window.location.href = '/signup/local'
+                window.location.href = 'http://nectorr.com'
             } //if (data.s == 1)
         } else {
-            window.location.href = '/signup/local'
+            window.location.href = 'http://nectorr.com'
+//            window.location.href = '/signup/local'
         } //if (cookieValue) {
     }
         return returnValue;

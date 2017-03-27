@@ -79,6 +79,9 @@ router.get('/get/html', function (req, res) {
 
                     var serverMessage = { status: 'SUCCESS', message: "URL read successfully", data: getTagsForBooster(body, clientUrl) }
                     sendMessageToServer(serverMessage, callback, res);
+                } else if (error) {
+                    var serverMessage = { status: 'ERROR', message: "Unable to read the pasted url. " + error.message };
+                    sendMessageToServer(serverMessage, callback, res);
                 }//if (!error && response.statusCode === 200) {
             });
         }//if (url) {
@@ -1053,17 +1056,17 @@ var sendEmail = function (recieverName,recieverEmail, emailText) {
 var sendMessageToServer = function(msg, callback, res, post ){//= false) {
     // msg has to be a valid json object
     var payload = JSON.stringify(msg);
-    payload = payload.replace(/\\n/g, "\\n")
-        .replace(/\\'/g, "\\'")
-        .replace(/\\"/g, '\\"')
-        .replace(/\\&/g, "\\&")
-        .replace(/\\r/g, "\\r")
-        .replace(/\\t/g, "\\t")
-        .replace(/\\b/g, "\\b")
-        .replace(/\\f/g, "\\f");
-    // remove non-printable and other non-valid JSON chars
-    payload = payload.replace(/[\u0000-\u0019]+/g, "");
-    var response = JSON.stringify(payload);
+    //payload = payload.replace(/\\n/g, "\\n")
+    //    .replace(/\\'/g, "\\'")
+    //    .replace(/\\"/g, '\\"')
+    //    .replace(/\\&/g, "\\&")
+    //    .replace(/\\r/g, "\\r")
+    //    .replace(/\\t/g, "\\t")
+    //    .replace(/\\b/g, "\\b")
+    //    .replace(/\\f/g, "\\f");
+    //// remove non-printable and other non-valid JSON chars
+    //payload = payload.replace(/[\u0000-\u0019]+/g, "");
+    var response = payload;//JSON.stringify(payload);
     //res.writeHead(200, { 'Content-Type': 'text/plain', 'Content-Length': +response.length + '' });
     var returnValue = callback + '(' + response + ')';
     if (!post) {

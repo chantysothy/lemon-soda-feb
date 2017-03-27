@@ -1,5 +1,5 @@
 ﻿var fbScope = "manage_pages, user_managed_groups";
-var boostingProfile,  selectVignette;
+var boostingProfile,  selectVignette, postNowVignette;
 var getConnectedSocialMedia;
 var twitterScope, googlePlusScope, linkedInScope, instagramScope 
 var iconUrl = ['../img/social/facebook-64.png', '../img/social/twitter-64.png', '../img/social/google-plus-64.png', '../img/social/instagram-64.png', '../img/social/linkedin-64.png', '../img/social/tumblr-64.png'];// Array
@@ -17,6 +17,7 @@ $(window).load(function (e) {
         
     });//$nectorrFacebookLogin(['user_posts', 'manage_pages'], null, function (fbResponse) {
     $("#preloader").fadeOut("fast");
+    $("#preloader").hide();
 
 
     //$('#imageHolder').append();
@@ -32,6 +33,35 @@ $(document).ready(function () {
     //createBoostingProfile();
     $('#boosterPreview').hide();
     $('#buttonPanel').hide();
+    $('#boosterTextArea').keypress(function (e) {
+
+        $('#boosterTextArea').markRegExp(/([@]|[#])([a-z])\w+/gmi);
+    });
+
+    $nectorrFacebookLogin(facebookDefaults.scope, null, function (fbResponse) {
+        console.log(fbResponse);    
+    });
+    $("#postNowVignette").animatedModal({
+        modalTarget: 'postNowVignetteModal',
+        animatedIn: 'fadeIn',
+        animatedOut: 'fadeOut',
+        animationDuration: '0.7s',
+        color: 'rgba(51,51,51,0.9)',
+        //color:'#3498db',
+        // Callbacks
+        beforeOpen: function () {
+            console.log("The postNowVignetteModal animation before open was called");
+        },
+        afterOpen: function () {
+            console.log("The animat postNowVignetteModal ion after open is completed");
+        },
+        beforeClose: function () {
+            console.log("The postNowVignetteModal animation before close was called");
+        },
+        afterClose: function () {
+            console.log("The postNowVignetteModal animation after close is completed");
+        }
+    });
     selectVignette = $("#selectVignette").animatedModal({
         modalTarget: 'selectVignetteModal',
         animatedIn: 'fadeIn',
@@ -52,9 +82,6 @@ $(document).ready(function () {
         afterClose: function () {
             console.log("The selectVignetteModal animation after close is completed");
         }
-    });
-    $nectorrFacebookLogin(facebookDefaults.scope, null, function (fbResponse) {
-        console.log(fbResponse);    
     });
     $("#manageVignette").animatedModal({
         modalTarget: 'manageVignetteModal',
@@ -77,7 +104,7 @@ $(document).ready(function () {
             console.log("The animation after close is completed");
         }
     });
-    $('#postNow').click(function (e) {
+    $('#postNow-old').click(function (e) {
         // get Url, get imgUrl, get Caption, get Text
         //var originalUrl, shortUrlForServer, imageUrlForServer, headingForServer, textForServer
         $nectorrFacebookLogin(facebookDefaults.scope, null, function (fbResponse) {
@@ -93,52 +120,66 @@ $(document).ready(function () {
 
     $('#boosterTextArea').bind("paste", function (e) {
         // access the clipboard using the api
+        $('#serverResponse').hide();
+        $('#preloader').fadeIn('fast');
         var pastedData = e.originalEvent.clipboardData.getData('text');
-        originalUrl = pastedData; //for server comm
         //, , imageUrlForServer, headingForServer, textForServer
         //$('#boosterTextArea').val(pastedData);
         // preview pane
-        //var baseUrl = getBaseUrl(pastedData);    
-        $('#serverResponse').hide();
+        //var baseUrl = getBaseUrl(pastedData); original
+        linkify(pastedData, function (extractedUrl) {
+            shortenUrl(extractedUrl.url, function (data) {
+                if (data.shortUrl) {
+                    var shortUrl = data.shortUrl;
+                    shortUrlForServer = shortUrl; //used for server comm
+                    var postData = pastedData;
+                    postData = postData.replace(extractedUrl.url, shortUrl+"\n");
+
+                    $('#boosterTextArea').val(postData);
+                    $("#boosterPreview").attr("src", shortUrl);
+                    // get list of images
+                    getHTML(extractedUrl.url, function (html) {
+                        var h1Data = html.h1Tags
+                        $("#h1Text").text(h1Data[0]);
+                        headingForServer = h1Data[0];
+
+                        var paras = html.pTags;
+
+                        var para = paras[0], strLen;
+                        if (para) {
+                            if (paras[0] || paras[0] == "") para = paras[1];
+                            if (para.length > 97) { strLen = 97 } else { strLen = para.length - 1 }
+                            para = para.substr(0, strLen);
+                            para += '...';
+                            $('#paraText').text(para);
+                            textForServer = para;
+                            $('#buttonPanel').show();
+                        }
+                        slideIndex = 0;
+                        imageList = html.imgTags;
+                        //imageList = cleanImageList(imageList);
+                        //imageList = $(parentDiv).children('img').map(function () { return $(this) }).get();
+                        if (imageList) {
+                            plusDivs(slideIndex);// display images
+                            $('#boosterPreview').show();
+
+                        }
+                        //addImageListToDiv("", imageList);
+                        //showDivs(slideIndex);
+
+                    });
+                } else {
+                    manageServerResponse({ status: "ERROR", message: "An error occured while shortening Url." });
+                } //if (data){
+                });//shortenUrl(pastedData, function (data) {
+
+        
+            $('#preloader').hide()
+            $('#boosterTextArea').markRegExp(/([@]|[#])([a-z])\w+/gmi);
+
+        });
+        //originalUrl = url;function
         // google shortner
-        shortenUrl(pastedData, function (data) {
-            var shortUrl = data.shortUrl;
-            shortUrlForServer = shortUrl; //used for server comm
-            $('#boosterTextArea').val(shortUrl);
-            $("#boosterPreview").attr("src", shortUrl);
-            // get list of images
-            getHTML(pastedData, function (html) {
-                var h1Data = html.h1Tags
-                $("#h1Text").text(h1Data[0]);
-                headingForServer = h1Data[0];
-
-                var paras = html.pTags;
-
-                var para = paras[0], strLen;
-                if (para) {
-                    if (paras[0] || paras[0] == "") para = paras[1];
-                    if (para.length > 97) { strLen = 97 } else { strLen = para.length - 1 }
-                    para = para.substr(0, strLen);
-                    para += '...';
-                    $('#paraText').text(para);
-                    textForServer = para;
-                    $('#buttonPanel').show();
-                }
-                slideIndex = 0;
-                imageList = html.imgTags;
-                //imageList = cleanImageList(imageList);
-                //imageList = $(parentDiv).children('img').map(function () { return $(this) }).get();
-                if (imageList) {
-                    plusDivs(slideIndex);// display images
-                    $('#boosterPreview').show();
-
-                }
-                //addImageListToDiv("", imageList);
-                //showDivs(slideIndex);
-            });//getElementsFromUrl(pastedData, 'h1', function (h1Data) {
-
-
-        });//shortenUrl(pastedData, function (data) {
     }); //$('booster')..bind("paste", function (e) {
 
 
@@ -539,3 +580,13 @@ var getPermsFromServer = function (sm_name, callback) {
         }//if (sm_name) { 
     } //if (callback) { 
 }//var getPermissionsFromClient = function () { 
+
+var linkify = function (text , callback) {
+    var urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+    return text.replace(urlRegex, function (url) {
+        if (callback) {
+            callback({ "url": url });
+        };
+    });
+}
+

@@ -78,7 +78,10 @@
   top: 48%;
 }
 
-
+mark {
+  background: #8d82c4;
+  color : #ffffff
+}
 /* Box Model */
 
 	*, *:before, *:after {

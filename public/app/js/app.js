@@ -257,10 +257,11 @@ $(document).ready(function () {
         $('#icon_fb').click(function (e) {
 
             $nectorrFacebookLogin(facebookDefaults.scope, e, function (data) {
+                $("#icon_fb").html('&#10003;')
+                $("icon_fb_img").fadeIn('fast');
                 if (data) {
                     $saveLoginInfo('facebook', data, null, function (serverResponse) {
                         manageServerResponse(serverResponse);
-                        $("#icon_fb").html('&#10003;')
                     });//$saveLoginInfo(linkedInProfile, event, function (res) {
 
                 } //if (data) { 

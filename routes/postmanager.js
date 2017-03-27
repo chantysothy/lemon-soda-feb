@@ -193,7 +193,7 @@ var uploadMediaToTwitter = function (pathUri, callback) {
         var client = new Twitter();
         request.get(pathUri, function (error, response, body) {
             if (!error && response.statusCode == 200) {
-                twitter.post('media/upload', { media: body }, function (error, media, response) {
+                client.post('media/upload', { media: body }, function (error, media, response) {
                     callback(response);
                 });//client.post('media/upload', { media: data }, function (error, media, response) {
                 // Continue with your processing here.

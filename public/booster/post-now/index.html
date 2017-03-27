@@ -9,7 +9,9 @@
 <head>
     <meta charset="UTF-8" />
     <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">  -->
-    <title>NECTORR APP - Booster Manager</title>
+    <title>NECTORR APP - Select Vignette</title>
+    <link rel="shortcut icon" href="favicon-1024.png">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Login and Registration Form with HTML5 and CSS3" />
     <meta name="keywords" content="html5, css3, form, switch, animation, :target, pseudo-class" />
@@ -21,15 +23,16 @@
     <link href="../../assets/magic-search/jquery.magicsearch.css" rel="stylesheet" />
     <link href="../../assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
     <link rel="shortcut icon" href="../../favicon-1024.png">
+    <link rel="stylesheet" type="text/css" href="../../assets/css/main.css" />
     <link rel="stylesheet" type="text/css" href="css/demo.css" />
     <link rel="stylesheet" type="text/css" href="css/style2.css" />
     <link href="../../css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="css/animate-custom.css" />
     <link href="../../css/bootstrap.min.css" rel="stylesheet" />
-
+    <link href="../../css/font-awesome.min.css" rel="stylesheet" />
     <link href="css/bootstrap-tagsinput.css" rel="stylesheet" />
     <link href="css/booster-manager.css" rel="stylesheet" />
-    <link href="css/tokens.css" rel="stylesheet" />
+    <link href="../../assets/css/main.css" rel="stylesheet" />
     <script type="text/javascript" src="//platform.linkedin.com/in.js">
         api_key: 8161blmvykyv0a
         authorize: true
@@ -43,57 +46,39 @@
     </script>
 </head>
 <body style="background-color: #333333">
+    <div id="fb-root"></div>
     <!-- preloader -->
     <div id="preloader">
-        <img src="../img/preloader.gif" alt="Preloader">
+        <img src="../../img/preloader.gif" alt="nectorr.com">
     </div>
     <!-- end preloader -->
 
-    <script type="text/javascript">
-         (function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) return;
-  js = d.createElement(s); js.id = id;
-  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&amp;version=v2.7";
-  fjs.parentNode.insertBefore(js, fjs);
-                                                    }(document, 'script', 'facebook-jssdk'));
-    </script>
     <div class="container">
         <!-- Codrops top bar -->
         <section>
             <div id="container_demo">
                 <div id="wrapper">
                     <div id="login" class="animate form nectorr-body-dark-text">
-                        <form autocomplete="on">
-                            <h1>Add a new vignette</h1>
+                        <form autocomplete="off">
+                            <h1>Select vignette for boosting</h1>
 
                             <p>
-                                <label for="vignette-name" class="uname"> Give your vignette a name </label>
-                                <input id="input-vignette-name" name="vignette-name" required="required" type="text" placeholder="e.g. soft launch of new product XYZ." />
+                                <br /><br />
+                                <label for="vignette-name" class="uname"> Start keying in a vignette name </label>
+                                <input id="vignette-name" class="magicsearch" name="vignette-name" required="required" type="text" placeholder="e.g. soft launch of new product XYZ." />
                             </p>
-                            <div><br /><br /></div>
-
-                            <p class="uname">Start keying in a postable location.</p>
-                            <div class="col-xs-12" id="options-type-name">
-                                <input id="sm-options-type-name" name="sm-options-type-name" required="required" type="text"
-                                       placeholder="e.g. group, page, circle, list name" class="magicsearch" />
+                            <div><br /><br /><div id="serverResponse"></div>
+                            
+                            <div id="user-actions">
+                                <a id="schedule-now" href="#" class="postable pull-right">
+                                    <img src="../../assets/icon-new/broadcast-64.png" style="width: 70px; margin-right: 5px; padding-right: 5px" />
+                                </a>
                             </div>
-
-                            <div id="select-options2" class="col-xs-12">
-                                <div class="col-md-1 col-lg-1 pull-right">
-                                    <div id="icon_display">
-                                        <a href="#">
-                                            <img id="btnSave" class="image" src="../../assets/icon-new/save-64.png" />
-                                            
-                                            <!--//<img src="../../assets/icons/save-64.png" />-->
-                                            <!--<img src="../../assets/icons/forward-64.png" />-->
-                                        </a>
-                                    </div>
-                                </div>
                                 <!--<p class="login button">
                                     <input id="btnLogin" type="submit" value="Next" />
                                 </p>-->
                             </div>
+                            <div><br /><br /></div>
                             <!--<p class="change_link">
                                 Not a member yet ?
                                 <a href="#toregister" class="to_register">Join us</a>
@@ -104,45 +89,47 @@
             </div>
 
         </section>
-        <!--<section>
-            <div id="divSetCalendar">
-                <div id="wrapper" style="color : #ffffff">
-                    <div id="setCalender" class="animate form nectorr-body-dark-text">
-                        <form>
-                            <h1>Set vignette timelines</h1>
-                            <div id="message"></div>
-
-                            <div id="weekCalendar" style="color:#333333"></div>
-                            <br />
-                            <div id="serverResponse" ></div>
-                            <div><br /></div>
-                            <div id="icon_display" class="col-lg-1 col-md-1 pull-left">
-                                <input id="btnBack" type="submit" value="Back" class="pull-left" />
-                                <a href="#">
-                                    <img id="btnBack" src="../../assets/icon-new/left-64.png" />
+        <!--<section >
+            <div id="manage-timelines">
+                <div id="wrapper">
+                    <div id="login" class="animate form nectorr-body-dark-text">
+                        <form autocomplete="off">
+                            <h1>Select days and time for posting</h1>
+                            <div id="time-line">
+                                <p>
+                                    <br />                                    
+                                   <div id="vignette-timeline" name="vignette-timeline" color="#333333"/>
+                                    <br />
+                                </p>
+                                
+                            </div>
+                            <div id="timeline-selection">
+                                <p id="selected-timeline"></p>
+                            </div>
+                            <div id="user-actions">
+                                <a id="go-back" href="#" class="postable pull-left">
+                                    <img src="../../assets/icon-new/left-64.png" style="width: 70px; margin-right: 5px; padding-right: 5px"/>
                                 </a>
                             </div>
-                            <div id="icon_display" class="col-lg-1 col-md-1 pull-right">
-                                <input id="btnPrev" type="submit" value="Back" />
-                                <input id="btnSave" type="submit" value="Save" />
-                                <a href="#">
-                                    <img id="btnSave" src="../../assets/icon-new/save-64.png" />
+                            <div id="user-actions">
+                                <a id="schedule-now" href="#" class="postable pull-right">
+                                    <img src="../../assets/icon-new/broadcast-64.png" style="width: 70px; margin-right: 5px; padding-right: 5px"/>
                                 </a>
                             </div>
-                        </form> 
-
+                        </form>
                     </div>
                 </div>
             </div>
         </section>-->
         <!--<footer id="footer">
+            <hr />
             <div class="inner">
                 <ul class="icons">
-                    <li><a href="https://twitter.com/nectorrsocial" target="_blank" class="fa fa-twitter"><span class="label">Twitter</span></a></li>
-                    <li><a href="https://www.facebook.com/nectorrcom-1594185710887326/" target="_blank" class="fa fa-facebook"><span class="label">Facebook</span></a></li>
+                    <li><a href="https://twitter.com/nectorrsocial" target="_blank" class="icon alt fa-twitter"><span class="label">Twitter</span></a></li>
+                    <li><a href="https://www.facebook.com/nectorrcom-1594185710887326/" target="_blank" class="icon alt fa-facebook"><span class="label">Facebook</span></a></li>
                     <li><a href="#" class="icon alt fa-instagram"><span class="label">Instagram</span></a></li>
-                    <li><a href="https://business.google.com/u/2/b/103251000631707483687/" target="_blank" class="fa fa-google"><span class="label">Google</span></a></li>
-                    <li><a href="https://www.linkedin.com/company-beta/13238498" target="_blank" class="fa fa-linkedin"><span class="label">LinkedIn</span></a></li>
+                    <li><a href="https://business.google.com/u/2/b/103251000631707483687/" target="_blank" class="icon alt fa-google"><span class="label">Google</span></a></li>
+                    <li><a href="https://www.linkedin.com/company-beta/13238498" target="_blank" class="icon alt fa-linkedin"><span class="label">LinkedIn</span></a></li>
                     <li>
                         <span id="siteseal" style="margin-top:10px ; padding-top: 10px">
                             <script async type="text/javascript" src="https://seal.godaddy.com/getSeal?sealID=BMLFjEnfD2XPUDWz4DoQOJh8r1ptJ7bvcx12WeNpdSVAPRdingV90jKIlmgH"></script>
@@ -150,8 +137,7 @@
 
                     </li>
                 </ul>
-                <ul class="copyright">
-                <li>&copy; Untitled</li><li>Design: <a href="https://html5up.net">HTML5 UP</a></li>
+
             </ul>
             </div>
         </footer>-->
@@ -163,16 +149,16 @@
     <script src="../../app/js/sm_login.js"></script>
     <script src="../../app/js/cookie.js"></script>
     <script src="js/jquery.dd.min.js"></script>
-    <script src="js/booster-manager.js"></script>
+    <script src="js/booster-select.js"></script>
     <!--<script src="js/bootstrap-tagsinput.js"></script>-->
     <script src="js/tokens.min.js"></script>
-    <!--<script src ="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/js/bootstrap.min.js"></script>-->
+    <!--<script src ="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/js/bootstrap.min.js"></script>-->
     <script src="../../assets/jquery.weekcalendar/jquery.weekcalendar.js"></script>
     <script src="../../assets/magic-search/jquery.magicsearch.js"></script>
     <script src="../../assets/underscore/underscore.js"></script>
     <script src="../../assets/codebird-js/codebird.js"></script>
     <script src="https://apis.google.com/js/api.js" type="text/javascript"></script>
-
+    <script src="../../assets/animated-modal/animatedModal.js"></script>
 </body>
 
 </html>

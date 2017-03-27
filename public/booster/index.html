@@ -70,7 +70,7 @@
     <div id="fb-root"></div>
     <!-- preloader -->
     <div id="preloader">
-        <img src="../../img/preloader.gif" alt="nectorr.com">
+        <img src="../../images/loading-animation.gif" alt="nectorr.com">
     </div>
     <!-- end preloader -->
 
@@ -101,7 +101,7 @@
         <div class="row" >
             <div style="align-content : center">
                 <br /> 
-                <h2>SOCIAL BOOSTER <span>&reg;</span></h2>
+                <h2>SOCIAL BOOSTER<span>&reg;</span></h2>
 
                                 
                 <div id="showMessage" style="font-family:GothamRoundedLight">
@@ -110,7 +110,7 @@
 
                 <br /><br />
                 <div id="boosterArea"  style="margin-top: 10px; margin-bottom: 10px">
-                    <textarea id="boosterTextArea" rows="3" cols="70" class="booster" placeholder="copy/paste url here for social boosting." ></textarea>
+                    <textarea id="boosterTextArea" rows="3" cols="70" class="booster" placeholder="copy/paste url here for social boosting. You can also key in hash tags and text." ></textarea>
                 </div>
                 <div id="serverResponse" class="col-md-8 col-lg-8"></div>
                 <div id ="boosterPreview" class="booster-preview col-md-8 col-lg-8" >
@@ -129,7 +129,7 @@
                 <div id="buttonPanel" class="col-xs-12">
                     <div class="col-md-2 col-lg-2">
                         <div id="icon_display">
-                            <a href="#">
+                            <a id="#postNowVignette" href="#postNowVignetteModal">
                                 <img id="postNow" class="image" src="./img/boost-now.png" />
                             </a>
                             <p>Post now</p>
@@ -159,6 +159,18 @@
             </div>
         </div>
     </div>
+    <div id="postNowVignetteModal">
+        <div id="btn-close-modal" class="close-selectVignetteModal close-btn">
+            <img src="../assets/forms/img/close.png" />
+        </div>
+
+        <div class="modal-content">
+            <!--Your modal content goes here-->
+            <iframe src="post-now/index.html" style="width:100%; height: 700px" scrolling="no" frameborder="0"></iframe>
+
+        </div>
+    </div>
+
     <div id="selectVignetteModal" >
         <div id="btn-close-modal" class="close-selectVignetteModal close-btn">
             <img src="../assets/forms/img/close.png" />
@@ -202,12 +214,15 @@
     <!-- Essential jQuery Plugins
     ================================================== -->
     <!-- Main jQuery -->
+    <!--<script src="../assets/jquery-3.1.1.min.js"></script>-->
     <script src="../js/jquery-1.11.3.min.js"></script>
+
     <script src="../js/bootstrap.min.js"></script>
     <script src="../js/jquery-countTo.js"></script>
     <script src="https://connect.facebook.net/en_US/all.js"></script>
     <!-- jquery.appear -->
-    <script src="../js/jquery.appear.js"></script>-
+    <script src="../js/jquery.appear.js"></script>
+    <script src="https://cdn.rawgit.com/julmot/mark.js/6.1.0/dist/jquery.mark.min.js"></script>
     <!-- Contact form validation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/3.32/jquery.form.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.11.1/jquery.validate.min.js"></script>
