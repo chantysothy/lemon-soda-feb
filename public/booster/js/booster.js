@@ -1,5 +1,5 @@
-﻿var fbScope = "manage_pages, user_managed_groups";
-var boostingProfile,  selectVignette, postNowVignette;
+﻿var uploadedFiles=[]
+var boostingProfile, selectVignette, postNowVignette;
 var getConnectedSocialMedia;
 var twitterScope, googlePlusScope, linkedInScope, instagramScope 
 var iconUrl = ['../img/social/facebook-64.png', '../img/social/twitter-64.png', '../img/social/google-plus-64.png', '../img/social/instagram-64.png', '../img/social/linkedin-64.png', '../img/social/tumblr-64.png'];// Array
@@ -31,6 +31,110 @@ window.closeManageModal = function () {
 };
 $(document).ready(function () {
     //createBoostingProfile();
+    Dropzone.options.uploadWidget = {
+        paramName: 'file',
+        maxFilesize: 10, // MB
+        maxFiles: 4,
+        addRemoveLinks: true,
+        dictDefaultMessage: 'Click to add photos or videos to your post.',
+        dictResponseError: 'nectorr server configuration error.',
+        //headers: {
+        //    'x-csrf-token': "vidurkohli"
+        //},
+        acceptedFiles: 'image/*, video/*,.mp4,.mov,.wmv',
+        init: function () {
+            this.options.dictRemoveFile = "Delete";
+            this.options.maxFilesize = 10;
+            this.options.maxThumbnailFilesize = 10;
+            //New file added
+            this.on("addedfile", function (file) {
+                console.log('new file added ', file);
+            });
+            // remove file starts
+            this.on("removedfile", function (file) {
+                $.ajax({
+                    headers: { "Accept": "application/json" }
+                    , type: 'GET'
+                    , url: '/upload/delete'
+                    , data: "file=" + file.serverFileName
+                    , dataType: "jsonp"
+                    , jsonp: "callback"
+                    , crossDomain: true
+                    , beforeSend: function (xhr) {
+                        xhr.withCredentials = true;
+                    }
+                    , jsonPCallback: "jsonpCallback"
+                    , success: function (data) {
+                            //var elementList = $(html).find(element);
+                            manageServerResponse(data);
+                    }//success: function (data) {
+                    , error: function (jqXHR, textStatus, errorThrown) {
+                        //var msgBox = $('#butrfly-login').find();
+                        alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
+                    }//error: function (jqXHR, textStatus, errorThrown) {
+                });
+
+            });
+            // Send file starts
+
+            this.on("sending", function (file, xhr, formData) {
+                formData.append('fileName', { originalName: file.name });
+                console.log('upload started', file);
+                //$('.meter').show();
+            });
+
+            this.on("totaluploadprogress", function (progress) {
+                console.log("progress ", progress);
+                //$('.roller').width(progress + '%');
+            });
+
+            this.on("queuecomplete", function (progress) {
+                //$('.meter').delay(999).slideUp(999);
+                console.log("Queue complete ", progress);
+            });
+
+            // On removing file
+            this.on('success', function (file, resp) {
+                console.log(file);
+                console.log(resp);
+                var response = JSON.parse(resp);
+                var serverInfo = response.data.fileName;
+                file['serverFileName'] = serverInfo;
+            });
+            this.on('thumbnail', function (file) {
+                if (file.type == "image/jpeg" || file.type == "image/png") {
+                    if (file.width < 250 || file.height < 250) {
+                        file.rejectDimensions();
+                    } else {
+                        file.acceptDimensions();
+                    }
+                } else if ((file.type != 'video/mp4') || (file.type != 'video/mp4') || (file.type != 'video/quicktime') || (file.type != 'video/x-ms-wmv') || (file.type = 'video/x-msvideo')) {
+                    if (file.size > 50) {
+                        file.rejectDimension();
+                    }
+                } else {
+                    file.rejectDimensions();
+                }
+            });
+        },
+        accept: function (file, done) {
+            file.acceptDimensions = done;
+            file.rejectDimensions = function () {
+                if (file.type != "image/jpeg" && file.type != "image/png") {
+                    done('The image must be at least 250 x 250px')
+                    return;
+                } else if ((file.type != 'video/mp4') || (file.type != 'video/mp4') || (file.type != 'video/quicktime') || (file.type != 'video/x-ms-wmv') || (file.type = 'video/x-msvideo')) {
+                    done('Invalid video format or size exceed 50 mb.')
+                    return;
+                } else {
+                    done('file format not supported by nectorr.');
+                    return;
+                }//if (file.type != "image/jpeg" && file.type != "image/ png") {
+            };
+            uploadedFiles.push({ fileDetails: file });
+        }
+    };
+
     $('#boosterPreview').hide();
     $('#buttonPanel').hide();
     $('#boosterTextArea').keypress(function (e) {
@@ -178,6 +282,7 @@ $(document).ready(function () {
             $('#boosterTextArea').markRegExp(/([@]|[#])([a-z])\w+/gmi);
 
         });
+
         //originalUrl = url;function
         // google shortner
     }); //$('booster')..bind("paste", function (e) {
@@ -585,8 +690,80 @@ var linkify = function (text , callback) {
     var urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
     return text.replace(urlRegex, function (url) {
         if (callback) {
-            callback({ "url": url });
+            callback({"url": url });
         };
     });
 }
 
+var updateServerInfoToFileArray = function (serverInfo, action, callback) {
+    if (typeof action == 'function') {
+        action = callback;
+        action = null;
+    }
+
+    var element = uploadedFiles.filter(filterArray(serverInfo,this));
+
+    if (element) {
+        switch (action) {
+            case 'delete':
+                removeFileFromServer(serverInfo, callback);
+                // delete element
+                break;
+            case 'update':
+                callback({});
+                break;
+
+        }//switch (action) {
+
+    }//if (element) {
+//                uploadedFiles.push({fileDetails: file});
+
+}//var updateServerInfoToFileArray = function (serverInfo, action, callback) {
+
+var filterArray = function (fileName, element) {
+        if (element.originalFileName == fileName) {
+            return element;
+        }//if (element.originalFileName == fileName) {
+}//var filterArray = function (fileName) {
+
+var removeFileFromServer = function (fileName, callback) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'upload/delete',
+                    data: JSON.stringify({ id: fileName }),//, _token: $('#csrf-token').val() },
+                    dataType: 'html',
+                    success: function (data) {
+                        var rep = JSON.parse(data);
+                        if (callback) {
+                            callback(rep);
+                        } //if (callback) {
+                    } //success: function (data) {
+                });
+
+}
+var getFilePath = function (file, callback) {
+    $.ajax({
+        headers: { "Accept": "application/json" }
+        , type: 'GET'
+        , url: '/upload/path'
+        , data: "file=" + file
+        , dataType: "jsonp"
+        , jsonp: "callback"
+        , crossDomain: true
+        , beforeSend: function (xhr) {
+            xhr.withCredentials = true;
+        }
+        , jsonPCallback: "jsonpCallback"
+        , success: function (data) {
+            //var elementList = $(html).find(element);
+            if (callback)
+                callback(data);
+        }//success: function (data) {
+        , error: function (jqXHR, textStatus, errorThrown) {
+            //var msgBox = $('#butrfly-login').find();
+            alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
+        }//error: function (jqXHR, textStatus, errorThrown) {
+    });
+
+
+}//var getFilePath = function (file, callback) {

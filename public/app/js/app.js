@@ -10,7 +10,8 @@
 
         getQueryTags(function (searchOptions) {
             getLoggedInUserDetails(function (userData) {
-                var data = JSON.parse(userData)
+//                var data = JSON.parse(userData)
+                var data = userData;
                 if (data.status == "SUCCESS") {
                     loggedInUserInfo = data;
                     var publishCredentials = {

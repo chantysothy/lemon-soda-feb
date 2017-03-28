@@ -10,6 +10,7 @@ var streamer = require('./routes/streamer.js');
 var vignette = require('./routes/vignette.js');
 var scheduler = require('./routes/scheduler.js');
 var postManager = require('./routes/postmanager.js');
+var fileManager = require('./routes/fileManager.js');
 var fs = require('fs');
 var mongodb = require('mongodb');
 var mongoose = require('mongoose');
@@ -99,6 +100,8 @@ app.use(streamer);
 app.use(vignette);
 app.use(scheduler);
 app.use(postManager);
+app.use(fileManager);
+
 
 var port = 1337;//process.env.PORT || 5000;
 app.set('port', port);

@@ -207,6 +207,7 @@
     <Compile Include="public\signup\invite\js\invite.js" />
     <Compile Include="public\signup\js\login.js" />
     <Compile Include="public\signup\local\js\invite.js" />
+    <Compile Include="routes\fileManager.js" />
     <Compile Include="routes\postmanager.js" />
     <Compile Include="routes\google.js" />
     <Compile Include="routes\scheduler.js" />
@@ -845,6 +846,7 @@
     <Content Include="public\assets\doT\LICENSE-DOT.txt" />
     <Content Include="public\assets\doT\package.json" />
     <Content Include="public\assets\doT\README.md" />
+    <Content Include="public\assets\dropzone\dropzone.css" />
     <Content Include="public\assets\fast-select\fastselect.css" />
     <Content Include="public\assets\fast-select\fastselect.min.css" />
     <Content Include="public\assets\font-awesome\css\font-awesome.css" />
@@ -2096,6 +2098,9 @@
     <Folder Include="public\signup\local\css\fonts\" />
     <Folder Include="public\signup\local\images\" />
     <Folder Include="public\signup\local\js\" />
+    <Folder Include="public\upload\" />
+    <Folder Include="public\upload\images\" />
+    <Folder Include="public\upload\videos\" />
     <Folder Include="typings\" />
     <Folder Include="typings\globals\" />
     <Folder Include="typings\globals\cheerio\" />

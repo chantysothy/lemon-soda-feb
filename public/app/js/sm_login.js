@@ -334,11 +334,12 @@ var $getTwitterLists = function (callback) {
 }//var saveFacebookData = function (data) { 
 
 var $saveLoginInfo = function (smName, loginInfo, event, callback) {
+    var dataToPost = "smProfile=" + JSON.stringify(loginInfo) + "&email=" + $getClientEmail() + "&sm_name=" + smName;
     $.ajax({
         headers: { "Accept": "application/json" }
         , type: 'POST'
         , url: '/profile/save'
-        , data: "smProfile=" + JSON.stringify(loginInfo) + "&email=" + $getClientEmail()+"&sm_name="+smName
+        , data: dataToPost
         ,dataType: "jsonp"
         , jsonp: "callback"
         , crossDomain: true
@@ -353,7 +354,8 @@ var $saveLoginInfo = function (smName, loginInfo, event, callback) {
                 if (callback) { 
                     callback(data);
                 }
-            } else { 
+            } else {
+                manageServerResponse(data);
             } //if (data.status == 'SUCCESS') { 
         }
         , error: function (jqXHR, textStatus, errorThrown) {

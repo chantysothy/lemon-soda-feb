@@ -41,6 +41,7 @@
     <!--<link rel="stylesheet" href="../css/font-awesome.min.css">-->
     <link href="css/w3.css" rel="stylesheet" />
     <link rel="stylesheet" href="../assets/css/main.css">
+    <link href="../assets/dropzone/dropzone.css" rel="stylesheet" />
     <!-- Twitter Bootstrap css -->
     <!--<link rel="stylesheet" href="../css/bootstrap.min.css">-->
     <!-- jquery.fancybox  -->
@@ -110,6 +111,11 @@
 
                 <br /><br />
                 <div id="boosterArea"  style="margin-top: 10px; margin-bottom: 10px">
+                    <form id="upload-widget" method="post" action="/upload/files" class="dropzone" style="background: #333333; color:#ffffff" >
+                        <div class="fallback">
+                            <input name="file" type="file" />
+                        </div>
+                    </form>
                     <textarea id="boosterTextArea" rows="3" cols="70" class="booster" placeholder="copy/paste url here for social boosting. You can also key in hash tags and text." ></textarea>
                 </div>
                 <div id="serverResponse" class="col-md-8 col-lg-8"></div>
@@ -235,6 +241,7 @@
     <script src="../app/js/sm_login.js"></script>
     <script src="../app/js/jsonutils.js"></script>
     <script src="js/booster.js"></script>
+    <script src="../assets/dropzone/dropzone.js"></script>
     <!-- Single Page Nav -->
     <!--<!--<script src="../js/jquery.singlePageNav.min.js"></script>
     <!-- Twitter Bootstrap -->
