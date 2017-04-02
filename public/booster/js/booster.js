@@ -30,14 +30,14 @@ window.closeManageModal = function () {
     $('#manageVignette').modal('hide');
 };
 $(document).ready(function () {
-    //createBoostingProfile();
     Dropzone.options.uploadWidget = {
         paramName: 'file',
         maxFilesize: 10, // MB
         maxFiles: 4,
         addRemoveLinks: true,
         dictDefaultMessage: 'Click to add photos or videos to your post.',
-        dictResponseError: 'nectorr server configuration error.',
+        dictResponseError: 'nectorr server is not responding.',
+        clickable: true,
         //headers: {
         //    'x-csrf-token': "vidurkohli"
         //},
@@ -48,9 +48,16 @@ $(document).ready(function () {
             this.options.maxThumbnailFilesize = 10;
             //New file added
             this.on("addedfile", function (file) {
+                $('#serverResponse').hide();
                 console.log('new file added ', file);
             });
             // remove file starts
+            this.on("maxfilesexceeded", function (file) {
+                //alert("No more files please!");
+                manageServerResponse({status: "ERROR",message : "No more files please!"});
+                this.removeFile(file);
+            });// remove file starts
+ 
             this.on("removedfile", function (file) {
                 $.ajax({
                     headers: { "Accept": "application/json" }
@@ -65,8 +72,8 @@ $(document).ready(function () {
                     }
                     , jsonPCallback: "jsonpCallback"
                     , success: function (data) {
-                            //var elementList = $(html).find(element);
-                            manageServerResponse(data);
+                        //var elementList = $(html).find(element);
+                        manageServerResponse(data);
                     }//success: function (data) {
                     , error: function (jqXHR, textStatus, errorThrown) {
                         //var msgBox = $('#butrfly-login').find();
@@ -78,7 +85,9 @@ $(document).ready(function () {
             // Send file starts
 
             this.on("sending", function (file, xhr, formData) {
-                formData.append('fileName', { originalName: file.name });
+                formData.append('fileName', JSON.stringify({ originalName: file.name }));
+                formData.append('fileDetails', JSON.stringify(file));
+                formData.append('email', $getClientEmail());
                 console.log('upload started', file);
                 //$('.meter').show();
             });
@@ -98,9 +107,18 @@ $(document).ready(function () {
                 console.log(file);
                 console.log(resp);
                 var response = JSON.parse(resp);
-                var serverInfo = response.data.fileName;
+                var serverInfo = absolutePath(response.data.serverFileName);
                 file['serverFileName'] = serverInfo;
+                imageList.push(serverInfo);
+                $("#currentImg").attr('src', imageList[imageList.length - 1]);
+                $('#boosterPreview').show();
+                $('#buttonPanel').show();
+
             });
+            this.on('sendingmultiple', function (data, xhr, formData) {
+
+            });//this.on('sendingmultiple', function (data, xhr, formData) {
+
             this.on('thumbnail', function (file) {
                 if (file.type == "image/jpeg" || file.type == "image/png") {
                     if (file.width < 250 || file.height < 250) {
@@ -133,7 +151,268 @@ $(document).ready(function () {
             };
             uploadedFiles.push({ fileDetails: file });
         }
-    };
+    }; //Dropzone.options.uploadWidget = {
+    //});
+    //createBoostingProfile();
+  //  // Send file starts
+  //  nectorrDropzone.on("sending", function (file, xhr, formData) {
+  //      $(formData).append('fileDetails', { originalName: file.name });
+  //      $(formData).append('email', { data: $getClientEmail() });
+  //      console.log('upload started', file);
+  //      //$('.meter').show();
+  //  });//this.on("sending", function (file, xhr, formData) {
+  //  nectorrDropzone.accept = function (file, done) {
+  //      file.acceptDimensions = done;
+  //      file.rejectDimensions = function () {
+  //          if (file.type != "image/jpeg" && file.type != "image/png") {
+  //              done('The image must be at least 250 x 250px')
+  //              return;
+  //          } else if ((file.type != 'video/mp4') || (file.type != 'video/mp4') || (file.type != 'video/quicktime') || (file.type != 'video/x-ms-wmv') || (file.type = 'video/x-msvideo')) {
+  //              done('Invalid video format or size exceed 50 mb.')
+  //              return;
+  //          } else {
+  //              done('file format not supported by nectorr.');
+  //              return;
+  //          }//if (file.type != "image/jpeg" && file.type != "image/ png") {
+  //      };
+  //      uploadedFiles.push({ fileDetails: file });
+  //  }
+
+    //nectorrDropzone.init = function () {
+    //    this.options.dictRemoveFile = "Delete";
+    //    this.options.maxFilesize = 10;
+    //    this.options.maxThumbnailFilesize = 10;
+    //    this.options.clickable = true;
+    //    this.on("selectedFiles", function (files) {
+    //        console.log("selected files : " + files);
+    //    });
+    //    //New file added
+    //    this.on("addedfile", function (file) {
+    //        console.log('new file added ', file);
+    //        addHiddenFields(file);
+    //    });
+
+    //    this.on("maxfilesexceeded", function (file) {
+    //        manageServerResponse({ status: "ERROR", message: "No more files please!" });
+    //        this.removeFile(file);
+    //    });// remove file starts
+
+    //    this.on("removedfile", function (file) {
+    //        // remove file from array
+    //        $.ajax({
+    //            headers: { "Accept": "application/json" }
+    //            , type: 'GET'
+    //            , url: '/upload/delete'
+    //            , data: "file=" + file.serverFileName
+    //            , dataType: "jsonp"
+    //            , jsonp: "callback"
+    //            , crossDomain: true
+    //            , beforeSend: function (xhr) {
+    //                xhr.withCredentials = true;
+    //            }
+    //            , jsonPCallback: "jsonpCallback"
+    //            , success: function (data) {
+    //                //var elementList = $(html).find(element);
+    //                manageServerResponse(data);
+    //            }//success: function (data) {
+    //            , error: function (jqXHR, textStatus, errorThrown) {
+    //                //var msgBox = $('#butrfly-login').find();
+    //                alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
+    //            }//error: function (jqXHR, textStatus, errorThrown) {
+    //        });
+
+    //    });
+
+    //    // Send file starts
+    //    this.on("sending", function (file, xhr, formData) {
+    //        $(formData).append('fileDetails', { originalName: file.name });
+    //        $(formData).append('email', { data: $getClientEmail() });
+    //        console.log('upload started', file);
+    //        //$('.meter').show();
+    //    });//this.on("sending", function (file, xhr, formData) {
+
+    //    this.on('sendingmultiple', function (files, xhr, formData) {
+
+    //    });//this.on('sendingmultiple', function (data, xhr, formData) {
+
+    //    this.on("totaluploadprogress", function (progress) {
+    //        console.log("progress ", progress);
+    //        //$('.roller').width(progress + '%');
+    //    });//this.on("totaluploadprogress", function (progress) {
+
+    //    this.on("queuecomplete", function (progress) {
+    //        //$('.meter').delay(999).slideUp(999);
+    //        console.log("Queue complete ", progress);
+    //    });//this.on("queuecomplete", function (progress) {
+
+    //    // On removing file
+    //    this.on('success', function (file, resp) {
+    //        console.log(file);
+    //        console.log(resp);
+    //        var response = JSON.parse(resp);
+    //        var serverInfo = absolutePath(response.data.fileName.path);
+    //        file['serverFileName'] = serverInfo;
+    //        imageList.push(serverInfo);
+    //        $("#currentImg").attr('src', imageList[imageList.length - 1]);
+    //        $('#boosterPreview').show();
+    //        $('#buttonPanel').show();
+    //    });//this.on('success', function (file, resp) {
+    //    this.on('thumbnail', function (file) {
+    //        if (file.type == "image/jpeg" || file.type == "image/png") {
+    //            if (file.width < 250 || file.height < 250) {
+    //                file.rejectDimensions();
+    //            } else {
+    //                file.acceptDimensions();
+    //            }
+    //        } else if ((file.type != 'video/mp4') || (file.type != 'video/mp4') || (file.type != 'video/quicktime') || (file.type != 'video/x-ms-wmv') || (file.type = 'video/x-msvideo')) {
+    //            if (file.size > 50) {
+    //                file.rejectDimension();
+    //            }
+    //        } else {
+    //            file.rejectDimensions();
+    //        }
+    //    });
+    //},
+    //nectorrDropzone.accept= function (file, done) {
+    //    file.acceptDimensions = done;
+    //    file.rejectDimensions = function () {
+    //        if (file.type != "image/jpeg" && file.type != "image/png") {
+    //            done('The image must be at least 250 x 250px')
+    //            return;
+    //        } else if ((file.type != 'video/mp4') || (file.type != 'video/mp4') || (file.type != 'video/quicktime') || (file.type != 'video/x-ms-wmv') || (file.type = 'video/x-msvideo')) {
+    //            done('Invalid video format or size exceed 50 mb.')
+    //            return;
+    //        } else {
+    //            done('file format not supported by nectorr.');
+    //            return;
+    //        }//if (file.type != "image/jpeg" && file.type != "image/ png") {
+    //    };
+    //    uploadedFiles.push({ fileDetails: file });
+    //}
+
+//    nectorrDropzone.options.uploadWidget = {
+////        Dropzone.options.uploadWidget = {
+//        paramName: 'file',
+//        maxFilesize: 10, // MB
+//        maxFiles: 4,
+//        addRemoveLinks: true,
+//        dictDefaultMessage: 'Click to add photos or videos to your post.',
+//        dictResponseError: 'nectorr server configuration error.',
+//        //headers: {
+//        //    'x-csrf-token': "vidurkohli"
+//        //},
+//        acceptedFiles: 'image/*, video/*,.mp4,.mov,.wmv',
+//        init: function () {
+//            this.options.dictRemoveFile = "Delete";
+//            this.options.maxFilesize = 10;
+//            this.options.maxThumbnailFilesize = 10;
+//            this.options.clickable = true;
+//            this.on("selectedFiles", function (files) {
+//                console.log("selected files : " + files);
+//            });
+//            //New file added
+//            this.on("addedfile", function (file) {
+//                console.log('new file added ', file);
+//                addHiddenFields(file);
+//            });
+//            this.on("maxfilesexceeded", function (file) {
+//                //alert("No more files please!");
+//                manageServerResponse({status: "ERROR",message : "No more files please!"});
+//                this.removeFile(file);
+//            });// remove file starts
+//            this.on("removedfile", function (file) {
+//                // remove file from array
+//                $.ajax({
+//                    headers: { "Accept": "application/json" }
+//                    , type: 'GET'
+//                    , url: '/upload/delete'
+//                    , data: "file=" + file.serverFileName
+//                    , dataType: "jsonp"
+//                    , jsonp: "callback"
+//                    , crossDomain: true
+//                    , beforeSend: function (xhr) {
+//                        xhr.withCredentials = true;
+//                    }
+//                    , jsonPCallback: "jsonpCallback"
+//                    , success: function (data) {
+//                            //var elementList = $(html).find(element);
+//                            manageServerResponse(data);
+//                    }//success: function (data) {
+//                    , error: function (jqXHR, textStatus, errorThrown) {
+//                        //var msgBox = $('#butrfly-login').find();
+//                        alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
+//                    }//error: function (jqXHR, textStatus, errorThrown) {
+//                });
+
+//            });
+//            // Send file starts
+
+//            this.on("sending", function (file, xhr, formData) {
+//                formData.append('fileDetails', { originalName: file.name });
+//                formData.append('email', { data: $getClientEmail() });
+//                console.log('upload started', file);
+//                //$('.meter').show();
+//            });//this.on("sending", function (file, xhr, formData) {
+
+//            this.on('sendingmultiple', function (data, xhr, formData) {
+
+//            });//this.on('sendingmultiple', function (data, xhr, formData) {
+
+//            this.on("totaluploadprogress", function (progress) {
+//                console.log("progress ", progress);
+//                //$('.roller').width(progress + '%');
+//            });//this.on("totaluploadprogress", function (progress) {
+
+//            this.on("queuecomplete", function (progress) {
+//                //$('.meter').delay(999).slideUp(999);
+//                console.log("Queue complete ", progress);
+//            });//this.on("queuecomplete", function (progress) {
+
+//            // On removing file
+//            this.on('success', function (file, resp) {
+//                console.log(file);
+//                console.log(resp);
+//                var response = JSON.parse(resp);
+//                var serverInfo = absolutePath(response.data.fileName.path);
+//                file['serverFileName'] = serverInfo;
+//                imageList.push(serverInfo);
+//                $("#currentImg").attr('src', imageList[imageList.length - 1]);
+//                $('#boosterPreview').show();
+//                $('#buttonPanel').show();
+//            });//this.on('success', function (file, resp) {
+//            this.on('thumbnail', function (file) {
+//                if (file.type == "image/jpeg" || file.type == "image/png") {
+//                    if (file.width < 250 || file.height < 250) {
+//                        file.rejectDimensions();
+//                    } else {
+//                        file.acceptDimensions();
+//                    }
+//                } else if ((file.type != 'video/mp4') || (file.type != 'video/mp4') || (file.type != 'video/quicktime') || (file.type != 'video/x-ms-wmv') || (file.type = 'video/x-msvideo')) {
+//                    if (file.size > 50) {
+//                        file.rejectDimension();
+//                    }
+//                } else {
+//                    file.rejectDimensions();
+//                }
+//            });
+//        },
+//        accept: function (file, done) {
+//            file.acceptDimensions = done;
+//            file.rejectDimensions = function () {
+//                if (file.type != "image/jpeg" && file.type != "image/png") {
+//                    done('The image must be at least 250 x 250px')
+//                    return;
+//                } else if ((file.type != 'video/mp4') || (file.type != 'video/mp4') || (file.type != 'video/quicktime') || (file.type != 'video/x-ms-wmv') || (file.type = 'video/x-msvideo')) {
+//                    done('Invalid video format or size exceed 50 mb.')
+//                    return;
+//                } else {
+//                    done('file format not supported by nectorr.');
+//                    return;
+//                }//if (file.type != "image/jpeg" && file.type != "image/ png") {
+//            };
+//            uploadedFiles.push({ fileDetails: file });
+//        }
+//    };
 
     $('#boosterPreview').hide();
     $('#buttonPanel').hide();
@@ -187,6 +466,7 @@ $(document).ready(function () {
             console.log("The selectVignetteModal animation after close is completed");
         }
     });
+
     $("#manageVignette").animatedModal({
         modalTarget: 'manageVignetteModal',
         animatedIn: 'fadeIn',
@@ -208,6 +488,7 @@ $(document).ready(function () {
             console.log("The animation after close is completed");
         }
     });
+
     $('#postNow-old').click(function (e) {
         // get Url, get imgUrl, get Caption, get Text
         //var originalUrl, shortUrlForServer, imageUrlForServer, headingForServer, textForServer
@@ -220,7 +501,6 @@ $(document).ready(function () {
         });//$nectorrFacebookLogin(['user_posts', 'manage_pages'], null, function (fbResponse) {
         e.preventDefault();
     });//$('#postNow').click(function (e) {
-
 
     $('#boosterTextArea').bind("paste", function (e) {
         // access the clipboard using the api
@@ -237,8 +517,9 @@ $(document).ready(function () {
                     var shortUrl = data.shortUrl;
                     shortUrlForServer = shortUrl; //used for server comm
                     var postData = pastedData;
-                    postData = postData.replace(extractedUrl.url, shortUrl+"\n");
-
+                    postData = postData.replace(extractedUrl.url, shortUrl + "\n");
+                    var hashTags = hashify(postData);
+                    textForServer = hashTags;
                     $('#boosterTextArea').val(postData);
                     $("#boosterPreview").attr("src", shortUrl);
                     // get list of images
@@ -256,11 +537,19 @@ $(document).ready(function () {
                             para = para.substr(0, strLen);
                             para += '...';
                             $('#paraText').text(para);
-                            textForServer = para;
+                            if (!textForServer) {
+                                textForServer = para;
+                            } else {
+                                textForServer += "/n" + para;
+                            }
                             $('#buttonPanel').show();
                         }
                         slideIndex = 0;
-                        imageList = html.imgTags;
+                        if (imageList.length > 0) {
+                            imageList = imageList.push(html.imgTags);
+                        } else {
+                            imageList = html.imgTags;
+                        }
                         //imageList = cleanImageList(imageList);
                         //imageList = $(parentDiv).children('img').map(function () { return $(this) }).get();
                         if (imageList) {
@@ -287,13 +576,9 @@ $(document).ready(function () {
         // google shortner
     }); //$('booster')..bind("paste", function (e) {
 
-
-
-    //if (!getConnectedSocialMedia) {
-    //    getConnectedSocialMedia = getPerms();
-    //}
     validateLogin();
 }); //$(document).ready(function () {
+
 var addImageListToDiv = function (divName, imgList) {
     if (!divName || !imgList) return;
     
@@ -313,6 +598,7 @@ var cleanImageList = function (imgList) {
     }//for (var counter = 0; counter < imgList.length; counter++) {
     return returnValue;
 }//var cleanImageList = function (imgList) {
+
 var plusDivs= function (index) {
     //showDivs(slideIndex += n);
     if (index < imageList.length - 1) {
@@ -686,7 +972,23 @@ var getPermsFromServer = function (sm_name, callback) {
     } //if (callback) { 
 }//var getPermissionsFromClient = function () { 
 
-var linkify = function (text , callback) {
+var hashify = function (text) {
+    var returnValue = [];
+    var tempArray = text.split(' ');
+    for (var tagCounter = 0; tagCounter < tempArray.length; tagCounter++) {
+        var element = tempArray[tagCounter];
+        if (element.substring(0, 1) == "#") {
+            returnValue.push(element);
+        }//if (element.substring(0, 1) == "#") {
+    }//for (var tagCounter = 0; tagCounter < tempArray.length; tagCounter++) {
+    var returnValueString="";
+    for (var ret_valCounter = 0; ret_valCounter < returnValue.length; ret_valCounter++) {
+        returnValueString= returnValueString + returnValue[ret_valCounter] + " ";
+    }//for (var ret_valCounter = 0; ret_valCounter < returnValue.length; ret_valCounter++) {
+    return returnValueString;
+}//var hashify = function (text) {
+
+var linkify = function (text, callback) {
     var urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
     return text.replace(urlRegex, function (url) {
         if (callback) {
@@ -710,7 +1012,7 @@ var updateServerInfoToFileArray = function (serverInfo, action, callback) {
                 // delete element
                 break;
             case 'update':
-                callback({});
+                //callback({});
                 break;
 
         }//switch (action) {
@@ -741,12 +1043,13 @@ var removeFileFromServer = function (fileName, callback) {
                 });
 
 }
-var getFilePath = function (file, callback) {
+
+var getFilePath = function (fileName, callback) {
     $.ajax({
         headers: { "Accept": "application/json" }
-        , type: 'GET'
+        , type: 'get'
         , url: '/upload/path'
-        , data: "file=" + file
+        , data: "file=" + fileName
         , dataType: "jsonp"
         , jsonp: "callback"
         , crossDomain: true
@@ -767,3 +1070,26 @@ var getFilePath = function (file, callback) {
 
 
 }//var getFilePath = function (file, callback) {
+
+var absolutePath = function (href) {
+    var link = document.createElement("a");
+    link.href = href;
+    var returnValue = (link.protocol + "//" + link.host + link.pathname + link.search + link.hash);
+    // check if this link is in HTML, if so delete it.
+    return returnValue;
+}
+var addHiddenFields = function (file) {
+    $('<input>').attr({
+        type: 'hidden',
+        id: 'fileDetails',
+        name: 'fileDetails',
+        value: JSON.stringify(file)
+    }).appendTo('upload-widget');
+
+    $('<input>').attr({
+        type: 'hidden',
+        id: 'email',
+        name: 'Email',
+        value: $getClientEmail()
+    }).appendTo('upload-widget');
+}//var addHiddenFields = function () {

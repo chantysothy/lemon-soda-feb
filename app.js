@@ -2,6 +2,7 @@ var express = require('express');
 var contentType = require('content-type');
 var getRawBody = require('raw-body');
 var path = require('path');
+var busboy = require('connect-busboy');
 var expressSession = require('express-session');
 var router = require('./routes/index');
 var tweets = require('./routes/tweets');
@@ -12,6 +13,7 @@ var scheduler = require('./routes/scheduler.js');
 var postManager = require('./routes/postmanager.js');
 var fileManager = require('./routes/fileManager.js');
 var fs = require('fs');
+var busboy = require('connect-busboy');
 var mongodb = require('mongodb');
 var mongoose = require('mongoose');
 var passport = require('passport');
@@ -92,6 +94,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 // setup routes
+app.use(busboy());
 app.use('/', router);
 app.use(google);
 app.use(tweets);

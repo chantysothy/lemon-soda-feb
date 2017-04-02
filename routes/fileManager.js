@@ -1,6 +1,7 @@
 ﻿var express = require('express');
 var router = express.Router();
 var fs = require('fs');
+var multer = require('multer')
 //vignettes
 var userModel = require('../models/user');
 var vignetteModel = require('../models/vignettes');
@@ -10,6 +11,12 @@ var userPosts = require('../models/userposts');
 var config = require('../config/config');
 
 var imageFileBasePath = '../lemon-soda-jan/public/upload/images', videoFileBasePath;
+var imagePublishPath = '../upload/images', videoFileBasePath;
+
+var uploader = multer(
+    {
+        dest: imageFileBasePath
+    });
 
 router.get('/upload/path', function (req, res) {
     var callback = req.query.callback;
@@ -58,40 +65,85 @@ router.get('/upload/delete', function (req, res) {
             res.end();
         }
     }//if (callback) {
-})//router.get('/upload/delete', function (req, res) {
+});//router.get('/upload/delete', function (req, res) {
+//var upload = require('fileupload').createFileUpload(imageFileBasePath).middleware;
+router.post('upload/files-new',function(req,res,next){
+    //var upload = require('fileupload').createFileUpload(imageFileBasePath).middleware;
+    var fstream;
+    req.pipe(req.busboy);
+    req.busboy.on('file', function (fieldname, file, filename) {
+        console.log("Uploading: " + filename);
+
+        //Path where image will be uploaded
+        fstream = fs.createWriteStream(imageFileBasePath+"\/" + filename);
+        file.pipe(fstream);
+        fstream.on('close', function () {
+            console.log("Upload Finished of " + filename);
+            var response = {
+                status: "SUCCESS", message: "File uploaded.", data: {
+                    originalFileName: filename,
+                    serverFileName : serverFileName
+                }
+            }//var response = {
+        });
+    });    
+});//router.post('upload/files', upload.single('file'), function (req, res, next) {
 
 router.post('/upload/files', function (req, res) {
     var fileSize = req.headers['content-length'];
-    var originalFileName = req.body.fileName
-    var email = req.headers['email'];
-    var uploadedBytes = 0;
+    var fstream;
+    req.pipe(req.busboy);
+    req.busboy.on('file', function (fieldname, file, filename) {
+        console.log("Uploading: " + filename);
 
-    var fileName
-    getUserId(email, function (userInfo) {
-        if (userInfo.status == "SUCCESS") {
-            fileName = userInfo.data._id + "_" + Date.now();
-            var fullFileName = imageFileBasePath + "\\" + fileName;
-            var destinationFile = fs.createWriteStream(fullFileName);
-            req.pipe(destinationFile);
-            req.on('data', function (d) {
-                uploadedBytes += d.length;
-                var p = (uploadedBytes / fileSize) * 100;
-                //res.body['fileName'] = fileName;
-                //res.write(JSON.stringify({ status: "SUCCESS", message: "Uploading " + parseInt(p) + "%" }));
-            });//request.on('data', function (d) {
+        //Path where image will be uploaded
+        var tempFileName = Date.now().toString() + '-' + filename;
+        var serverFileName = imageFileBasePath + "\/" + tempFileName;
+        var publishUrl = imagePublishPath + "\/" + tempFileName;
 
-
-            req.on('end', function () {
-                res.write(JSON.stringify({status: "SUCCESS", message:"File upload complete.", data : {"fileName": fileName }}));
-                res.end();
-                destinationFile.close();
-            });
-
-        } else {
-            res.send(JSON.stringify(userInfo));
+        fstream = fs.createWriteStream(serverFileName);
+        file.pipe(fstream);
+        fstream.on('close', function () {
+            console.log("Upload Finished of " + filename);
+            var response = {
+                status: "SUCCESS", message: "File uploaded.", data: {
+                    originalFileName: filename,
+                    "serverFileName": publishUrl
+                }
+                
+            }//var response = {
+            res.write(JSON.stringify(response));
             res.end();
-        }//if (userInfo.status == "SUCCESS") {
-    });// + '_' + Date.now()
+        });
+    });    
+
+    //var email = req.headers['email'];
+//    var uploadedBytes = 0; 
+//    var fileName, fullFileName;
+////    fileName = userInfo.data._id + "_" + Date.now();
+//    fileName = Date.now();
+//    var clientFileName = " ";//req.files.file.path;
+//    var extnArray = clientFileName.split('.');
+//    if (extnArray && extnArray.length > 0) {
+//        var extn = extnArray[extnArray.length - 1]
+//        fullFileName = imageFileBasePath + "\/" + fileName + "." + extn;
+//    } else {
+//        fullFileName = imageFileBasePath + "\/" + fileName;
+//    }
+//    var destinationFile = fs.createWriteStream(fullFileName);
+//    req.pipe(destinationFile);
+//    req.on('data', function (d) {
+//                    uploadedBytes += d.length;
+//                    var p = (uploadedBytes / fileSize) * 100;
+//                    //res.body['fileName'] = fileName;
+//                    //res.write(JSON.stringify({ status: "SUCCESS", message: "Uploading " + parseInt(p) + "%" }));
+//                });//request.on('data', function (d) {
+//    req.on('end', function () {
+//        res.write(JSON.stringify({ status: "SUCCESS", message: "File upload complete.", data: { "fileName": destinationFile } }));
+//        res.end();
+//        destinationFile.close();
+//    });//req.on('end', function () {
+
 });//router.get('/google/profile', function (req, res) {
 
 var escapeSpecialChars = function (param) {

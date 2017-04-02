@@ -997,7 +997,8 @@ var postUsingVignette = function (vignetteInfo,callback) {
     $.ajax({
         headers: { "Accept": "application/json" }
         , type: 'post'
-        , url: '/send/post/vignette'
+        //, 
+        , url: '/schedule/new'
         , data: "email=" + $getClientEmail() + "&dataToPost=" + JSON.stringify(vignetteInfo.dataToPost) + "&vignettes=" + JSON.stringify(vignetteInfo.vignettes) + "&timelines=" + JSON.stringify(vignetteInfo.timelines)//+ "&vignetteInfo=" + JSON.stringify(vignetteData) + "&vignette_name=" + vignetteName
         , dataType: "jsonp"
         , jsonp: "callback"

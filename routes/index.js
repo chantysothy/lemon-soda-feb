@@ -649,11 +649,17 @@ router.get('/facebook/read/posts', function (req, res) {
 var getTagsForBooster = function (body,url) {
 //    var tagsArray = ['title', 'imageId', 'paragraphs'];
     var tagsArray = ['h1', 'img', 'p'];
+    var alternateTagsArray = ['h2', null, null];
     var attribArray = [null, 'src', null];
     var returnValue = {}
     for (var counter = 0; counter < tagsArray.length; counter++){
-        var tagResult = getTagsFromHTML(tagsArray[counter], attribArray[counter], body,url);
-            returnValue[tagsArray[counter]+'Tags'] = tagResult;
+        var tagResult = getTagsFromHTML(tagsArray[counter], attribArray[counter], body, url);
+        if (tagResult.length > 0) {
+            returnValue[tagsArray[counter] + 'Tags'] = tagResult;
+        } else {
+            tagResult = getTagsFromHTML(alternateTagsArray[counter], attribArray[counter], body, url);
+            returnValue[tagsArray[counter] + 'Tags'] = tagResult;
+        }
     }//for (var counter = 0; counter < tagsArray.length; counter++){
     return returnValue;
 } //var getTagsForBooster = function () {
@@ -726,11 +732,10 @@ router.get('/twitter/get/lists', function (req, res) {
     }//if (callback) {
     //console.log("Instagram callback : " + JSON.stringify(req.query['#access_token']));
 });
-
-router.get('/auth/twitter', function (req, res) {
+ router.get('/auth/twitter', function (req, res) {
     var callback = req.query.callback;
     if (callback) {
-        twitterEmail = rea.query.email;
+        twitterEmail = req.query.email;
         if (twitterEmail) {
             var twitterAPI = new Twitter({
                 consumerKey: config.twitter.consumer_key
@@ -758,9 +763,7 @@ router.get('/auth/twitter/callback', function (req, res) {
     var a = 1;// for debugger breakpoint. TBR
     var callback = req.query.callback;
     var twitterStream = [];
-
-
-    var twitterAPI = new Twitter({
+    var twitterAPI = new TwitterBase({
         consumerKey: config.twitter.consumer_key
         , consumerSecret: config.twitter.consumer_secret
         , callback: config.twitter.redirect_url
