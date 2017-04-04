@@ -14,7 +14,7 @@ var dbConfig = require('../config/database');
 var Agenda = require('agenda');
 var agenda = new Agenda({ db: { address: dbConfig.url, collection: 'agenda-scheduler' } });
 var Scheduler = require('../utils/scheduler');
-var scheduler = Scheduler.getInstance();
+//var scheduler = Scheduler.getInstance();
 
 agenda.on('ready', function () {
     console.log("Agenda ready to start");
@@ -337,10 +337,6 @@ var getFBAccessToken = function (callback) {
     //});
 }//var getFBAccessToken = function (callback) {
 
-var getTwitterBearerToken = function (callback) {
-
-}//var getTwitterBearerToken = function (callback) {
-
 var getTwitterToken = function (callback) {
     passport.use("twitter", new TwitterStrategy({
 
@@ -576,13 +572,25 @@ var validateToken = function (token, callback) {
         }//if (callback) {
     });
 }//var validateToken = function(token, callback) {
-router.get('/schedule/new', function (req, res) {
-    var callback = req.query.callback;
+router.post('/schedule/new', function (req, res) {
+    var callback = req.body.callback;
     if (callback) {
-        var email = req.query.email;
+        var email = req.body.email;
         if (email) {
-            var postScheduler = scheduler.getInstance();
-            postScheduler.addTask(null)
+            //var postScheduler = scheduler
+            var vignettes = JSON.parse(req.body.vignettes).vignettes;
+            if (!Scheduler.isRunning) {
+                Scheduler.startScheduler()
+            }
+            var dataToPost = JSON.parse(req.body.dataToPost);
+            dataToPost['vignettes'] = vignettes;
+            var vignetteTimelines = JSON.parse(req.body.timelines);
+            var task = {
+                name: email + Date.now()
+                , timelines: vignetteTimelines 
+            }
+            Scheduler.setTask(email, task, dataToPost, function (taskData) {
+            });
         }//if (email) {
     }//if (callback) {
     

@@ -11,6 +11,7 @@ var Scheduler = function Scheduler() {
 
     this.findByHandle = function (callback) {
         var condition = { taskHandle: this._taskHandle };
+
         schedulerTaskModel.find(condition, function (err, doc) {
             if (err) {
                 console.log(err);
@@ -36,6 +37,54 @@ var Scheduler = function Scheduler() {
 
         });//this.findByHandle(function (taskObject) {
     };
+
+    this.quickSort = function (arr, left, right) {
+        var len = arr.length,
+            pivot,
+            partitionIndex;
+
+
+        if (left < right) {
+            pivot = right;
+            partitionIndex = partition(arr, pivot, left, right);
+
+            //sort left and right
+            quickSort(arr, left, partitionIndex - 1);
+            quickSort(arr, partitionIndex + 1, right);
+        }
+        return arr;
+    }//function quickSort(arr, left, right)
+
+    this.partition = function(arr, pivot, left, right) {
+        var pivotValue = arr[pivot],
+            partitionIndex = left;
+
+        for (var i = left; i < right; i++) {
+            if (arr[i] < pivotValue) {
+                swap(arr, i, partitionIndex);
+                partitionIndex++;
+            }
+        }//function partition(arr, pivot, left, right) {
+        swap(arr, right, partitionIndex);
+        return partitionIndex;
+    }
+
+    this.swap = function (arr, i, j) {
+        var temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+
+    this.curateTimeLine = function (timeline) {
+        var timeNow = Date.now();
+        timeline.forEach(function (item, index) {
+            if (timeNow > item) {
+                timeline.splice(index, 1);
+            }
+        });
+        return timeline;
+    }
+
     this.setTask = function (userId, task, params, callback) {
         //set this.executeAt
         if (this._started)
@@ -46,9 +95,11 @@ var Scheduler = function Scheduler() {
                         task['callback'] = callback;
                         var dbModel = new schedulerTaskModel();
                         dbModel.email = userId;
-                        var timeline = task.schedule;
-                        timeline = this.quicksort(timeline, 0, timeline.length);
-                        timeline = this.curateTimeLine(timeline);
+                        var timeline = task.timelines.timeline;
+                        timeline = this.quickSort(timeline, 0, timeline.length);
+//                        timeline = this.curateTimeLine(timeline);
+//                        timeline = quicksort(timeline, 0, timeline.length);
+//                        timeline = this.curateTimeLine(timeline);
                         if (timeline.length > 0) {
                             task.task.executeAt = timeline[0]
                             this._taskHandle = setTimeOut(this.execute(), task.task.executeAt);
@@ -87,38 +138,61 @@ var Scheduler = function Scheduler() {
     };
 
     this.stopScheduler = function () {
-
+        if (this._taskHandle)
+            clearTimeout(this._taskHandle);
+        this.isRunning = false;
     }////this.SetTask = function (userId, task, params, callback) {
 
     this.startScheduler = function () {
-
+        this.isRunning = true;
     }////this.SetTask = function (userId, task, params, callback) {
 
     this.restartScheduler = function () {
-
+        this.stopScheduler();
+        this.startScheduler();
     }////this.SetTask = function (userId, task, params, callback) {
-    //====SINGLETON CLASS DEFINITION=====================================
-
-    Scheduler.getInstance = function () {
-        if (this._instance == null) {
-            this._instance = new Scheduler();
-        }//if (this._instance== null){
-        return this._instance;
-    }//Scheduler.getInstance(){
-
-    Scheduler.start = function () {
-        if (!this._started) {
-            // get the first
-        } else {
-            throw new Error("Scheduler is running. Stop the scheduler to start again.");
-        }
-    }//Scheduler.start = function () {
-
-    Scheduler.stop = function () {
-
-    }//Scheduler.stop = function () {
-
-    Scheduler.restart = function () {
-
-    }////Scheduler.stop = function () {
+    this.isRunning = function () {
+        return this._started;
+        //this.stopScheduler();
+    }
+    //this.startScheduler();
 }//var Scheduler = function Scheduler() {
+//====SINGLETON CLASS DEFINITION=====================================
+
+Scheduler.stop = function () {
+
+}//Scheduler.stop = function () {
+
+Scheduler.restart = function () {
+}////Scheduler.stop = function () {
+
+Scheduler.isRunning = function () {
+    return this._started;
+}
+
+Scheduler.addTask = function (userId, task, params, callback) {
+    this.setTask(userId, task, params, function (taskParam) {
+        callback(taskParam);
+        this.restartScheduler();
+    });//this.setTask(userId, task, params, function (taskParam) {
+};
+
+Scheduler.start = function () {
+    if (!this._started) {
+        // get the first
+    } else {
+        throw new Error("Scheduler is running. Stop the scheduler to start again.");
+    }
+}//Scheduler.start = function () {
+
+Scheduler.getInstance = function () {
+    if (this._instance == null) {
+        this._instance = new Scheduler();
+    }//if (this._instance== null){
+    this._instance._started = true;
+    return this._instance;
+}//Scheduler.getInstance(){
+
+
+
+module.exports = Scheduler.getInstance();

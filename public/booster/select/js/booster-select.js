@@ -44,47 +44,57 @@ window.closeModal = function () {
     $('#iframeModal').modal('hide');
 };
 $(document).ready(function () {
-    $('#vignette-timeline').weekCalendar({
-        timeslotsPerHour: 4,
-        height: function ($calendar) {
-            return 240//$(window).height() - $("h1").outerHeight();
-        },
-        eventRender: function (calEvent, $event) {
-            if (calEvent.end.getTime() < new Date().getTime()) {
-                $event.css("backgroundColor", "#aaa");
-                $event.find(".time").css({ "backgroundColor": "#999", "border": "1px solid #888" });
-            }
-        },
-        eventNew: function (calEvent, $event) {
-            var id = Date.now().toString();
-            calEvent["nectorr-id"] = id;
-            timeLines.push(calEvent);
-        },
-        eventDrop: function (calEvent, $event) {
-            //displayMessage("<strong>Moved Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
-            var a = calEvent;
-            //findReplaceEvent(calEvent);
-        },
-        eventResize: function (calEvent, $event) {
-            //set the font sizes here
-            displayMessage("<strong>Resized Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
-        },
-        eventClick: function (calEvent, $event) {
-            var id = Date.now().toString();
-            calEvent['nectorr-id'] = id;
-            timeLines.push(calEvent);
-        },
-        eventMouseover: function (calEvent, $event) {
-            //displayMessage("<strong>Mouseover Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
-        },
-        eventMouseout: function (calEvent, $event) {
-            //displayMessage("<strong>Mouseout Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
-        },
-        noEvents: function () {
-            displayMessage("There are no events for this week");
-        },
-        data: eventData
+    $('broadcastNow').hide();
+    $('broadcastBtn').hide();
+    var dateNow = Date();
+    $('#select-time').datetimepicker({
+        value: dateNow
+        , format: 'd/m/Y'
+        , inline: true
+        , defaultTime: '10:00'
     });
+    $('#select-time').show();
+    //$('#vignette-timeline').weekCalendar({
+    //    timeslotsPerHour: 4,
+    //    height: function ($calendar) {
+    //        return 240//$(window).height() - $("h1").outerHeight();
+    //    },
+    //    eventRender: function (calEvent, $event) {
+    //        if (calEvent.end.getTime() < new Date().getTime()) {
+    //            $event.css("backgroundColor", "#aaa");
+    //            $event.find(".time").css({ "backgroundColor": "#999", "border": "1px solid #888" });
+    //        }
+    //    },
+    //    eventNew: function (calEvent, $event) {
+    //        var id = Date.now().toString();
+    //        calEvent["nectorr-id"] = id;
+    //        timeLines.push(calEvent);
+    //    },
+    //    eventDrop: function (calEvent, $event) {
+    //        //displayMessage("<strong>Moved Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
+    //        var a = calEvent;
+    //        //findReplaceEvent(calEvent);
+    //    },
+    //    eventResize: function (calEvent, $event) {
+    //        //set the font sizes here
+    //        displayMessage("<strong>Resized Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
+    //    },
+    //    eventClick: function (calEvent, $event) {
+    //        var id = Date.now().toString();
+    //        calEvent['nectorr-id'] = id;
+    //        timeLines.push(calEvent);
+    //    },
+    //    eventMouseover: function (calEvent, $event) {
+    //        //displayMessage("<strong>Mouseover Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
+    //    },
+    //    eventMouseout: function (calEvent, $event) {
+    //        //displayMessage("<strong>Mouseout Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
+    //    },
+    //    noEvents: function () {
+    //        displayMessage("There are no events for this week");
+    //    },
+    //    data: eventData
+    //});
 
     $("#manage-timelines").hide();
 
