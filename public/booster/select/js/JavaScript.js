@@ -22,7 +22,7 @@
     //$('#dateTimeSelector')
     $('#newDateTime').click(function (e) {
         var divId = Date.now().toString();
-        var newInput = $("<input type=\"text\" id=\"" + divId + "\" name=\"" + divId + "\" />").appendTo('#clone-group');
+        var newInput = $("<input type=\"text\" id=\"" + divId + "\" name=\"" + divId + "\" class=\"dateTimePickerForUI\" />").appendTo('#clone-group');
         newInput.attr('placeholder', 'click to add timeline');
         newInput.datetimepicker();
         //$('<div>', {
