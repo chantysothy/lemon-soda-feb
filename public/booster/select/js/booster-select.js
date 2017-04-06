@@ -107,11 +107,11 @@ $('#go-back').click(function (e) {
 
 });//$('#set-time').click(function (e) {
 
-$('#schedule-now').click(function (e) {
+$('#broadcastNow').click(function (e) {
 
     selectedVignettes = [];
     selectedVignettes = getSelectedVignettes();
-    getTimeLines();// filled into global variable timeline.
+    timeLines= getTimeLines();// filled into global variable timeline.
     if (confirm('You want to post now ?')) {
         // Save it!
         if (timeLines.length > 0) {
@@ -171,14 +171,18 @@ var manageServerResponse = function (data, multipleRecords = false) {
 var getSelectedVignettes = function () {
     var returnValue= []
     var multiItems = $(".multi-item").map(function () {
-        return "'" + this.outerHTML + "'";
+        //return "'" + this.outerHTML + "'";
+        return this.outerHTML;
+        //var item = $(this.outerHTML);getTimeLines
+        //return JSON.stringify(JSON.parse('{'+'id:'+this.title+', title:'+this.textContent+'}'))
     }).get().join().split(',');
     for (var divCounter = 0; divCounter < multiItems.length; divCounter++) {
-        var childItem = $(multiItems[divCounter]);
-        var childText = childItem.attr('title');
-        var childItemArray = childText.split('·');
 
-        var elementId = childItem.attr('data-id');
+        var childItem = $(multiItems[divCounter]);
+        var childText = childItem.attr('title');//');
+        //var childItemArray = childText.split('·');
+
+        var elementId = childItem.attr('textContent');//');
 
         var vignette = { id: elementId, desc: childText };//, type: childItemArray[1], sm_name: childItemArray[0] };
         returnValue.push(vignette);
@@ -187,10 +191,19 @@ var getSelectedVignettes = function () {
     return returnValue;
 }
 var getTimeLines = function () {
-    timeLines = [];
-    $('.timelines').each(function () {
-        if ($(this).val()) {
-            timeLines.push(this);
+    returnValue = [];
+    var timelines = $('.timeline');
+    for (var timelineCounter = 0; timelineCounter < timelines.length; timelineCounter++) {
+        var inputValue = $(timelines[timelineCounter]).val()
+        if (inputValue) {
+            returnValue.push(inputValue);
         }
-    });//$('.timelines').each(function () {
+    }//for (var timelineCounter = 0; timelineCounter < timelines.length; timelineCounter++) {
+    return returnValue;
+
+    //.each(function () {
+    //    if ($(this).val()) {
+    //        timeLines.push(this);
+    //    }
+    //});//$('.timeline').each(function () {
 }//var getTimeLines = function () {

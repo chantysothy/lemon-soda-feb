@@ -181,8 +181,7 @@ var SocialMediaGroupsAndPages = {
             $nectorrFacebookLogin(facebookDefaults.scope, null, function (data) {
                 var returnValue = []
                 var user_id = data.authResponse.userID;
-                FB.api("/" + user_id + "/groups",
-                    function (response) {
+                $executeFacebookCommand(facebookDefaults.scope,'/'+user_id+'/groups',function(response){
                         if (response && !response.error) {
                             var postableLocs = {
                                 groups: []

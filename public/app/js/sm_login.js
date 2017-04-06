@@ -105,14 +105,7 @@ $nectorrLinkedInLogin = function (linkedInLoginScope, event, callback) {
 }//$nectorrLinkedInLogin = function (linkedInLoginScope, event, callback) {
 
 $nectorrFacebookLogin = function (fbScope, event, callback) {
-    FB.init({
-        appId: facebookDefaults.appId,  // Change appId 409742669131720 with your Facebook Application ID
-        status: true,
-        xfbml: true,
-        cookie: true,
-        version: 'v2.7' // use version 2.7
-
-    });
+    initFacebookAPI();
 
     if (fbScope) {
             FB.getLoginStatus(function (response) {
@@ -125,7 +118,11 @@ $nectorrFacebookLogin = function (fbScope, event, callback) {
                             fbAccessToken = response.authResponse.accessToken;
                             //var accessToken = response.authResponse.accessToken;
                             nectorrFacebookId = response.authResponse.userID;
-                            callback(response);
+                            if (response.authResponse.expiresIn <= 10000) {
+                                extendFBAccessToken(fbAccessToken, callback);
+                            } else {
+                                callback(response);
+                            }
 
                         } else {
                             alert("There was an error in connecting with facebook. The  message nectorr recieved is : " + error)
@@ -459,15 +456,8 @@ var $setCredsToServer = function (creds, callback) {
 var $executeFacebookCommand = function (scope, command, callback) {
     if (!scope) return;
 
-    if (command){
-        FB.init({
-            appId: facebookDefaults.appId,  // Change appId 409742669131720 with your Facebook Application ID
-            status: true,
-            xfbml: true,
-            cookie: true,
-            version: 'v2.7' // use version 2.7
-
-        });
+    if (command) {
+        initFacebookAPI();
 
         FB.getLoginStatus(function (response) {
             if (response.status === 'connected') {
@@ -1161,7 +1151,7 @@ var extendFBAccessToken = function (fbAccessToken, callback) {
         oAuthParams['client_id'] = facebookDefaults.appId;
         oAuthParams['client_secret'] = facebookDefaults.appSecret;
         oAuthParams['grant_type'] = 'fb_exchange_token';
-        oAuthParams['fb_exchange_token'] = 'accessToken';
+        oAuthParams['fb_exchange_token'] = fbAccessToken;
         oAuthParams['response_type'] = 'token';
         FB.api('/oauth/access_token', 'post', oAuthParams, function (response) {
             if (callback) {
