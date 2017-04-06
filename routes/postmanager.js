@@ -572,27 +572,4 @@ var validateToken = function (token, callback) {
         }//if (callback) {
     });
 }//var validateToken = function(token, callback) {
-router.post('/schedule/new', function (req, res) {
-    var callback = req.body.callback;
-    if (callback) {
-        var email = req.body.email;
-        if (email) {
-            //var postScheduler = scheduler
-            var vignettes = JSON.parse(req.body.vignettes).vignettes;
-            if (!Scheduler.isRunning) {
-                Scheduler.startScheduler()
-            }
-            var dataToPost = JSON.parse(req.body.dataToPost);
-            dataToPost['vignettes'] = vignettes;
-            var vignetteTimelines = JSON.parse(req.body.timelines);
-            var task = {
-                name: email + Date.now()
-                , timelines: vignetteTimelines 
-            }
-            Scheduler.setTask(email, task, dataToPost, function (taskData) {
-            });
-        }//if (email) {
-    }//if (callback) {
-    
-});
 module.exports = router;

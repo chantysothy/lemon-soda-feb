@@ -19,7 +19,6 @@
     <meta name="google-signin-scope" content="profile email">
     <meta name="google-signin-client_id" content="909374797832-f1c2micujrjjjm078tkpjfmg8i02mmd8.apps.googleusercontent.com">
     <link rel='stylesheet' type='text/css' href='https://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/smoothness/jquery-ui.css' />
-    <link href="../../assets/jquery.weekcalendar/jquery.weekcalendar.css" rel="stylesheet" />
     <link href="../../assets/magic-search/jquery.magicsearch.css" rel="stylesheet" />
     <link href="../../assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
     <link rel="shortcut icon" href="../../favicon-1024.png">
@@ -33,13 +32,18 @@
     <link href="css/bootstrap-tagsinput.css" rel="stylesheet" />
     <link href="css/booster-manager.css" rel="stylesheet" />
     <link href="../../assets/css/main.css" rel="stylesheet" />
-    <link href="../../assets/datetimepicker/build/jquery.datetimepicker.min.css" rel="stylesheet" />
+    <!--<link href="../../assets/datetimepicker/build/jquery.datetimepicker.min.css" rel="stylesheet" />-->
+    <link rel="stylesheet" type="text/css" media="all" href= "https://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/smoothness/jquery-ui.css" />
+    <link href="../../assets/bootstrap-datetimepicker-master/build/css/bootstrap-datetimepicker.css" rel="stylesheet" />
+
+    <link href="css/buttons-core.css" rel="stylesheet" />
     <script type="text/javascript" src="//platform.linkedin.com/in.js">
         api_key: 8161blmvykyv0a
         authorize: true
         onLoad: onLinkedInLoad
     </script>
-    <link href="../../assets/datetimepicker/jquery.datetimepicker.css" rel="stylesheet" />
+    <!--<link href="../../assets/datetimepicker/jquery.datetimepicker.css" rel="stylesheet" />-->
+
     <script>
         var onLinkedInLoad = function () {
 
@@ -50,55 +54,56 @@
 <body style="background-color: #333333">
     <div id="fb-root"></div>
     <!-- preloader -->
-    <div id="preloader">
+    <!--<div id="preloader">
         <img src="../../images/loading-animation.gif" alt="nectorr.com">
-    </div>
+    </div>-->
     <!-- end preloader -->
 
     <div class="container">
         <!-- Codrops top bar -->
         <section>
-            <div id="container_demo">
+            <div id="container_demo" style="min-height:300px;overflow:hidden">
                 <div id="wrapper">
                     <div id="login" class="animate form nectorr-body-dark-text">
-                        <form autocomplete="off">
+                        <form autocomplete="off" style="overflow:hidden">
                             <h1>Select vignette for boosting</h1>
 
                             <p>
                                 <br /><br />
                                 <label for="vignette-name" class="uname"> Start keying in a vignette name </label>
-                                <input id="vignette-name" class="magicsearch" name="vignette-name" required="required" type="text" placeholder="e.g. soft launch of new product XYZ." />
+                                <input id="vignette-name" class="magicsearch" name="vignette-name" type="text" placeholder="e.g. soft launch of new product XYZ." />
                             </p>
                             <div><br /><div id="serverResponse"></div></div>
-                            <div id="select-time" class="col-md-6 col-lg-6"></div>
-                            <div id="selectedTime" class="col-md-6 col-lg-6"></div>
-                            <div id="select-options2" class="col-xs-12">
-                                <div class="col-md-12 col-lg-12 pull-right">
-                                    <div id="icon_display">
-                                        <a id="selectCalendar" href="#">
-                                            <img id="set-time" class="image" src="./images/calendar-64.png" />                                            
-                                        </a>
-                                        <a id="broadcastNow" href="#">
-                                            <img id="broadcastBtn" class="image" src="./images/broadcast-64.png"/>
-                                        </a>
-                                    </div>
-                                </div>
-                                <!--<p class="login button">
-                                    <input id="btnLogin" type="submit" value="Next" />
-                                </p>-->
+                            <button id="newDateTime" href="#" class="pure-button button-booster">
+                                Add a timeline
+                            </button>
+                            <div id="selectedTime" class="col-xs-12">
+
                             </div>
-                            <div><br /><br /></div>
-                            <!--<p class="change_link">
-                                Not a member yet ?
-                                <a href="#toregister" class="to_register">Join us</a>
-                            </p>-->
-                        </form>
-                    </div>
+
+                        <div id="select-options2" class="col-xs-12">
+                                <div id="icon_display">
+                                    <!--<a id="selectCalendar" href="#">
+                                        <img id="set-time" class="postable pull-left" src="./images/calendar-64.png" />
+                                    </a>-->
+                                    <!--<p>set<br />timeline</p>
+                                    <p>boost<br />now</p>-->
+                                    <a id="broadcastNow" href="#">
+                                        <img id="broadcastBtn" class="postable pull-right" src="./images/broadcast-64.png" />
+                                    </a>
+                                </div>
+                        </div>
+                    <!--<p class="change_link">
+            Not a member yet ?
+            <a href="#toregister" class="to_register">Join us</a>
+        </p>-->
+                    </form>
+                </div>
                 </div>
             </div>
 
         </section>
-        <section >
+        <!--<section id="timeline-manager" >
             <div id="manage-timelines">
                 <div id="wrapper">
                     <div id="login" class="animate form nectorr-body-dark-text">
@@ -129,7 +134,7 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </section>-->
         <!--<footer id="footer">
             <hr />
             <div class="inner">
@@ -163,7 +168,7 @@
     <!--<script src="js/bootstrap-tagsinput.js"></script>-->
     <script src="js/tokens.min.js"></script>
     <!--<script src ="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/js/bootstrap.min.js"></script>-->
-    <script src="../../assets/jquery.weekcalendar/jquery.weekcalendar.js"></script>
+    <!--<script src="../../assets/jquery.weekcalendar/jquery.weekcalendar.js"></script>-->
     <script src="../../assets/magic-search/jquery.magicsearch.js"></script>
     <script src="../../assets/underscore/underscore.js"></script>
     <script src="../../assets/codebird-js/codebird.js"></script>
@@ -172,7 +177,12 @@
     <!--<script src="../../assets/datetimepicker/build/jquery.datetimepicker.min.js"></script>-->
     <!--<script src="../../assets/datetimepicker/build/jquery.datetimepicker.full.js"></script>-->
     <!--<script src="../../assets/datetimepicker/jquery.datetimepicker.min.js"></script>-->
-    <script src="../../assets/datetimepicker/jquery.datetimepicker.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.js"></script>
+    <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    <script src="../../assets/bootstrap-datetimepicker-master/build/js/bootstrap-datetimepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" media="screen" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
     <script>
 
         $('broadcastNow').hide();

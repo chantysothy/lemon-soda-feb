@@ -1677,6 +1677,8 @@
     <Content Include="public\booster\select\css\animate-custom.css" />
     <Content Include="public\booster\select\css\booster-manager.css" />
     <Content Include="public\booster\select\css\bootstrap-tagsinput.css" />
+    <Content Include="public\booster\select\css\buttons-core.css" />
+    <Content Include="public\booster\select\css\buttons.css" />
     <Content Include="public\booster\select\css\dd.css" />
     <Content Include="public\booster\select\css\demo.css" />
     <Content Include="public\booster\select\css\fonts\BebasNeue-webfont.eot" />

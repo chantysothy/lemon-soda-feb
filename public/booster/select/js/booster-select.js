@@ -1,6 +1,6 @@
-﻿jQuery(window).load(function () {
-    $("#preloader").fadeOut("slow");
-});
+﻿//jQuery(window).load(function () {
+    
+//});
 
 var vignetteList = [];
 var selectedOptions = [];
@@ -29,73 +29,36 @@ var eventData = {
 
 var selectedPostableLocs = {};
 
-$(window).load(function (e) {
+//$(document).load(function (e) {
+//    //$("#preloader").fadeOut("slow");
 
+//    function displayMessage(message) {
+//        $("#message").html(message).fadeIn();
+//    }
 
-    function displayMessage(message) {
-        $("#message").html(message).fadeIn();
-    }
+//    //$calendar.weekCalendar("refresh");
 
-    //$calendar.weekCalendar("refresh");
-
-    var smElementCounter = 0;
-}); //$(window).load(function () { 
+//    var smElementCounter = 0;
+//}); //$(window).load(function () { 
 window.closeModal = function () {
     $('#iframeModal').modal('hide');
 };
 $(document).ready(function () {
+    $('body').attr('color', '#333333');
+    $('#newDateTime').click(function (ev) {
+        ev.preventDefault();
+        var divId = Date.now().toString();
+        var newDiv = $('<div/>').insertAfter("#selectedTime");
+        //newDiv.attr('class', 'input-group date col-xs-3');
+        newDiv.attr('class', 'col-xs-3');      
+        var newInput = $("<input type=\"text\" id=\"" + divId + "\" name=\"" + divId + '_input' + "\" class=\"timeline\" />").appendTo(newDiv);
+        newInput.attr('placeholder', 'click to add timeline');
+        //newInput.attr('color', '#ffffff');
+        newInput.datetimepicker();
+    });
     $('broadcastNow').hide();
     $('broadcastBtn').hide();
     var dateNow = Date();
-    $('#select-time').datetimepicker({
-        value: dateNow
-        , format: 'd/m/Y'
-        , inline: true
-        , defaultTime: '10:00'
-    });
-    $('#select-time').show();
-    //$('#vignette-timeline').weekCalendar({
-    //    timeslotsPerHour: 4,
-    //    height: function ($calendar) {
-    //        return 240//$(window).height() - $("h1").outerHeight();
-    //    },
-    //    eventRender: function (calEvent, $event) {
-    //        if (calEvent.end.getTime() < new Date().getTime()) {
-    //            $event.css("backgroundColor", "#aaa");
-    //            $event.find(".time").css({ "backgroundColor": "#999", "border": "1px solid #888" });
-    //        }
-    //    },
-    //    eventNew: function (calEvent, $event) {
-    //        var id = Date.now().toString();
-    //        calEvent["nectorr-id"] = id;
-    //        timeLines.push(calEvent);
-    //    },
-    //    eventDrop: function (calEvent, $event) {
-    //        //displayMessage("<strong>Moved Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
-    //        var a = calEvent;
-    //        //findReplaceEvent(calEvent);
-    //    },
-    //    eventResize: function (calEvent, $event) {
-    //        //set the font sizes here
-    //        displayMessage("<strong>Resized Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
-    //    },
-    //    eventClick: function (calEvent, $event) {
-    //        var id = Date.now().toString();
-    //        calEvent['nectorr-id'] = id;
-    //        timeLines.push(calEvent);
-    //    },
-    //    eventMouseover: function (calEvent, $event) {
-    //        //displayMessage("<strong>Mouseover Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
-    //    },
-    //    eventMouseout: function (calEvent, $event) {
-    //        //displayMessage("<strong>Mouseout Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
-    //    },
-    //    noEvents: function () {
-    //        displayMessage("There are no events for this week");
-    //    },
-    //    data: eventData
-    //});
-
     $("#manage-timelines").hide();
 
     getVignetteFromDb(function (data) {
@@ -145,17 +108,27 @@ $('#go-back').click(function (e) {
 });//$('#set-time').click(function (e) {
 
 $('#schedule-now').click(function (e) {
+
     selectedVignettes = [];
     selectedVignettes = getSelectedVignettes();
-    var dataForPost = { url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
-    var itemsToPost = { "vignettes": { vignettes: selectedVignettes }, "dataToPost": dataForPost, "timelines": { timeline: timeLines } }
-    postUsingVignette(itemsToPost, function (data) {
-        if (data.status == "SUCCESS") {
-
+    getTimeLines();// filled into global variable timeline.
+    if (confirm('You want to post now ?')) {
+        // Save it!
+        if (timeLines.length > 0) {
+            var dataForPost = { url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
+            var itemsToPost = { "vignettes": { vignettes: selectedVignettes }, "dataToPost": dataForPost, "timelines": { timeline: timeLines } }
+            postUsingVignette(itemsToPost, function (data) {
+            if (data.status == "SUCCESS") {
+                manageServerResponse(data);
+            } else {
+                manageServerResponse(data);
+            }
+        });
         } else {
-
+        // post now
         }
-    });
+    } //if (confirm('You want to post now ?')) {
+
 });//$('#btnPostNow').click(function (e) {
 
 var curateVignetteList = function (listFromDB) {
@@ -213,3 +186,11 @@ var getSelectedVignettes = function () {
     }//for (var divCounter = 0; divCounter < childCounter; divCounter++){
     return returnValue;
 }
+var getTimeLines = function () {
+    timeLines = [];
+    $('.timelines').each(function () {
+        if ($(this).val()) {
+            timeLines.push(this);
+        }
+    });//$('.timelines').each(function () {
+}//var getTimeLines = function () {

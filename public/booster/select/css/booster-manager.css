@@ -17,3 +17,9 @@ border-width: 1px
 }
 select#type-send-to option[value="group"]   { background-image:url(../images/icon-group.png);   }
 select#type-send-to option[value="page"] { background-image:url(../images/icon-page.png); }
+.button-booster {
+    color: white;
+    border-radius: 4px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    background: rgb(28, 184, 65); /* this is a green */
+}

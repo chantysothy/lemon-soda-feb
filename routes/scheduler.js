@@ -62,6 +62,83 @@ router.post("/scheduler/now", function (req, res) {
     }//if (callback) {
 });//router.post("/scheduler/post-now", function (req, res) {
 
+router.post('/scheduler/new', function (req, res) {
+    var callback = req.body.callback;
+    if (callback) {
+        var email = req.body.email;
+        if (email) {
+            //var postScheduler = scheduler
+            var vignettes = JSON.parse(req.body.vignettes).vignettes;
+            if (!Scheduler.isRunning) {
+                Scheduler.startScheduler()
+            }
+            var dataToPost = JSON.parse(req.body.dataToPost);
+            dataToPost['vignettes'] = vignettes;
+            var vignetteTimelines = JSON.parse(req.body.timelines);
+            var task = {
+                name: email + Date.now()
+                , timelines: vignetteTimelines
+            }
+            Scheduler.setTask(email, task, dataToPost, function (taskData) {
+            });
+        }//if (email) {
+    }//if (callback) {
+
+});
+
+router.post('/scheduler/edit', function (req, res) {
+
+});//router.post('/scheduler/edit', function (req, res) {
+
+router.get('/scheduler/delete', function (req, res) {
+
+});//router.post('/scheduler/delete', function (req, res) {
+
+var getSchedulerObjectFromDatabase = function (schedulerInfo, callback) {
+    if (callback) {
+        var condition = { email: schedulerInfo.email, dateTime: schedulerInfo.dateTime, completed: schedulerInfo.status.completed, deleted: false };
+
+        schedulerModel.findOne(condition, function (err, doc) {
+            if (!err) {
+                callback({found : true, data : doc._doc});
+            } else {
+                callback({found : false , error : err});
+            }//if (!err) {
+        });//schedulerModel.findOne(condition, function (err, doc) {
+    }//if (callback) {
+}; //var getSchedulerObjectFromDatabase = function(schedulerInfo, callback) {
+var setScheduler = function () {
+    scheduler = nts.init();
+    global.scheduler = scheduler;
+    scheduler.on('scheduler', function (type, pid, msg) {
+        switch (type) {
+            case 'task_loop':
+                // When an execution is over and the next execution starts
+                manageSchedulerTaskLoop(type, pid, msg);
+                break;
+            case 'task_exit':
+                // Task`s last execution. Loop ends.
+                manageSchedulerTaskExit(type, pid, msg);
+                break;
+            case 'task_error':
+                // task error. Loop ends.
+                manageSchedulerTaskError(type, pid, msg);
+                break;
+            default: break;
+        }
+    })//scheduler.on('scheduler', function (type, pid, msg) {
+}//var setScheduler = function () {
+var deleteScheduler = function(schedulerInfo, callback) {
+
+}//var deleteScheduler = function (schedulerInfo, callback) {
+var manageSchedulerTaskLoop = function (type, pid, msg) {
+}//var manageSchedulerTaskLoop = function(type, pid, msg){
+var manageSchedulerTaskExit = function (type, pid, msg) {
+    //save to database or update records with timelines
+}//var manageSchedulerTaskExit = function (type, pid, msg) {
+var manageSchedulerTaskError = function (type, pid, msg) {
+    //
+}//var manageSchedulerTaskError = function (type, pid, msg) {
 var sendMessageToServer = function (msg, callback, res, post) {//= false) {
     // msg has to be a valid json object
     var payload = JSON.stringify(msg);
@@ -87,61 +164,4 @@ var sendMessageToServer = function (msg, callback, res, post) {//= false) {
     }
 }
 
-router.post('/scheduler/edit', function (req, res) {
-
-});//router.post('/scheduler/edit', function (req, res) {
-
-router.get('/scheduler/delete', function (req, res) {
-
-});//router.post('/scheduler/delete', function (req, res) {
-
-var getSchedulerObjectFromDatabase = function (schedulerInfo, callback) {
-    if (callback) {
-        var condition = { email: schedulerInfo.email, dateTime: schedulerInfo.dateTime, completed: schedulerInfo.status.completed, deleted: false };
-
-        schedulerModel.findOne(condition, function (err, doc) {
-            if (!err) {
-                callback({found : true, data : doc._doc});
-            } else {
-                callback({found : false , error : err});
-            }//if (!err) {
-        });//schedulerModel.findOne(condition, function (err, doc) {
-    }//if (callback) {
-}; //var getSchedulerObjectFromDatabase = function(schedulerInfo, callback) {
-
-    
-
-var setScheduler = function () {
-    scheduler = nts.init();
-    global.scheduler = scheduler;
-    scheduler.on('scheduler', function (type, pid, msg) {
-        switch (type) {
-            case 'task_loop':
-                // When an execution is over and the next execution starts
-                manageSchedulerTaskLoop(type, pid, msg);
-                break;
-            case 'task_exit':
-                // Task`s last execution. Loop ends.
-                manageSchedulerTaskExit(type, pid, msg);
-                break;
-            case 'task_error':
-                // task error. Loop ends.
-                manageSchedulerTaskError(type, pid, msg);
-                break;
-            default: break;
-        }
-    })//scheduler.on('scheduler', function (type, pid, msg) {
-}//var setScheduler = function () {
-
-var deleteScheduler = function(schedulerInfo, callback) {
-
-}//var deleteScheduler = function (schedulerInfo, callback) {
-var manageSchedulerTaskLoop = function (type, pid, msg) {
-}//var manageSchedulerTaskLoop = function(type, pid, msg){
-var manageSchedulerTaskExit = function (type, pid, msg) {
-    //save to database or update records with timelines
-}//var manageSchedulerTaskExit = function (type, pid, msg) {
-var manageSchedulerTaskError = function (type, pid, msg) {
-    //
-}//var manageSchedulerTaskError = function (type, pid, msg) {
 module.exports = router;
