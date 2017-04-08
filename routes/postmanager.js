@@ -565,7 +565,7 @@ var evaluateVignetteAndPost = function (dataToPost, callback) {
     }//var getPostableUrl = function (smPostDetails) {
 }//var EvaluateVignetteAndPost = function (dataToPost) {
 var validateToken = function (token, callback) {
-    var commandString = "graph.facebook.com/debug_token?input_token=" + token + "&accesstoken=" + config.facebookAuth.app_access_token
+    var commandString = "https://graph.facebook.com/debug_token?input_token=" + token + "&accesstoken=" + config.facebookAuth.app_access_token
     request.get(commandString).on('response', function (response) {
         if (response.status==200) {
             callback(response);

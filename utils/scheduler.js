@@ -1,4 +1,8 @@
-﻿var mongoose = require('mongoose');
+﻿var mongoose = require('mongoose').require('mongoose-long')(mongoose);
+
+var SchemaTypes = mongoose.Schema.Types;
+var Long = mongoose.Types.Long;
+
 var schedulerTaskModel = require('../models/schedulerData.js');
 
 
@@ -8,7 +12,7 @@ var Scheduler = function Scheduler() {
     this._task = null;
     this._taskHandle = null;
     this._started = false;
-
+    this.partitionIndex = -1;
     this.findByHandle = function (callback) {
         var condition = { taskHandle: this._taskHandle };
 
@@ -23,7 +27,7 @@ var Scheduler = function Scheduler() {
             }//if (doc) {
         });//schedulerTaskModel.find(condition, function (err, doc) {
     }//this.findByHandle = function () {
-
+    var self = this;
     this.execute = function () {
         // remove the first element of timeline
         var taskModel = this.findByHandle();
@@ -31,49 +35,13 @@ var Scheduler = function Scheduler() {
         this.findByHandle(function(taskObject) {
         // set status to complete
             taskObject.status = 2;
-            taskObject.timeline = taskObject.timeline.splice(0, 1);
+            //taskObject.timeline = taskObject.timeline.splice(0, 1);
         // remove the first item from timeLine
         // setTask using object recieved from find handle
 
         });//this.findByHandle(function (taskObject) {
     };
 
-    this.quickSort = function (arr, left, right) {
-        var len = arr.length,
-            pivot,
-            partitionIndex;
-
-
-        if (left < right) {
-            pivot = right;
-            partitionIndex = partition(arr, pivot, left, right);
-
-            //sort left and right
-            quickSort(arr, left, partitionIndex - 1);
-            quickSort(arr, partitionIndex + 1, right);
-        }
-        return arr;
-    }//function quickSort(arr, left, right)
-
-    this.partition = function(arr, pivot, left, right) {
-        var pivotValue = arr[pivot],
-            partitionIndex = left;
-
-        for (var i = left; i < right; i++) {
-            if (arr[i] < pivotValue) {
-                swap(arr, i, partitionIndex);
-                partitionIndex++;
-            }
-        }//function partition(arr, pivot, left, right) {
-        swap(arr, right, partitionIndex);
-        return partitionIndex;
-    }
-
-    this.swap = function (arr, i, j) {
-        var temp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = temp;
-    }
 
     this.curateTimeLine = function (timeline) {
         var timeNow = Date.now();
@@ -95,26 +63,31 @@ var Scheduler = function Scheduler() {
                         task['callback'] = callback;
                         var dbModel = new schedulerTaskModel();
                         dbModel.email = userId;
-                        var timeline = task.timelines.timeline;
-                        timeline = this.quickSort(timeline, 0, timeline.length);
+                        var timeline = task.timelines;
+//                        timeline = this.quickSort(timeline, 0, timeline.length-1);
 //                        timeline = this.curateTimeLine(timeline);
 //                        timeline = quicksort(timeline, 0, timeline.length);
 //                        timeline = this.curateTimeLine(timeline);
                         if (timeline.length > 0) {
-                            task.task.executeAt = timeline[0]
-                            this._taskHandle = setTimeOut(this.execute(), task.task.executeAt);
-                            task['taskHandle'] = this._taskHandle;
-                        }
-                        dbModel.task = task;
-                        dbModel.save(function (err, doc, rows) {
-                            if (err) {
-                                console.log(err);
-                                return;
-                            }
-                            if (doc) {
+                            task['executeAt'] = Date.parse(timeline[0]);
+                            var executionTime = Long.fromString(task.executeAt) - Date.now();
+                            if (executionTime > 0) {
+                                this._taskHandle = setTimeout(function () {
+                                    this.execute();
+                                }, executionTime);
+                                task['taskHandle'] = this._taskHandle;
+                                dbModel.task = task;
+                                dbModel.save(function (err, doc, rows) {
+                                    if (err) {
+                                        console.log(err);
+                                        return;
+                                    }
+                                    if (doc) {
 
-                            }//if (doc) {
-                        });
+                                    }//if (doc) {
+                                });
+                            }//if (executionTime > 0) {
+                        }//if (timeline.length > 0) {
                     } else {
                         throw new Error("callback is in incorrect format.");
                     }
@@ -140,12 +113,18 @@ var Scheduler = function Scheduler() {
     this.stopScheduler = function () {
         if (this._taskHandle)
             clearTimeout(this._taskHandle);
-        this.isRunning = false;
+        this._started = false;
     }////this.SetTask = function (userId, task, params, callback) {
 
     this.startScheduler = function () {
         this.isRunning = true;
+        this._taskHandle = setInterval(
+            function () {
+                self.executeNow();
+                //this.executeNow()
+            }, 30000);
     }////this.SetTask = function (userId, task, params, callback) {
+
 
     this.restartScheduler = function () {
         this.stopScheduler();
@@ -154,6 +133,37 @@ var Scheduler = function Scheduler() {
     this.isRunning = function () {
         return this._started;
         //this.stopScheduler();
+    }
+
+    this.executeNow = function () {
+        var EXECUTE_AT = Date.now() + (5 * 60 * 1000); 
+        var condition = { 'task.executeAt': { '$lte' : EXECUTE_AT, '$gt': Date.now()} };
+        schedulerTaskModel.find(condition, function (err, docs) {
+            if (err) {
+                throw new Error("StartSchedulerFindError : " + err.message);
+                //return;
+            }//if (err) {
+
+            if (docs.length>0) {
+                // add the first 100 records from the result set in ascending
+                for (var taskCounter = 0; taskCounter < docs.length; taskCounter++) {
+                    var taskInfo = docs[taskCounter].task;
+                    var timeForExecution = taskInfo.executeAt - Date.now();
+                    this._taskHandle= setTimeout(function () {
+                        try {
+                            taskinfo.callback(taskInfo);
+                            taskInfo['status'] = "COMPLETE";
+                            taskInfo.save();
+                        } catch (err) {
+                            console.log("Scheduler error at : "+taskinfo._id+". Error = "+err)
+                        }
+                    }, timeForExecution);//setTimeout(function () {
+                }//for (var taskCounter = 0; taskCounter < docs.length; taskCounter++) {
+                // set timeout
+            }//if (doc) {
+
+
+        });
     }
     //this.startScheduler();
 }//var Scheduler = function Scheduler() {
@@ -189,6 +199,7 @@ Scheduler.getInstance = function () {
     if (this._instance == null) {
         this._instance = new Scheduler();
     }//if (this._instance== null){
+    this._instance.startScheduler();
     this._instance._started = true;
     return this._instance;
 }//Scheduler.getInstance(){

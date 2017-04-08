@@ -19,4 +19,4 @@ var Scheduler = {
 
 var schedulerSchema = mongoose.Schema(Scheduler);
 
-module.exports = mongoose.model('scheduler', schedulerSchema);
+module.exports = mongoose.model('native-scheduler', schedulerSchema);

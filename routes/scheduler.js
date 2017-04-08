@@ -2,9 +2,11 @@
 var router = express.Router();
 var nts = require('node-task-scheduler');
 var schedulerModel = require('../models/schedulerData');
-var scheduler;
+var Scheduler= require('../utils/scheduler');
 var config = require('../config/config');
+var userModel = require('../models/user');
 
+var partitionIndex = -2;
 router.post('/scheduler/add', function (req, res) {
     var callback = req.body.callback;
     if (callback) {
@@ -63,27 +65,69 @@ router.post("/scheduler/now", function (req, res) {
 });//router.post("/scheduler/post-now", function (req, res) {
 
 router.post('/scheduler/new', function (req, res) {
-    var callback = req.body.callback;
-    if (callback) {
-        var email = req.body.email;
-        if (email) {
-            //var postScheduler = scheduler
-            var vignettes = JSON.parse(req.body.vignettes).vignettes;
-            if (!Scheduler.isRunning) {
-                Scheduler.startScheduler()
-            }
-            var dataToPost = JSON.parse(req.body.dataToPost);
-            dataToPost['vignettes'] = vignettes;
-            var vignetteTimelines = JSON.parse(req.body.timelines);
-            var task = {
-                name: email + Date.now()
-                , timelines: vignetteTimelines
-            }
-            Scheduler.setTask(email, task, dataToPost, function (taskData) {
-            });
-        }//if (email) {
-    }//if (callback) {
+    var email = req.body.email;
+    var message;
+    if (email) {
+        var condition = { "local.email": email };
+        userModel.findOne(condition, function (err, doc) {
+            if (err) {
+                message = { status: "ERROR", message: "An error occured while validating user credentials." };
+                sendMessageToServer(message, null, res, true);
+                return;
+            }//if (err) {
 
+            if (doc) {
+                var dataToPost = JSON.parse(req.body.dataToPost);
+                var vignetteTimelines = JSON.parse(req.body.timelines);
+
+                if (vignetteTimelines.timeline.length > 0) {
+                    vignetteTimelines.timeline = quickSort(vignetteTimelines.timeline, 0, vignetteTimelines.timeline.length - 1);
+
+                    dataToPost['executeAt'] = vignetteTimelines.timeline[0];
+                    dataToPost['timeLine']  = vignetteTimelines;
+                    dataToPost['callback'] = schedulerCallback;
+                    dataToPost['vignettes'] = JSON.parse(req.body.vignettes);
+
+                    var taskInfo = { "email": email, task: dataToPost }
+                    schedulerModel.create(taskInfo, function (err, docs) {
+                        if (err) {
+                            message = { status: "ERROR", message: "We encountered an error while updating your tasks to nectorr databases." };
+                            sendMessageToServer(message, null, res, true);
+                            return;
+                        }//if (err) {
+                        if (doc) {
+                            message = { status: "SUCCESS", message: "Tasks successfully submitted. Nectorr shall execute it for you." };
+                            sendMessageToServer(message, null, res);
+                            //if (!Scheduler.isRunning()) {
+                            //    Scheduler.startScheduler();
+                            //}//if (!Scheduler.isRunning()) {
+                        }//if (doc) {
+                    });//schedulerModel.create(taskInfo, function (err, docs) {
+                }//if (vignetteTimelines.length > 0) {
+            }//if (doc) {
+
+        });//userModel.findOne(condition, function (err, doc) {
+    } else {
+        message = { status: "ERROR", message: "user credentials are not valid." }
+        sendMessageToServer(message, null, res, true);
+    }
+        //if (email) {
+        //    //var postScheduler = scheduler
+        //    var vignettes = JSON.parse(req.body.dataToPost).vignettes;
+        //    if (!Scheduler.isRunning()) {
+        //        Scheduler.startScheduler()
+        //    }
+        //    var dataToPost = JSON.parse(req.body.dataToPost);
+        //    //dataToPost['vignettes'] = vignettes;
+        //    var vignetteTimelines = JSON.parse(req.body.timelines);
+        //    var task = {
+        //        name: email + Date.now()
+        //        , timelines: getMilliSeconds(vignetteTimelines)
+        //    }
+        //    Scheduler.setTask(email, task, dataToPost, function (taskData) {
+        //        var a = taskData
+        //    });
+        //}//if (email) {
 });
 
 router.post('/scheduler/edit', function (req, res) {
@@ -153,7 +197,14 @@ var sendMessageToServer = function (msg, callback, res, post) {//= false) {
     // remove non-printable and other non-valid JSON chars
     payload = payload.replace(/[\u0000-\u0019]+/g, "");
     var response = JSON.stringify(msg);
+
+    if (callback == null) {
+        res.write(response);
+        res.end();
+        return;
+    }//if (callback == null) {
     //res.writeHead(200, { 'Content-Type': 'text/plain', 'Content-Length': +response.length + '' });
+
     if (!post) {
         var returnValue = callback + '(' + response + ')';
         res.send(returnValue);
@@ -163,5 +214,54 @@ var sendMessageToServer = function (msg, callback, res, post) {//= false) {
         res.end();
     }
 }
+var getMilliSeconds = function (input) {
+    var returnValue = [];
 
+    for (var counter = 0; counter < input.timeline.length; counter++) {
+        var date = Date.parse(input.timeline[counter]);
+        if (date) {
+            returnValue.push(date);
+        }
+
+    }//for (var counter = 0; counter < input.length; counter++) {
+
+    return returnValue;
+}//var getMilliSeconds = function (input) {
+var quickSort = function (arr, left, right) {
+    var len = arr.length,
+        pivot
+        ;
+    if (left < right) {
+        pivot = right;
+        partitionIndex = partition(arr, pivot, left, right);
+
+        //sort left and right
+        quickSort(arr, left, partitionIndex - 1);
+        quickSort(arr, partitionIndex + 1, right);
+    }
+    return arr;
+}//function quickSort(arr, left, right)
+
+var partition = function (arr, pivot, left, right) {
+    var pivotValue = arr[pivot];
+    partitionIndex = left;
+
+    for (var i = left; i < right; i++) {
+        if (arr[i] < pivotValue) {
+            swap(arr, i, partitionIndex);
+            partitionIndex++;
+        }
+    }//function partition(arr, pivot, left, right) {
+    swap(arr, right, partitionIndex);
+    return partitionIndex;
+} //var partition = function (arr, pivot, left, right) {
+
+var swap = function (arr, i, j) {
+    var temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+}//var swap = function (arr, i, j) {
+var schedulerCallback = function (error, taskInfo, params) {
+
+}//var callback = function (error, taskInfo, params) {
 module.exports = router;

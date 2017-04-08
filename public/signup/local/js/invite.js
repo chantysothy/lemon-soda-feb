@@ -21,7 +21,7 @@ $(document).ready(function () {
                 ,jsonPCallback: "jsonpCallback"
                 , success: function (data) {
                     if (data) {
-                        data = JSON.parse(data);
+                        //data = JSON.parse(data);
                         if (data.status == 'SUCCESS') {
                             var cookieValue = JSON.stringify({ e: loginDetails.user_name, s: 1 });
                             manageServerResponse(data);
@@ -104,10 +104,8 @@ $(document).ready(function () {
         }//var getInvitation = function(request) { 
         $("#btnLogin").click(function (e) {
             e.preventDefault();
-            $("#preloader").fadeIn("fast");
             var loginInfo = getLoginDetails();
             validateLogin(loginInfo);
-            $("#preloader").fadeOut("fast");
         }); //$("#signThemUp").click(function () { 
 
 }); //$(document).ready(function () {

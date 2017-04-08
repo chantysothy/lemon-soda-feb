@@ -112,7 +112,7 @@ $('#broadcastNow').click(function (e) {
     selectedVignettes = [];
     selectedVignettes = getSelectedVignettes();
     timeLines= getTimeLines();// filled into global variable timeline.
-    if (confirm('You want to post now ?')) {
+    if (confirm('Do you want to post now ?')) {
         // Save it!
         if (timeLines.length > 0) {
             var dataForPost = { url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
@@ -172,7 +172,7 @@ var getSelectedVignettes = function () {
     var returnValue= []
     var multiItems = $(".multi-item").map(function () {
         //return "'" + this.outerHTML + "'";
-        return this.outerHTML;
+        return Date.parse(this.outerHTML);
         //var item = $(this.outerHTML);getTimeLines
         //return JSON.stringify(JSON.parse('{'+'id:'+this.title+', title:'+this.textContent+'}'))
     }).get().join().split(',');
@@ -182,12 +182,12 @@ var getSelectedVignettes = function () {
         var childText = childItem.attr('title');//');
         //var childItemArray = childText.split('·');
 
-        var elementId = childItem.attr('textContent');//');
+        var elementId = childItem.attr('data-id');//');
 
         var vignette = { id: elementId, desc: childText };//, type: childItemArray[1], sm_name: childItemArray[0] };
         returnValue.push(vignette);
 
-    }//for (var divCounter = 0; divCounter < childCounter; divCounter++){
+    }//for (var divCounter = 0; divCounter < childCounter; divCounter++){Date
     return returnValue;
 }
 var getTimeLines = function () {
@@ -196,7 +196,7 @@ var getTimeLines = function () {
     for (var timelineCounter = 0; timelineCounter < timelines.length; timelineCounter++) {
         var inputValue = $(timelines[timelineCounter]).val()
         if (inputValue) {
-            returnValue.push(inputValue);
+            returnValue.push(Date.parse(inputValue).toString());
         }
     }//for (var timelineCounter = 0; timelineCounter < timelines.length; timelineCounter++) {
     return returnValue;

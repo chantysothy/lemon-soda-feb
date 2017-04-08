@@ -988,9 +988,9 @@ var postUsingVignette = function (vignetteInfo,callback) {
         headers: { "Accept": "application/json" }
         , type: 'post'
         //, 
-        , url: '/schedule/new'
+        , url: '/scheduler/new'
         , data: "email=" + $getClientEmail() + "&dataToPost=" + JSON.stringify(vignetteInfo.dataToPost) + "&vignettes=" + JSON.stringify(vignetteInfo.vignettes) + "&timelines=" + JSON.stringify(vignetteInfo.timelines)//+ "&vignetteInfo=" + JSON.stringify(vignetteData) + "&vignette_name=" + vignetteName
-        , dataType: "jsonp"
+        //, dataType: "jsonp"
         , jsonp: "callback"
         , crossDomain: true
         , beforeSend: function (xhr) {
@@ -999,7 +999,7 @@ var postUsingVignette = function (vignetteInfo,callback) {
         , jsonPCallback: "jsonpCallback"
         , success: function (data) {
             if (callback) {
-                callback(data);
+                callback(JSON.parse(data));
             } //if (callback) { 
         }
         , error: function (jqXHR, textStatus, errorThrown) {

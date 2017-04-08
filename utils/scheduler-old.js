@@ -122,14 +122,6 @@ var Scheduler = function Scheduler() {
         if (!_schedulerOn) {
             var condition = { status: { $lt: 0 } };
             schedulerTaskModel.find(condition, function (err, docs) {
-                if (err) {
-                    throw new Error("StartSchedulerFindError : " + err.message);
-                }//if (err) {
-
-                if (docs) {
-                    // add the first 100 records from the result set in ascending
-                    // set timeout
-                }//if (doc) {
             }).sort();
             // get from db
         } else {
@@ -141,6 +133,7 @@ var Scheduler = function Scheduler() {
     function StopScheduler() {
         if (_schedulerOn) {
             //update database with all the required entries
+            var schedulerExecuteAt = 5 * 60 * 1000;// every five minutes
             if (_taskHandle) {
                 // set this task as uninitialized
                 clearTimeout(_taskHandle);
