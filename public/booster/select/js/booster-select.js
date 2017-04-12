@@ -185,7 +185,7 @@ var getSelectedVignettes = function () {
         var elementId = childItem.attr('data-id');//');
 
         var vignette = { id: elementId, desc: childText };//, type: childItemArray[1], sm_name: childItemArray[0] };
-        returnValue.push(vignette);
+        (elementId && childText)?returnValue.push(vignette): false;
 
     }//for (var divCounter = 0; divCounter < childCounter; divCounter++){Date
     return returnValue;
@@ -196,7 +196,7 @@ var getTimeLines = function () {
     for (var timelineCounter = 0; timelineCounter < timelines.length; timelineCounter++) {
         var inputValue = $(timelines[timelineCounter]).val()
         if (inputValue) {
-            returnValue.push(Date.parse(inputValue).toString());
+            returnValue.push(Date.parse(inputValue));
         }
     }//for (var timelineCounter = 0; timelineCounter < timelines.length; timelineCounter++) {
     return returnValue;

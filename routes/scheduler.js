@@ -5,7 +5,9 @@ var schedulerModel = require('../models/schedulerData');
 var Scheduler= require('../utils/scheduler');
 var config = require('../config/config');
 var userModel = require('../models/user');
-
+var Itener = require('../utils/itener');//.getInstance();
+var itener = new Itener().getInstance();
+itener.start();
 var partitionIndex = -2;
 router.post('/scheduler/add', function (req, res) {
     var callback = req.body.callback;
@@ -67,6 +69,7 @@ router.post("/scheduler/now", function (req, res) {
 router.post('/scheduler/new', function (req, res) {
     var email = req.body.email;
     var message;
+    var a = itener.isRunning()
     if (email) {
         var condition = { "local.email": email };
         userModel.findOne(condition, function (err, doc) {
@@ -74,39 +77,55 @@ router.post('/scheduler/new', function (req, res) {
                 message = { status: "ERROR", message: "An error occured while validating user credentials." };
                 sendMessageToServer(message, null, res, true);
                 return;
-            }//if (err) {
+            }
 
-            if (doc) {
+            //if (err) {
+
+            //if (doc) {
                 var dataToPost = JSON.parse(req.body.dataToPost);
                 var vignetteTimelines = JSON.parse(req.body.timelines);
 
-                if (vignetteTimelines.timeline.length > 0) {
-                    vignetteTimelines.timeline = quickSort(vignetteTimelines.timeline, 0, vignetteTimelines.timeline.length - 1);
+            //    if (vignetteTimelines.timeline.length > 0) {
+            //        vignetteTimelines.timeline = quickSort(vignetteTimelines.timeline, 0, vignetteTimelines.timeline.length - 1);
 
                     dataToPost['executeAt'] = vignetteTimelines.timeline[0];
-                    dataToPost['timeLine']  = vignetteTimelines;
-                    dataToPost['callback'] = schedulerCallback;
-                    dataToPost['vignettes'] = JSON.parse(req.body.vignettes);
+                    dataToPost['timeLine'] = vignetteTimelines;
+                    itener.on('Itener_TaskStart', function (taskData) {
+                        var a = taskData;
+                    });//itener.on('Itener_TaskStart', function (taskData) {
 
-                    var taskInfo = { "email": email, task: dataToPost }
-                    schedulerModel.create(taskInfo, function (err, docs) {
-                        if (err) {
-                            message = { status: "ERROR", message: "We encountered an error while updating your tasks to nectorr databases." };
-                            sendMessageToServer(message, null, res, true);
-                            return;
-                        }//if (err) {
-                        if (doc) {
-                            message = { status: "SUCCESS", message: "Tasks successfully submitted. Nectorr shall execute it for you." };
-                            sendMessageToServer(message, null, res);
-                            //if (!Scheduler.isRunning()) {
-                            //    Scheduler.startScheduler();
-                            //}//if (!Scheduler.isRunning()) {
-                        }//if (doc) {
-                    });//schedulerModel.create(taskInfo, function (err, docs) {
-                }//if (vignetteTimelines.length > 0) {
-            }//if (doc) {
+                    itener.on('Itener_Error', function (err) {
+                        var message = { status: "ERROR", message: " An error occured while scheduling your post(s.) " + JSON.stringify(err) }
+                    });//itener.on('Itener_Error', function (err) {
+
+                    itener.on('Itener_Task_Scheduled', function (taskData) {
+                        var a = taskData;
+                    });
+                    itener.schedule(email, dataToPost, null);
+            //        //dataToPost['callback'] = schedulerCallback;
+            //        dataToPost['vignettes'] = JSON.parse(req.body.vignettes);
+                    
+            //        var taskInfo = { "email": email, task: dataToPost, executeAt: vignetteTimelines.timeline[0], 'callback': schedulerCallback}
+            //        schedulerModel.create(taskInfo, function (err, docs) {
+            //            if (err) {
+            //                message = { status: "ERROR", message: "We encountered an error while updating your tasks to nectorr databases." };
+            //                sendMessageToServer(message, null, res, true);
+            //                return;
+            //            }//if (err) {
+            //            if (doc) {
+            //                message = { status: "SUCCESS", message: "Tasks successfully submitted. Nectorr shall execute it for you." };
+            //                sendMessageToServer(message, null, res);
+
+            //                //if (!Scheduler.isRunning()) {
+            //                //    Scheduler.startScheduler();
+            //                //}//if (!Scheduler.isRunning()) {
+            //            }//if (doc) {
+            //        });//schedulerModel.create(taskInfo, function (err, docs) {
+            //    }//if (vignetteTimelines.length > 0) {
+            //}//if (doc) {
 
         });//userModel.findOne(condition, function (err, doc) {
+
     } else {
         message = { status: "ERROR", message: "user credentials are not valid." }
         sendMessageToServer(message, null, res, true);
@@ -262,6 +281,7 @@ var swap = function (arr, i, j) {
     arr[j] = temp;
 }//var swap = function (arr, i, j) {
 var schedulerCallback = function (error, taskInfo, params) {
-
+    var a = error;
+    alert(JSON.parse(taskInfo));
 }//var callback = function (error, taskInfo, params) {
 module.exports = router;

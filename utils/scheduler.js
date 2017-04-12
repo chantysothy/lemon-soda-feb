@@ -1,4 +1,6 @@
-﻿var mongoose = require('mongoose').require('mongoose-long')(mongoose);
+﻿var mongoose = require('mongoose');
+var mongooseLong= require('mongoose-long')(mongoose);
+var mongooseFunction=require('mongoose-function')(mongoose);
 
 var SchemaTypes = mongoose.Schema.Types;
 var Long = mongoose.Types.Long;
@@ -136,8 +138,9 @@ var Scheduler = function Scheduler() {
     }
 
     this.executeNow = function () {
-        var EXECUTE_AT = Date.now() + (5 * 60 * 1000); 
-        var condition = { 'task.executeAt': { '$lte' : EXECUTE_AT, '$gt': Date.now()} };
+        var EXECUTE_AT = Date.now() + (5 * 60 * 1000);
+        var TASK_COMPLETE = "COMPLETE"; TASK_EXECUTED = "EXECUTED";
+        var condition = { "executeAt": { $gte: Date.now() }, $and: [{ "executeAt": { $lte: EXECUTE_AT } }] }//{ 'executeAt': { '$lte': EXECUTE_AT, '$gt': Date.now() } };//, 'status': { '$exists' : false }}; // 
         schedulerTaskModel.find(condition, function (err, docs) {
             if (err) {
                 throw new Error("StartSchedulerFindError : " + err.message);
@@ -148,21 +151,39 @@ var Scheduler = function Scheduler() {
                 // add the first 100 records from the result set in ascending
                 for (var taskCounter = 0; taskCounter < docs.length; taskCounter++) {
                     var taskInfo = docs[taskCounter].task;
-                    var timeForExecution = taskInfo.executeAt - Date.now();
-                    this._taskHandle= setTimeout(function () {
-                        try {
-                            taskinfo.callback(taskInfo);
-                            taskInfo['status'] = "COMPLETE";
-                            taskInfo.save();
-                        } catch (err) {
-                            console.log("Scheduler error at : "+taskinfo._id+". Error = "+err)
-                        }
-                    }, timeForExecution);//setTimeout(function () {
+                    if (!docs[taskCounter]['status']) {
+                        docs[taskCounter]['status'] = TASK_EXECUTED;
+                        var callbackForScheduler = docs[taskCounter]['callback'];
+                        docs[taskCounter].save(function (err, docs) {
+                            if (err) {
+                                throw new Error("ERROR WHILE UPDATING TASK STATUS. ERROR DETAILS - " + JSON.stringify(err));
+                            }
+                        });
+                        var timeForExecution = docs[taskCounter].executeAt - Date.now();
+                        this._taskHandle = setTimeout(function () {
+                            try {
+                        //var callbackForScheduler = docs[taskCounter]['callback'];
+                                var callback = eval(callbackForScheduler);//(null, taskInfo);//var schedulerCallback = function (error, taskInfo, params)
+                                //this.prototype.callback = callback;
+                                //this.prototype.callback(null,taskInfo,null);
+                                var tmpCallback = new Object();
+                                tmpCallback['callback'] = callback;
+                                tmpCallback.callback(null, null, null);
+                                docs[taskCounter]['status'] = TASK_COMPLETE;
+                                //update executeAt with the next value in array
+                                docs[taskCounter].save(function (err, docs) {
+                                    if (err) {
+                                        throw new Error("ERROR WHILE UPDATING TASK STATUS. ERROR DETAILS - " + JSON.stringify(err));
+                                    }//if (err) {
+                                });//docs[taskCounter].save(function (err, docs) {
+                            } catch (err) {
+                                console.log("Scheduler error at : " + taskInfo._id + ". Error = " + err)
+                            }
+                        }, timeForExecution);//setTimeout(function () {
+                    }//if (docs[taskCounter]['status']) {
                 }//for (var taskCounter = 0; taskCounter < docs.length; taskCounter++) {
                 // set timeout
             }//if (doc) {
-
-
         });
     }
     //this.startScheduler();

@@ -1,8 +1,16 @@
 ﻿ 
 var mongoose = require('mongoose');
+var mongooseLong = require('mongoose-long')(mongoose);
+var SchemaTypes = mongoose.Schema.Types;
+var Long = mongoose.Types.Long;
+var mongooseFunction = require('mongoose-function')(mongoose);
+
 var Scheduler = {
     email: String
-    ,task: Object
+    , task: Object
+    , executeAt: SchemaTypes.Long
+    , callback: Function
+    , status: String 
     //, status: number
     //, schedule: []
     //, vignettes: []
