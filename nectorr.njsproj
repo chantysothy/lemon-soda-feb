@@ -234,6 +234,7 @@
     <Compile Include="routes\vignette.js" />
     <Compile Include="utils\encryptor.js" />
     <Compile Include="utils\itener.js" />
+    <Compile Include="utils\postmanager.js" />
     <Compile Include="utils\scheduler-old.js" />
     <Compile Include="utils\scheduler.js" />
     <Compile Include="utils\userUtils.js" />

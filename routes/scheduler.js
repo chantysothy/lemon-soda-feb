@@ -2,7 +2,8 @@
 var router = express.Router();
 var nts = require('node-task-scheduler');
 var schedulerModel = require('../models/schedulerData');
-var Scheduler= require('../utils/scheduler');
+//var Scheduler= require('../utils/scheduler');
+var postManager = require('../utils/postmanager');
 var config = require('../config/config');
 var userModel = require('../models/user');
 var Itener = require('../utils/itener');//.getInstance();
@@ -92,6 +93,12 @@ router.post('/scheduler/new', function (req, res) {
                     dataToPost['timeLine'] = vignetteTimelines;
                     itener.on('Itener_TaskStart', function (taskData) {
                         var a = taskData;
+                        var message = { status: "SUCCESS", message: "A task was executed.", data: taskData };
+                        postManager.postUsingVignette(taskData, function (taskExecutionStatus) {
+                            if (taskExecutionStatus.status == "SUCCESS") {
+                                sendMessageToServer(message, null, res, true);
+                            }//if (taskExecutionStatus.status == "SUCCESS") {
+                        });//postManager.postUsingVignette(taskData, function (taskExecutionStatus) {
                     });//itener.on('Itener_TaskStart', function (taskData) {
 
                     itener.on('Itener_Error', function (err) {
@@ -99,7 +106,11 @@ router.post('/scheduler/new', function (req, res) {
                     });//itener.on('Itener_Error', function (err) {
 
                     itener.on('Itener_Task_Scheduled', function (taskData) {
-                        var a = taskData;
+                        sendMessageToServer({ status: "SUCCESS", message: "Post scheduled successfully." }, null, res, true);
+                    });
+            //Itener_TaskSaved
+                    itener.on('Itener_Task_Saved', function (taskData) {
+                        sendMessageToServer({ status: "SUCCESS", message: "Post saved successfully.", data : taskData }, null, res, true);
                     });
                     itener.schedule(email, dataToPost, null);
             //        //dataToPost['callback'] = schedulerCallback;

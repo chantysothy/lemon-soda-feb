@@ -118,15 +118,26 @@ $('#broadcastNow').click(function (e) {
             var dataForPost = { url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
             var itemsToPost = { "vignettes": { vignettes: selectedVignettes }, "dataToPost": dataForPost, "timelines": { timeline: timeLines } }
             postUsingVignette(itemsToPost, function (data) {
-            if (data.status == "SUCCESS") {
-                manageServerResponse(data);
-            } else {
-                manageServerResponse(data);
-            }
-        });
+                if (data.status == "SUCCESS") {
+                    manageServerResponse(data);
+                } else {
+                    manageServerResponse(data);
+                }
+            });
         } else {
-        // post now
-        }
+            var postNowTimeLine = []; var postTime = Date.now() + (20 * 1000); postNowTimeLine.push(postTime);
+
+            var dataForPost = { url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
+            var itemsToPost = { "vignettes": { vignettes: selectedVignettes }, "dataToPost": dataForPost, "timelines": { timeline: postNowTimeLine } }
+            postUsingVignette(itemsToPost, function (data) {
+                if (data.status == "SUCCESS") {
+                    manageServerResponse(data);
+                } else {
+                    manageServerResponse(data);
+                }//if (data.status == "SUCCESS") {
+                // post now
+            });//postUsingVignette(itemsToPost, function (data) {
+        }//        if (timeLines.length > 0) {
     } //if (confirm('You want to post now ?')) {
 
 });//$('#btnPostNow').click(function (e) {
@@ -172,7 +183,7 @@ var getSelectedVignettes = function () {
     var returnValue= []
     var multiItems = $(".multi-item").map(function () {
         //return "'" + this.outerHTML + "'";
-        return Date.parse(this.outerHTML);
+        return this.outerHTML;
         //var item = $(this.outerHTML);getTimeLines
         //return JSON.stringify(JSON.parse('{'+'id:'+this.title+', title:'+this.textContent+'}'))
     }).get().join().split(',');

@@ -20,7 +20,7 @@ var Itener = function () {
     this.execute = function (callback) {
         var dbModel = schedulerTaskModel;
         var conditionTime = Date.now() + this.TIMEOUT_TIME ; 
-        var condition = { "executeAt": { "$lte": conditionTime } };//{ "executeAt": { $gte: Date.now() }, $and: [ { "executeAt": { $lte: 1491816900000 } }
+        var condition = { "executeAt": { $gte: Date.now() }, $and: [{ "executeAt": { $lte: conditionTime } }] }//{ "executeAt": { "$lte": conditionTime } };//{ "executeAt": { $gte: Date.now() }, $and: [ { "executeAt": { $lte: 1491816900000 } }
         dbModel.find(condition, function (err, docs) {
             if (err) {
                 callback({ error: err });
@@ -30,6 +30,16 @@ var Itener = function () {
                 for (var taskCounter = 0; taskCounter < docs.length; taskCounter++) {
                     var currentTask = docs[taskCounter];
                     callback(currentTask);
+                    docs[taskCounter].status = "COMPLETED";
+                    docs[taskCounter].save(function (err, doc, rows) {
+                        if (err) {
+                            self.emit('Itener_Error', err);
+                            return;
+                        }//if (err) {
+                        if (doc) {
+                            self.emit('Itener_Task_Saved', currentTask);
+                        }//if (doc) {
+                    });
                 }//for (var taskCounter = 0; taskCounter < docs.length; taskCounter++) {
             }//if (docs) {
         });
