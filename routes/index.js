@@ -691,6 +691,7 @@ var getTagsFromHTML = function (tag, attrib, html, page_url) {
 router.post('/post/twitter', function (req, res) {
 
 }); //router.post('/post / twitter', function (req, res) {
+
 router.get('/twitter/get/lists', function (req, res) {
     var callback = req.query.callback;
     if (callback) {
@@ -732,6 +733,7 @@ router.get('/twitter/get/lists', function (req, res) {
     }//if (callback) {
     //console.log("Instagram callback : " + JSON.stringify(req.query['#access_token']));
 });
+
  router.get('/auth/twitter', function (req, res) {
     var callback = req.query.callback;
     if (callback) {

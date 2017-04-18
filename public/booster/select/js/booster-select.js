@@ -1,7 +1,9 @@
 ﻿//jQuery(window).load(function () {
     
 //});
+var accessCredsForBooster = {}
 
+var accessTokens = {}
 var vignetteList = [];
 var selectedOptions = [];
 var selectedVignettes = [];
@@ -45,6 +47,7 @@ window.closeModal = function () {
 };
 $(document).ready(function () {
     $('body').attr('color', '#333333');
+    getAccessTokens();
     $('#newDateTime').click(function (ev) {
         ev.preventDefault();
         var divId = Date.now().toString();
@@ -55,6 +58,7 @@ $(document).ready(function () {
         newInput.attr('placeholder', 'click to add timeline');
         //newInput.attr('color', '#ffffff');
         newInput.datetimepicker();
+
     });
     $('broadcastNow').hide();
     $('broadcastBtn').hide();
@@ -116,7 +120,7 @@ $('#broadcastNow').click(function (e) {
         // Save it!
         if (timeLines.length > 0) {
             var dataForPost = { url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
-            var itemsToPost = { "vignettes": { vignettes: selectedVignettes }, "dataToPost": dataForPost, "timelines": { timeline: timeLines } }
+            var itemsToPost = { "vignettes": { vignettes: selectedVignettes }, "dataToPost": dataForPost, "timelines": { timeline: timeLines }, "accessCreds": accessCredsForBooster }
             postUsingVignette(itemsToPost, function (data) {
                 if (data.status == "SUCCESS") {
                     manageServerResponse(data);
@@ -218,3 +222,24 @@ var getTimeLines = function () {
     //    }
     //});//$('.timeline').each(function () {
 }//var getTimeLines = function () {
+
+var getAccessTokens = function () {
+       var a = "For breakpoint... to be removed."
+        $nectorrFacebookLogin(facebookDefaults.scope, null, function (fbAuthResponse) {
+            if (fbAuthResponse && !fbAuthResponse.error) {
+                accessCredsForBooster['facebook'] = fbAuthResponse;
+                //accessTokens
+            }//if (fbAuthResponse && !fbAuthResponse.error) {
+        });//$nectorrFacebookLogin(facebookDefaults.scope, null, function (fbAuthResponse) {
+        $nectorrTwitterLogin(function (twitterAuthResponse) {
+            if (twitterAuthResponse && !twitterAuthResponse.error) {
+                accessCredsForBooster['twitter'] = twitterAuthResponse;
+            }//if (twitterAuthResponse && !twitterAuthResponse.error) {
+        });//$nectorrTwitterLogin(function (twitterAuthResponse) {
+        gapi.load('client:auth2', $initializeGoogleAuth2);
+        initializeGoogle(true, function (googleResponse) {
+            var authResponseObject = googleResponse.currentUser.get().getAuthResponse();
+            accessCredsForBooster['google'] = authResponseObject;
+            accessCredsForBooster['google']['userId'] = googleResponse.currentUser.get().getId();
+        }, googlePlusDefaults.scopes);
+}

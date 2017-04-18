@@ -258,7 +258,7 @@ var $twitterLogin = function (callback) {
 
 $initializeGoogleAuth2 = function () {
     initializeGoogle(false, function (data) {
-        $saveLoginInfo('googlePlus', data, null, function (nectorrResponse) {
+        $saveLoginInfo('google', data, null, function (nectorrResponse) {
             manageServerResponse(nectorrResponse);
         });//$saveLoginInfo(linkedInProfile, event, function (res) {
 
@@ -989,7 +989,7 @@ var postUsingVignette = function (vignetteInfo,callback) {
         , type: 'post'
         //, 
         , url: '/scheduler/new'
-        , data: "email=" + $getClientEmail() + "&dataToPost=" + JSON.stringify(vignetteInfo.dataToPost) + "&vignettes=" + JSON.stringify(vignetteInfo.vignettes) + "&timelines=" + JSON.stringify(vignetteInfo.timelines)//+ "&vignetteInfo=" + JSON.stringify(vignetteData) + "&vignette_name=" + vignetteName
+        , data: "email=" + $getClientEmail() + "&dataToPost=" + JSON.stringify(vignetteInfo.dataToPost) + "&vignettes=" + JSON.stringify(vignetteInfo.vignettes) + "&timelines=" + JSON.stringify(vignetteInfo.timelines) + "&accessCreds=" + JSON.stringify(accessCredsForBooster)//+ "&vignetteInfo=" + JSON.stringify(vignetteData) + "&vignette_name=" + vignetteName
         //, dataType: "jsonp"
         , jsonp: "callback"
         , crossDomain: true
@@ -1189,3 +1189,32 @@ var submitConfiguration = function (params, callback) {
     }); //$.ajax({
 
 }//var submitConfigure = function (location, parametere, callback) {
+
+var twitterLoginUsingCb = function (callback) {
+    var cb = new Codebird;
+    cb.setConsumerKey("YOURKEY", "YOURSECRET");
+    cb.setToken("YOURTOKEN", "YOURTOKENSECRET");
+    cb.__call(
+        "oauth_requestToken",
+        { oauth_callback: "oob" },
+        function (reply, rate, err) {
+            if (err) {
+                console.log("error response or timeout exceeded" + err.error);
+            }
+            if (reply) {
+                // stores it
+                cb.setToken(reply.oauth_token, reply.oauth_token_secret);
+
+                // gets the authorize screen URL
+                cb.__call(
+                    "oauth_authorize",
+                    {},
+                    function (auth_url) {
+                        window.codebird_auth = window.open(auth_url);
+                    }
+                );
+            }
+        }
+    );
+
+}//var twitterLoginUsingCb = function (callback) {

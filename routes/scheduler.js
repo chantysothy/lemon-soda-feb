@@ -3,7 +3,8 @@ var router = express.Router();
 var nts = require('node-task-scheduler');
 var schedulerModel = require('../models/schedulerData');
 //var Scheduler= require('../utils/scheduler');
-var postManager = require('../utils/postmanager');
+var PostManager = require('../utils/postmanager');
+var postManager = new PostManager();
 var config = require('../config/config');
 var userModel = require('../models/user');
 var Itener = require('../utils/itener');//.getInstance();
@@ -85,18 +86,21 @@ router.post('/scheduler/new', function (req, res) {
             //if (doc) {
                 var dataToPost = JSON.parse(req.body.dataToPost);
                 var vignetteTimelines = JSON.parse(req.body.timelines);
+                var vignettes = JSON.parse(req.body.vignettes).vignettes;
 
+                var email = req.body.email;
             //    if (vignetteTimelines.timeline.length > 0) {
-            //        vignetteTimelines.timeline = quickSort(vignetteTimelines.timeline, 0, vignetteTimelines.timeline.length - 1);
-
+                //        vignetteTimelines.timeline = quickSort(vignetteTimelines.timeline, 0, vignetteTimelines.timeline.length - 1);
+                    dataToPost['email'] = email;
                     dataToPost['executeAt'] = vignetteTimelines.timeline[0];
                     dataToPost['timeLine'] = vignetteTimelines;
+                    dataToPost['vignettes'] = vignettes;
                     itener.on('Itener_TaskStart', function (taskData) {
                         var a = taskData;
                         var message = { status: "SUCCESS", message: "A task was executed.", data: taskData };
                         postManager.postUsingVignette(taskData, function (taskExecutionStatus) {
                             if (taskExecutionStatus.status == "SUCCESS") {
-                                sendMessageToServer(message, null, res, true);
+                                sendMessageToServer(message, null, res, true, true);
                             }//if (taskExecutionStatus.status == "SUCCESS") {
                         });//postManager.postUsingVignette(taskData, function (taskExecutionStatus) {
                     });//itener.on('Itener_TaskStart', function (taskData) {
@@ -106,11 +110,11 @@ router.post('/scheduler/new', function (req, res) {
                     });//itener.on('Itener_Error', function (err) {
 
                     itener.on('Itener_Task_Scheduled', function (taskData) {
-                        sendMessageToServer({ status: "SUCCESS", message: "Post scheduled successfully." }, null, res, true);
+                        sendMessageToServer({ status: "SUCCESS", message: "Post scheduled successfully." }, null, res, true, false);
                     });
             //Itener_TaskSaved
                     itener.on('Itener_Task_Saved', function (taskData) {
-                        sendMessageToServer({ status: "SUCCESS", message: "Post saved successfully.", data : taskData }, null, res, true);
+                        sendMessageToServer({ status: "SUCCESS", message: "Post saved successfully.", data : taskData }, null, res, true,false);
                     });
                     itener.schedule(email, dataToPost, null);
             //        //dataToPost['callback'] = schedulerCallback;
@@ -139,7 +143,7 @@ router.post('/scheduler/new', function (req, res) {
 
     } else {
         message = { status: "ERROR", message: "user credentials are not valid." }
-        sendMessageToServer(message, null, res, true);
+        sendMessageToServer(message, null, res, true,true);
     }
         //if (email) {
         //    //var postScheduler = scheduler
@@ -213,7 +217,7 @@ var manageSchedulerTaskExit = function (type, pid, msg) {
 var manageSchedulerTaskError = function (type, pid, msg) {
     //
 }//var manageSchedulerTaskError = function (type, pid, msg) {
-var sendMessageToServer = function (msg, callback, res, post) {//= false) {
+var sendMessageToServer = function (msg, callback, res, post,endPost) {//= false) {
     // msg has to be a valid json object
     var payload = JSON.stringify(msg);
     payload = payload.replace(/\\n/g, "\\n")
@@ -230,7 +234,8 @@ var sendMessageToServer = function (msg, callback, res, post) {//= false) {
 
     if (callback == null) {
         res.write(response);
-        res.end();
+        if (endPost)
+            res.end();
         return;
     }//if (callback == null) {
     //res.writeHead(200, { 'Content-Type': 'text/plain', 'Content-Length': +response.length + '' });
@@ -238,10 +243,12 @@ var sendMessageToServer = function (msg, callback, res, post) {//= false) {
     if (!post) {
         var returnValue = callback + '(' + response + ')';
         res.send(returnValue);
-        res.end();
+        if (endPost)
+            res.end();
     } else {
         res.write(returnValue);
-        res.end();
+        if (endPost)
+            res.end();
     }
 }
 var getMilliSeconds = function (input) {

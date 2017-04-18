@@ -90,10 +90,13 @@
                         //update_period : 300
                     }
                     $nectorrFacebookLogin(facebookDefaults.scope, null, function (response) {
-                        if (response) {
+                        if (response && response.authResponse.expiresIn > 10000) {
+                            publishCredentials.facebook.access_token = response.authResponse.accessToken;
+                            //accessCredsForBooster['facebook'] = response;
                             extendFBAccessToken(response.authResponse.accessToken,function (extendedTokenResponse) {
                                 facebookAuthObject = response;
                                 if (extendedTokenResponse && !extendedTokenResponse.error) {
+                                    //accessCredsForBooster['facebook'] = extendedTokenResponse;
                                     publishCredentials.facebook.access_token = extendedTokenResponse.authResponse.accessToken;
                                 } else {
                                     publishCredentials.facebook.access_token = response.authResponse.accessToken;
@@ -104,7 +107,7 @@
                                 $initializeGooglewithCallback(function (googleResponse) {
                                     googleAuthObject = googleResponse.currentUser.get().getAuthResponse();//getAuthResponse();
                                     var googleUser = googleResponse.currentUser.get().getId();
-
+                                    //accessCredsForBooster['google'] = response;                                        
                                     var socialFeedLoginInfo = {
                                         // INSTAGRAM
                                         facebook: {
@@ -427,7 +430,7 @@ var displayTwitterFeed = function (data) {
 
  //var validateUserObjectAndShowMessage = function (user) { 
 var authCreds = {
-    "twitter": {
+    " ": {
         'consumer_key': 'zR30W1z6cTQfYKaeMMrUdbXKm'
         , 'consumer_secret': 'W3k4tedpDKJ0hM6Hnn2I4hAHWag1INFw2ipaBOhgYBqt5zaxL2'
         , 'access_token': '103259010-9AtPODqSaurMAOaIiIfnJrr14TloFKXgx9wElaop'

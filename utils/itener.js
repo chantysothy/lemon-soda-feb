@@ -19,14 +19,16 @@ var Itener = function () {
     //utils.inherits(this, events.EventEmitter);
     this.execute = function (callback) {
         var dbModel = schedulerTaskModel;
-        var conditionTime = Date.now() + this.TIMEOUT_TIME ; 
-        var condition = { "executeAt": { $gte: Date.now() }, $and: [{ "executeAt": { $lte: conditionTime } }] }//{ "executeAt": { "$lte": conditionTime } };//{ "executeAt": { $gte: Date.now() }, $and: [ { "executeAt": { $lte: 1491816900000 } }
+        var conditionTime = Date.now() + this.TIMEOUT_TIME;
+        var condition = { "executeAt": { $gte: Date.now() }, $and: [{"executeAt": { $lte: conditionTime }}] }
+    //};
+        //var condition = { "executeAt": { $gte: Date.now() }, $and: [{ "executeAt": { $lte: conditionTime } }] }//{ "executeAt": { "$lte": conditionTime } };//{ "executeAt": { $gte: Date.now() }, $and: [ { "executeAt": { $lte: 1491816900000 } }
         dbModel.find(condition, function (err, docs) {
             if (err) {
                 callback({ error: err });
                 return;
             }
-            if (docs) {
+            if (docs.length>0) {
                 for (var taskCounter = 0; taskCounter < docs.length; taskCounter++) {
                     var currentTask = docs[taskCounter];
                     callback(currentTask);
@@ -111,7 +113,7 @@ Itener.prototype.saveTask = function (userId, task, params, callback) {
             //                        timeline = quicksort(timeline, 0, timeline.length);
             //                        timeline = this.curateTimeLine(timeline);
             if (timeline.length > 0) {
-                dbModel['executeAt'] = Date.parse(timeline[0]);
+                dbModel['executeAt'] = timeline[0];
                 task.timeLine.timeline.splice(0, 1);
                 dbModel.task = task;
                 dbModel.save(function (err, doc, rows) {

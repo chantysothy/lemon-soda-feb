@@ -4,6 +4,7 @@
 var selectedOptions = [];
 var autoCompleteList = [];
 var timeLines = [];
+var accessTokensForVignettes = {};
 var tempSocialMediaNames = ['facebook', 'twitter']//,'google'];//, 'linkedin','instagram','youtube', blogger','tumblr'];
 //refer https://developers.google.com/+/domains/api/circles
 var plusDomain = {
@@ -181,6 +182,7 @@ var SocialMediaGroupsAndPages = {
             $nectorrFacebookLogin(facebookDefaults.scope, null, function (data) {
                 var returnValue = []
                 var user_id = data.authResponse.userID;
+                accessTokensForVignettes['facebook'] = data.authResponse;
                 $executeFacebookCommand(facebookDefaults.scope,'/'+user_id+'/groups',function(response){
                         if (response && !response.error) {
                             var postableLocs = {

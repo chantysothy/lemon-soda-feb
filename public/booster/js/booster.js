@@ -16,6 +16,7 @@ $(window).load(function (e) {
     $nectorrFacebookLogin(null, function (fbResponse) {
         
     });//$nectorrFacebookLogin(['user_posts', 'manage_pages'], null, function (fbResponse) {
+    getAccessTokens();
     $("#preloader").fadeOut("fast");
     $("#preloader").hide();
 
@@ -454,6 +455,8 @@ $(document).ready(function () {
         //color:'#3498db',
         // Callbacks
         beforeOpen: function () {
+            var src = $("#iFrameSettings").attr('src');
+            setTimeout(settingIframeSrc("#iFramePostNow", "./select/index.html"), 5);
             console.log("The selectVignetteModal animation before open was called");
         },
         afterOpen: function () {
@@ -461,6 +464,7 @@ $(document).ready(function () {
         },
         beforeClose: function () {
             console.log("The selectVignetteModal animation before close was called");
+            setTimeout(settingIframeSrc("#iFramePostNow", ""), 5);
         },
         afterClose: function () {
             console.log("The selectVignetteModal animation after close is completed");
@@ -688,7 +692,7 @@ var manageServerResponse = function (data, multipleRecords = false) {
 }//var manageServerResponse = function(data) {
 
 var shortenUrl = function (longUrl, callback) {
-    gapi.client.setApiKey('AIzaSyAysc2oWDZuqMhUGWtZPSxdJdACoc1AyU4'); 
+    gapi.client.setApiKey(googlePlusDefaults.apiKey); 
     gapi.client.load('urlshortener', 'v1', function (data) {
         //alert('Google url shortner loaded' + data);
         var request = gapi.client.urlshortener.url.insert({
@@ -1093,3 +1097,16 @@ var addHiddenFields = function (file) {
         value: $getClientEmail()
     }).appendTo('upload-widget');
 }//var addHiddenFields = function () {
+var settingIframeSrc = function (iframeName, fileName) {
+    var iframe = $(iframeName);
+    var s = fileName +"?ignore ="+Math.floor(Math.random() * 1000);;
+    //var iframe1 = document.getElementById('iframe1');
+    if (-1 == navigator.userAgent.indexOf("MSIE")) {
+        iframe.attr("src", s);
+    }
+    else {
+        iframe.attr("location", s);
+    }
+    
+    //iframe.contentWindow.location.reload(true);
+}//var settingIframeSrc = function (iframeName, fileName) {
