@@ -229,17 +229,17 @@ var getAccessTokens = function () {
             if (fbAuthResponse && !fbAuthResponse.error) {
                 accessCredsForBooster['facebook'] = fbAuthResponse;
                 //accessTokens
+                $nectorrTwitterLogin(function (twitterAuthResponse) {
+                    if (twitterAuthResponse && !twitterAuthResponse.error) {
+                        accessCredsForBooster['twitter'] = twitterAuthResponse;
+                        initializeGoogle(true, function (googleResponse) {
+                            var authResponseObject = googleResponse.currentUser.get().getAuthResponse();
+                            accessCredsForBooster['google'] = authResponseObject;
+                            accessCredsForBooster['google']['userId'] = googleResponse.currentUser.get().getId();
+                        }, googlePlusDefaults.scopes.plusMe);
+                    }//if (twitterAuthResponse && !twitterAuthResponse.error) {
+                });//$nectorrTwitterLogin(function (twitterAuthResponse) {
             }//if (fbAuthResponse && !fbAuthResponse.error) {
         });//$nectorrFacebookLogin(facebookDefaults.scope, null, function (fbAuthResponse) {
-        $nectorrTwitterLogin(function (twitterAuthResponse) {
-            if (twitterAuthResponse && !twitterAuthResponse.error) {
-                accessCredsForBooster['twitter'] = twitterAuthResponse;
-            }//if (twitterAuthResponse && !twitterAuthResponse.error) {
-        });//$nectorrTwitterLogin(function (twitterAuthResponse) {
         gapi.load('client:auth2', $initializeGoogleAuth2);
-        initializeGoogle(true, function (googleResponse) {
-            var authResponseObject = googleResponse.currentUser.get().getAuthResponse();
-            accessCredsForBooster['google'] = authResponseObject;
-            accessCredsForBooster['google']['userId'] = googleResponse.currentUser.get().getId();
-        }, googlePlusDefaults.scopes);
 }

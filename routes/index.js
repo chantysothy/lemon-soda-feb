@@ -22,7 +22,7 @@ var redirectOptions = {
 };/* GET home page. */
 var userModel = require('../models/user');
 var invitationModel = require('../models/invitation');
-var transporter = nodeMailer.createTransport('smtps://connect@localhost:1337:email123@smtp.zoho.com');
+var transporter = nodeMailer.createTransport('smtps://connect@nectorr.in:email123@smtp.zoho.com');
 var enc_secret = new Buffer(config.twitter.consumer_key + ':' + config.twitter.consumer_secret).toString('base64');
 var oauthOptions = {
     url: 'https://api.twitter.com/oauth2/token', //https://api.twitter.com/oauth/access_token
@@ -765,7 +765,7 @@ router.get('/auth/twitter/callback', function (req, res) {
     var a = 1;// for debugger breakpoint. TBR
     var callback = req.query.callback;
     var twitterStream = [];
-    var twitterAPI = new TwitterBase({
+    var twitterAPI = new Twitter({
         consumerKey: config.twitter.consumer_key
         , consumerSecret: config.twitter.consumer_secret
         , callback: config.twitter.redirect_url

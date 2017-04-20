@@ -90,17 +90,22 @@
                         //update_period : 300
                     }
                     $nectorrFacebookLogin(facebookDefaults.scope, null, function (response) {
-                        if (response && response.authResponse.expiresIn > 10000) {
-                            publishCredentials.facebook.access_token = response.authResponse.accessToken;
+                        var facebookToken
+                        if (response && response.authResponse.expiresIn < 10000) {
                             //accessCredsForBooster['facebook'] = response;
-                            extendFBAccessToken(response.authResponse.accessToken,function (extendedTokenResponse) {
-                                facebookAuthObject = response;
-                                if (extendedTokenResponse && !extendedTokenResponse.error) {
+                            extendFBAccessToken(response.authResponse.accessToken, function (extendedTokenResponse) {
+//                                publishCredentials.facebook.access_token = extendedTokenResponse.authResponse.accessToken;
+                                (extendedTokenResponse && !extendedTokenResponse.error) ?
                                     //accessCredsForBooster['facebook'] = extendedTokenResponse;
-                                    publishCredentials.facebook.access_token = extendedTokenResponse.authResponse.accessToken;
-                                } else {
+                                    publishCredentials.facebook.access_token = extendedTokenResponse.authResponse.accessToken
+                                :
                                     publishCredentials.facebook.access_token = response.authResponse.accessToken;
-                                }
+                                
+
+                            });
+                        }
+                        publishCredentials.facebook.access_token = response.authResponse.accessToken;
+                                facebookAuthObject = response;
                                 var instagramAuthUrl = "https://api.instagram.com/oauth/authorize/?client_id=" + "f3a4940affd34bd7aaabebde1a685846" + "&response_type=code"
                                 var feedDiv = $('#socialfeeds');
                                 //saveFacebookInfo
@@ -114,7 +119,7 @@
                                             accounts: ['@' + facebookAuthObject.authResponse.userID],  //Array: Specify a list of accounts from which to pull posts
                                             limit: 5,                                    //Integer: max number of posts to load
                                             client_id: 'wj888T3jlauiQIjcdu751AELB', // make sure to have your app read-only
-                                            access_token: (extendedTokenResponse && !extendedTokenResponse.error) ? extendedTokenResponse.authResponse.accessToken : facebookAuthObject.authResponse.accessToken, // make sure to have your app read-only
+                                            access_token: facebookAuthObject.authResponse.accessToken, // make sure to have your app read-only
                                         },
                                         twitter: {
                                             accounts: ['@' + loggedInUserInfo.data.twitter.profileInfo.screen_name],  //Array: Specify a list of accounts from which to pull posts
@@ -163,10 +168,10 @@
                         }
                     });//fbconnect
 
-                } else {
-                    manageServerResponse(data);
-                }
-            });
+            //    } else {
+            //        manageServerResponse(data);
+            //    }
+            //});
 
         });
         //alert("social feed executed");
@@ -180,8 +185,19 @@ $(document).ready(function () {
         $('#logout').hide();
         window.location.href = '../';
     } else {
+        window.fbAsyncInit = function () {
+            //version = 'v2.7'
+            FB.init({
+                appId: facebookDefaults.appId,
+                status: true,
+                xfbml: true,
+                cookie: true,
+                version: 'v2.7' // use version 2.7
 
-        initFacebookAPI();
+            });
+        }//window.fbAsyncInit = function () {
+
+        //initFacebookAPI();
         var googleProfile, resourceName;
         //setCookie();    
         var linkedInProfile = {
@@ -257,12 +273,17 @@ $(document).ready(function () {
                 }//switch (response.status) {
             }); //$twitterLogin(function (redirectData) {
         }); //$('#icon_twitter').click(function (e) { 
+        $('#icon_youtube').click(function (e) {
+            e.preventDefault();
+            gapi.load('client:auth2', $initializeYoutubeAuth2);
 
+        });
         $('#icon_fb').click(function (e) {
 
-            $nectorrFacebookLogin(facebookDefaults.scope, e, function (data) {
+//            $nectorrFacebookLogin(facebookDefaults.scope, e, function (data) {
+            $nectorrFacebookLogin("email", e, function (data) {
                 $("#icon_fb").html('&#10003;')
-                $("icon_fb_img").fadeIn('fast');
+                //$("icon_fb_img").fadeIn('fast');
                 if (data) {
                     $saveLoginInfo('facebook', data, null, function (serverResponse) {
                         manageServerResponse(serverResponse);

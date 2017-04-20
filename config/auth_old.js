@@ -4,8 +4,8 @@
 module.exports = {
 
 	'facebookAuth' : {
-		'clientID' 		: '334582780223007', // your App ID
-        'clientSecret': '85f5abe5d8390c9134c9dd84befa26ed', // your App Secret
+        'clientID': '334582780223007', // your App ID
+        'clientSecret': '9b089aff5785a8b74f64ed3530f3d6f6', // your App Secret
 		'callbackURL' 	: 'https://nectorr.com/auth/facebook/callback'
 	},
 

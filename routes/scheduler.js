@@ -87,14 +87,16 @@ router.post('/scheduler/new', function (req, res) {
                 var dataToPost = JSON.parse(req.body.dataToPost);
                 var vignetteTimelines = JSON.parse(req.body.timelines);
                 var vignettes = JSON.parse(req.body.vignettes).vignettes;
+                var accessCreds = JSON.parse(req.body.accessCreds);
 
-                var email = req.body.email;
+                //var email = req.body.email;
             //    if (vignetteTimelines.timeline.length > 0) {
                 //        vignetteTimelines.timeline = quickSort(vignetteTimelines.timeline, 0, vignetteTimelines.timeline.length - 1);
                     dataToPost['email'] = email;
                     dataToPost['executeAt'] = vignetteTimelines.timeline[0];
                     dataToPost['timeLine'] = vignetteTimelines;
                     dataToPost['vignettes'] = vignettes;
+                    dataToPost['accessCreds'] = accessCreds;
                     itener.on('Itener_TaskStart', function (taskData) {
                         var a = taskData;
                         var message = { status: "SUCCESS", message: "A task was executed.", data: taskData };
@@ -117,28 +119,6 @@ router.post('/scheduler/new', function (req, res) {
                         sendMessageToServer({ status: "SUCCESS", message: "Post saved successfully.", data : taskData }, null, res, true,false);
                     });
                     itener.schedule(email, dataToPost, null);
-            //        //dataToPost['callback'] = schedulerCallback;
-            //        dataToPost['vignettes'] = JSON.parse(req.body.vignettes);
-                    
-            //        var taskInfo = { "email": email, task: dataToPost, executeAt: vignetteTimelines.timeline[0], 'callback': schedulerCallback}
-            //        schedulerModel.create(taskInfo, function (err, docs) {
-            //            if (err) {
-            //                message = { status: "ERROR", message: "We encountered an error while updating your tasks to nectorr databases." };
-            //                sendMessageToServer(message, null, res, true);
-            //                return;
-            //            }//if (err) {
-            //            if (doc) {
-            //                message = { status: "SUCCESS", message: "Tasks successfully submitted. Nectorr shall execute it for you." };
-            //                sendMessageToServer(message, null, res);
-
-            //                //if (!Scheduler.isRunning()) {
-            //                //    Scheduler.startScheduler();
-            //                //}//if (!Scheduler.isRunning()) {
-            //            }//if (doc) {
-            //        });//schedulerModel.create(taskInfo, function (err, docs) {
-            //    }//if (vignetteTimelines.length > 0) {
-            //}//if (doc) {
-
         });//userModel.findOne(condition, function (err, doc) {
 
     } else {

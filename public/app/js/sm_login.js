@@ -50,9 +50,9 @@ var twitterDefaults = {
 };
 
 var googlePlusDefaults = {
-    clientId: '909374797832-f1c2micujrjjjm078tkpjfmg8i02mmd8.apps.googleusercontent.com'
-    , clientSecret: 'Ep19nGJbDmuXn8_vpVdrTSQN'
-    , apiKey: 'AIzaSyC1huIp0GGPPedx0dZFFpAyGeGN9bnZTOY'
+    clientId: '288544546525-9c6un58f3omihkfdgkei9vn9e0e2duh2.apps.googleusercontent.com'
+    , clientSecret: '8AnAzFjLRXqUYilPCUvXayGo'
+    , apiKey: 'AIzaSyBoNZrtryIbvKUKa8H_XqWrzuP38J9rzto'
     , scopes: {
         plusMe: 'https://www.googleapis.com/auth/plus.me'
         , plusLogin: 'https://www.googleapis.com/auth/plus.login'
@@ -62,20 +62,21 @@ var googlePlusDefaults = {
         , plusStreamWrite: 'https://www.googleapis.com/auth/plus.stream.write'
         , plusCirclesWrite: 'https://www.googleapis.com/auth/plus.circles.write'
         , plusUserInfoProfile: 'https://www.googleapis.com/auth/userinfo.profile' 
+        , youTubeAuth: 'https://www.googleapis.com/auth/youtube'
     }
 }
 
 var facebookDefaults = {
     appId: '334582780223007'
-    , appSecret: '85f5abe5d8390c9134c9dd84befa26ed'
-    , token: ''
+    , appSecret: 'a26f07a41208de4ac64849ae66d5efb8'
+    , clientToken: '8d0b09a0e4c481ea9fd1ea8d88b984cc'
     , scope: "email,public_profile,publish_actions, user_managed_groups, manage_pages, publish_pages, pages_show_list,publish_stream,user_photos, user_photo_video_tags, user_posts"
     
 }
 
 var initFacebookAPI = function () {
     window.fbAsyncInit = function () {
-        version = 'v2.7'
+        //version = 'v2.7'
         FB.init({
             appId: facebookDefaults.appId,  
             status: true,
@@ -84,8 +85,16 @@ var initFacebookAPI = function () {
             version: 'v2.7' // use version 2.7
 
         });
-
     }
+    (function (d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id))
+            return;
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "//connect.facebook.net/en_US/all.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    } (document, 'script', 'facebook-jssdk'));
 }//var initFacebook = function () {
 var linkedInDefaults = {
 
@@ -108,6 +117,12 @@ $nectorrFacebookLogin = function (fbScope, event, callback) {
     initFacebookAPI();
 
     if (fbScope) {
+        ////FB.login(function (response) {
+        ////    if (response && !response.error) {
+        ////        callback(response);
+        ////    }
+        ////});
+
             FB.getLoginStatus(function (response) {
                 if (response.status === 'connected') {
                     fbAccessToken = response.authResponse.accessToken;
@@ -119,7 +134,7 @@ $nectorrFacebookLogin = function (fbScope, event, callback) {
                             //var accessToken = response.authResponse.accessToken;
                             nectorrFacebookId = response.authResponse.userID;
                             if (response.authResponse.expiresIn <= 10000) {
-                                extendFBAccessToken(fbAccessToken, callback);
+                                //extendFBAccessToken(fbAccessToken, callback);
                             } else {
                                 callback(response);
                             }
@@ -129,20 +144,11 @@ $nectorrFacebookLogin = function (fbScope, event, callback) {
                         }
                     }, fbScope);//FB.login(function () {
                 }//if (response.status === 'connected') {
-            });//FB.getLoginStatus(function (response) {
+            },true);//FB.getLoginStatus(function (response) {
     }//if (scope) { 
 }; //$facebookLogin = function (scope) {
 
 
-(function (d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id))
-            return;
-        js = d.createElement(s);
-        js.id = id;
-        js.src = "//connect.facebook.net/en_US/all.js";
-        fjs.parentNode.insertBefore(js, fjs);
-    }(document, 'script', 'facebook-jssdk'));
 
 var $nectorrTwitterLogin = function (callback) {
     var command = $twitterUrls.authorize_url;
@@ -249,7 +255,7 @@ var $twitterLogin = function (callback) {
                     } //if (callback) { 
             }
             , error: function (jqXHR, textStatus, errorThrown) {
-                alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + eJSON.stringify(rrorThrown));
+                alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + eJSON.stringify(errorThrown));
             }
         }); //$.ajax({
 
@@ -262,7 +268,7 @@ $initializeGoogleAuth2 = function () {
             manageServerResponse(nectorrResponse);
         });//$saveLoginInfo(linkedInProfile, event, function (res) {
 
-    }, googlePlusDefaults.scopes);
+    }, googlePlusDefaults.scopes.plusMe);
 } // Google signIn
 
 $initializeGooglewithCallback = function (callback) {
@@ -1218,3 +1224,38 @@ var twitterLoginUsingCb = function (callback) {
     );
 
 }//var twitterLoginUsingCb = function (callback) {
+var $initializeYoutubeAuth2 = function () {
+    $initializeYoutubeAuth2WithCallback(function (youtubeAuthResponse) {
+        //save youtube info to userModel
+    });//$initializeYoutubeAuth2WithCallback(function (youtubeAuthResponse) {
+}//var $initializeYoutubeAuth2 = function () {
+var $initializeYoutubeAuth2WithCallback = function (callback) {
+    gapi.load('auth2', function () {
+        auth2 = gapi.auth2.init({
+            client_id: googlePlusDefaults.clientId
+            //, fetch_basic_profile: false
+            , scope: googlePlusDefaults.scopes.youTubeAuth
+        }).then(function () {
+            gapi.load('client', function () {
+                gapi.client.init({
+                    apiKey: googlePlusDefaults.apiKey
+                    , clientId: googlePlusDefaults.clientId
+                    , scope: googlePlusDefaults.scopes.youTubeAuth
+                });//gapi.client.init({
+                gapi.client.load('youtube', 'v3', function () {
+                    var authInstance;
+                    authInstance = gapi.auth2.getAuthInstance();
+                    if (!authInstance.isSignedIn.get()) {
+                        authInstance.signIn();
+                    } else if (authInstance.isSignedIn.get()) {
+                        authInstance = gapi.auth2.getAuthInstance();
+                    }//if (!authInstance.isSignedIn.get()) {
+                    if (callback)
+                        callback(authInstance);
+                });//gapi.client.load('plus', 'v1', function () {
+
+
+            });////gapi.load('auth2', function () {
+        });//}).then(function () {
+    });//var $initializeYoutubeAuth2 = function (callback) {
+}//var $initializeYoutubeAuth2WithCallback = function (callback) {
