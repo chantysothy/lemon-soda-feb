@@ -1,4 +1,5 @@
-﻿$(window).load(function () {
+﻿var loginObject;
+$(window).load(function () {
     var googleAuthObject, facebookAuthObject, twitterAuthObject, instagramAuthObject, pinterestAuthObject, bloggerAuthObject, loggedInUserInfo;
     if (!$isLoggedIn()) {
         $('#invite').hide();
@@ -149,15 +150,16 @@
                                         show_media: true
 
                                     } //var socialFeedLoginInfo = {
-                                    var searchDetails = ['Monitor', 'ListenTo', 'Engagement', 'Trending', 'ListenTo'];
-                                    for (var searchDetailsCounter = 0; searchDetailsCounter < searchDetails.length; searchDetailsCounter++) {
-                                        var searchData = searchOptions.StreamObject[searchDetails[searchDetailsCounter]].split(',');
-                                        pushArray(socialFeedLoginInfo.facebook.accounts, searchData);
-                                        pushArray(socialFeedLoginInfo.twitter.accounts, searchData);
-                                        pushArray(socialFeedLoginInfo.google.accounts, searchData);
-                                    }//for (var searchDetailsCounter = 0; searchDetailsCounter < searchDetails.length; searchDetailsCounter++) {
-                                    feedDiv.socialfeed(socialFeedLoginInfo);
-
+                                    if (searchOptions.StreamObject) {
+                                        var searchDetails = ['Monitor', 'ListenTo', 'Engagement', 'Trending', 'ListenTo'];
+                                        for (var searchDetailsCounter = 0; searchDetailsCounter < searchDetails.length; searchDetailsCounter++) {
+                                            var searchData = searchOptions.StreamObject[searchDetails[searchDetailsCounter]].split(',');
+                                            pushArray(socialFeedLoginInfo.facebook.accounts, searchData);
+                                            pushArray(socialFeedLoginInfo.twitter.accounts, searchData);
+                                            pushArray(socialFeedLoginInfo.google.accounts, searchData);
+                                        }//for (var searchDetailsCounter = 0; searchDetailsCounter < searchDetails.length; searchDetailsCounter++) {
+                                        feedDiv.socialfeed(socialFeedLoginInfo);
+                                    }
                                 });
                                 
                             });
@@ -185,6 +187,9 @@ $(document).ready(function () {
         $('#logout').hide();
         window.location.href = '../';
     } else {
+        getLoginObject(function (loginObj) {
+            loginObject = loginObj;
+        });
         window.fbAsyncInit = function () {
             //version = 'v2.7'
             FB.init({
@@ -275,7 +280,11 @@ $(document).ready(function () {
         }); //$('#icon_twitter').click(function (e) { 
         $('#icon_youtube').click(function (e) {
             e.preventDefault();
-            gapi.load('client:auth2', $initializeYoutubeAuth2);
+            initializeGoogle(true, function (youTubeResponse) {
+                if (youTubeResponse) {
+                    //alert("Success");
+                }
+            }, googlePlusDefaults.scopes.youTubeAuth, 'youtube', 'v3');
 
         });
         $('#icon_fb').click(function (e) {

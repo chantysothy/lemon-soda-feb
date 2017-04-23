@@ -2,8 +2,8 @@
 mongoose.Promise = require('bluebird');
 
 var ConfigurationSchema = mongoose.Schema({
-    user_id: String
-    ,StreamObject: Object
+    "user_id" : String
+    , "StreamObject" : Object
 
 }); //var TrackNListenSchema = mongoose.Schema({
 

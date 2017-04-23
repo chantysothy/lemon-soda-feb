@@ -32,7 +32,6 @@ var eventData = {
 var selectedPostableLocs = {};
 
 //$(document).load(function (e) {
-//    //$("#preloader").fadeOut("slow");
 
 //    function displayMessage(message) {
 //        $("#message").html(message).fadeIn();
@@ -47,7 +46,9 @@ window.closeModal = function () {
 };
 $(document).ready(function () {
     $('body').attr('color', '#333333');
-    getAccessTokens();
+    $("#preloader").fadeOut("slow");
+    //getLoginObject
+    //getAccessTokens();
     $('#newDateTime').click(function (ev) {
         ev.preventDefault();
         var divId = Date.now().toString();
@@ -65,7 +66,7 @@ $(document).ready(function () {
     var dateNow = Date();
     $("#manage-timelines").hide();
 
-    getVignetteFromDb(function (data) {
+    setTimeout(getVignetteFromDb(function (data) {
         if (data.status = "SUCCESS") {
             vignetteList = curateVignetteList(data.data);
             //bind vignettelist to edit box
@@ -95,7 +96,7 @@ $(document).ready(function () {
             //display error message
         }//if (data.status = "SUCCESS") {
 
-    });//getVignetteFromDb(function (data) {
+    }),200);//getVignetteFromDb(function (data) {
 }); //$(document).ready(function () {
 $("#set-time").click(function (e) {
     e.preventDefault();
@@ -223,7 +224,7 @@ var getTimeLines = function () {
     //});//$('.timeline').each(function () {
 }//var getTimeLines = function () {
 
-var getAccessTokens = function () {
+var getAccessTokens = function (callback) {
        var a = "For breakpoint... to be removed."
         $nectorrFacebookLogin(facebookDefaults.scope, null, function (fbAuthResponse) {
             if (fbAuthResponse && !fbAuthResponse.error) {
@@ -233,13 +234,20 @@ var getAccessTokens = function () {
                     if (twitterAuthResponse && !twitterAuthResponse.error) {
                         accessCredsForBooster['twitter'] = twitterAuthResponse;
                         initializeGoogle(true, function (googleResponse) {
-                            var authResponseObject = googleResponse.currentUser.get().getAuthResponse();
-                            accessCredsForBooster['google'] = authResponseObject;
-                            accessCredsForBooster['google']['userId'] = googleResponse.currentUser.get().getId();
-                        }, googlePlusDefaults.scopes.plusMe);
+                            if (googleResponse.status != "ERROR") {
+                                var authResponseObject = googleResponse.currentUser.get().getAuthResponse();//
+                                accessCredsForBooster['google'] = authResponseObject;
+                                accessCredsForBooster['google']['userId'] = googleResponse.currentUser.get().getId();
+                                if (callback) {
+                                    callback(accessCredsForBooster);
+                                } else {
+                                    return accessCredsForBooster;
+                                }
+                            }//if (googleResponse.status != "ERROR") {
+                        }, googlePlusDefaults.scopes.plusMe, 'plus', 'v1');
                     }//if (twitterAuthResponse && !twitterAuthResponse.error) {
                 });//$nectorrTwitterLogin(function (twitterAuthResponse) {
             }//if (fbAuthResponse && !fbAuthResponse.error) {
         });//$nectorrFacebookLogin(facebookDefaults.scope, null, function (fbAuthResponse) {
-        gapi.load('client:auth2', $initializeGoogleAuth2);
+        //gapi.load('client:auth2', $initializeGoogleAuth2);
 }

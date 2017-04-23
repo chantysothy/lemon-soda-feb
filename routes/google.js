@@ -5,20 +5,21 @@ var userModel = require('../models/user');
 var userUtils = require('../utils/userUtils');
 
 var config = require('../config/config');
-router.get('/google/profile', function (req, res) {
+router.post('/google/profile', function (req, res) {
 
     //read profile 
     var profile, _id, time, headerValue;
-    var callback = req.query.callback;
+    //var callback = req.query.callback;
     var cookie = req.cookies;
-    if (callback) {
-        profile = req.query.googlePlusProfile;//+ '"}}';
+    //if (callback) {
+        profile = req.body.googlePlusProfile;//+ '"}}';
         profile = JSON.parse(profile);
 
         //userModel.bind(userModel.googlePlusProfile, req.query.googlePlusProfile.toArray());
         if (!profile.id) {
             var errorMessage = { status : 'ERROR' , message : 'Invalid Google+ profile recieved detected. Login with the correct Google+ profile.' };
-            res.send(callback + '('+JSON.stringify(errorMessage)+')');
+            res.send(JSON.stringify(errorMessage));
+//            res.send(callback + '('+JSON.stringify(errorMessage)+')');
             res.end();
             return;
 
@@ -74,7 +75,7 @@ router.get('/google/profile', function (req, res) {
             } //if (profile.id)
         });
 
-    }//if (callback) {
+    //}//if (callback) {
 }); //router.get('/GOOGLE/PROFILE', function (req, res) { 
 router.get('/google/youtube', function () { 
 
@@ -82,4 +83,17 @@ router.get('/google/youtube', function () {
 router.get('/google/locs', function (req, res) { 
 
 }); //router.get('/google/gplus', function (req, res) { 
+
+router.post('/plus/post/write', function (req, res) { });
+router.get('/plus/post/read', function (req, res) { });
+
+router.get('/plus/collections', function (req, res) { });
+router.get('/plus/collections/read', function (req, res) { });
+router.post('/plus/collections/write', function (req, res) { });
+
+router.get('/plus/circles', function (req, res) { });
+router.get('/plus/circles/read', function (req, res) { });
+router.post('plus/circles/write', function (req, res) { });
+
+
 module.exports = router;

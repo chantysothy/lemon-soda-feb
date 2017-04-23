@@ -9,7 +9,7 @@ $(document).ready(function () {
         if (data.status == "SUCCESS") {
             updatePreferences(data.StreamObject);
         } else {
-            manageServerResponse(data);
+            //manageServerResponse(data);
         }
     });//getConfiguration(function (data) {
     //});//$nectorrFacebookLogin("user_posts", null, function (data) {

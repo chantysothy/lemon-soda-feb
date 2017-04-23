@@ -50,9 +50,10 @@ var twitterDefaults = {
 };
 
 var googlePlusDefaults = {
-    clientId: '288544546525-9c6un58f3omihkfdgkei9vn9e0e2duh2.apps.googleusercontent.com'
-    , clientSecret: '8AnAzFjLRXqUYilPCUvXayGo'
-    , apiKey: 'AIzaSyBoNZrtryIbvKUKa8H_XqWrzuP38J9rzto'
+    clientId: '288544546525-2j9eagljdg25ojrddm33cmcqplcvu3g0.apps.googleusercontent.com'
+    , clientSecret: 'iQpmP8C4RGQ21KZelGqrIqhu'
+    , apiKey: 'AIzaSyBwtfeYOCtESyR4F8FmX9I0NrqatD4FIuM'
+    //AIzaSyCPIvHA2J4mbhEcwCZHm06EKZ86o5PlnyY
     , scopes: {
         plusMe: 'https://www.googleapis.com/auth/plus.me'
         , plusLogin: 'https://www.googleapis.com/auth/plus.login'
@@ -62,7 +63,9 @@ var googlePlusDefaults = {
         , plusStreamWrite: 'https://www.googleapis.com/auth/plus.stream.write'
         , plusCirclesWrite: 'https://www.googleapis.com/auth/plus.circles.write'
         , plusUserInfoProfile: 'https://www.googleapis.com/auth/userinfo.profile' 
+        , plusMediaUpload: 'https://www.googleapis.com/auth/plus.media.upload'
         , youTubeAuth: 'https://www.googleapis.com/auth/youtube'
+        , urlShortnerAuth: 'https://www.googleapis.com/auth/urlshortener'
     }
 }
 
@@ -70,7 +73,7 @@ var facebookDefaults = {
     appId: '334582780223007'
     , appSecret: 'a26f07a41208de4ac64849ae66d5efb8'
     , clientToken: '8d0b09a0e4c481ea9fd1ea8d88b984cc'
-    , scope: "email,public_profile,publish_actions, user_managed_groups, manage_pages, publish_pages, pages_show_list,publish_stream,user_photos, user_photo_video_tags, user_posts"
+    , scope: "email, public_profile, publish_actions, user_managed_groups, manage_pages, publish_pages, pages_show_list, publish_stream, user_photos, user_photo_video_tags, user_posts"
     
 }
 
@@ -285,15 +288,15 @@ var saveGoogleProfileData = function (profile) {
     loginProfile = JSON.stringify(loginProfile);
     $.ajax({
         headers: { "Accept": "application/json" }
-        , type: 'GET'
+        , type: 'post'
         , url: '/google/profile'
         , data: dataString
-        ,dataType: "jsonp"
+        //,dataType: "jsonp"
         , jsonp: "callback"
         , crossDomain: true
         , beforeSend: function (xhr) {
             xhr.withCredentials = true;
-            xhr.setRequestHeader("Content-Length", dataString.length);
+            //xhr.setRequestHeader("Content-Length", dataString.length);
         }
         ,jsonPCallback: "jsonpCallback"
         , success: function (data) {
@@ -459,12 +462,13 @@ var $setCredsToServer = function (creds, callback) {
     } //if (callback) { 
 }//var setCredsToServer -function (email) {
  
-var $executeFacebookCommand = function (scope, command, callback) {
+var $executeFacebookCommand = function (scope, command, callback , loginValidated = false) {
     if (!scope) return;
 
     if (command) {
-        initFacebookAPI();
-
+        if (!loginValidated) {
+            initFacebookAPI();
+        }//if (!loginValidated)
         FB.getLoginStatus(function (response) {
             if (response.status === 'connected') {
                 nectorrFacebookId = response.authResponse.userID;
@@ -611,7 +615,7 @@ var pushArray = function (pushTo, getFrom) {
 
 var googleUserScope = googlePlusDefaults.scopes.plusMe;//+ " " +
 var googleCircleScope = googlePlusDefaults.scopes.plusCirclesRead + " " + googlePlusDefaults.scopes.plusCirclesWrite;//googlePlusDefaults.scopes.plusMe,
-var initializeGoogle = function (getAuthResponse = false, callback, scope) {
+var initializeGoogle = function (getAuthResponse = false, callback, scope,product, version) {
     var auth2, authInstance;
         gapi.load('auth2', function () {
             //plusDomains.Circles.List
@@ -627,14 +631,15 @@ var initializeGoogle = function (getAuthResponse = false, callback, scope) {
                         , clientId: googlePlusDefaults.clientId
                         , scope: (!scope) ? googleUserScope : scope
                     })
-
-                    gapi.client.load('plus', 'v1', function () {
+                    if (!product || !version) product = 'plus'; version = 'v1';
+                    gapi.client.load(product, version, function () {
                         authInstance = gapi.auth2.getAuthInstance();
                         if (!authInstance.isSignedIn.get()) {
                             authInstance.signIn();
                         } else if (authInstance.isSignedIn.get()) {
                             
                             authInstance = gapi.auth2.getAuthInstance();
+                            if (product == 'plus') {
                                 var request = gapi.client.plus.people.get({
                                     'userId': 'me'
                                 });
@@ -654,15 +659,19 @@ var initializeGoogle = function (getAuthResponse = false, callback, scope) {
                                         } else {
                                             saveGoogleProfileData(resp);
                                         }
+
                                         // save cookie
                                         //userLoginTo
                                     } else {
                                         //error
 
-                                        callback({status : "ERROR", message : "Unable to connect with Google+ at the moment."});
+                                        callback({ status: "ERROR", message: "Unable to connect with Google+ at the moment." });
                                     }
-                            //    });
-                            });
+                                    //    });
+                                });
+                            } else {
+                                callback(authInstance);
+                            }//if (product == 'plus') {
                         }
                     });
 
@@ -1177,7 +1186,7 @@ var submitConfiguration = function (params, callback) {
         , type: 'post'
         , url: '/config/set'
         , data: "{email:" +'"'+$getClientEmail() +'"'+ ", StreamObject:" + JSON.stringify(params) + "}" //+ "&vignette_name=" + vignetteName
-        , dataType: "jsonp"
+        //, dataType: "jsonp"
         , jsonp: "callback"
         , crossDomain: true
         , beforeSend: function (xhr) {

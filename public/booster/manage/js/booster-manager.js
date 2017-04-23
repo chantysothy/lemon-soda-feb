@@ -28,43 +28,6 @@ var eventData = {
 var selectedPostableLocs = {};
 
 $(window).load(function (e) {
-    $('#weekCalendar').weekCalendar({
-        timeslotsPerHour: 4,
-        height: function ($calendar) {
-            return 240//$(window).height() - $("h1").outerHeight();
-        },
-        eventRender: function (calEvent, $event) {
-            if (calEvent.end.getTime() < new Date().getTime()) {
-                $event.css("backgroundColor", "#aaa");
-                $event.find(".time").css({ "backgroundColor": "#999", "border": "1px solid #888" });
-            }
-        },
-        eventNew: function (calEvent, $event) {
-            timeLines.push(calEvent);
-            // displayMessage("<strong>Added event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
-           // alert("You've added a new event. You would capture this event, add the logic for creating a new event with your own fields, data and whatever backend persistence you require.");
-        },
-        eventDrop: function (calEvent, $event) {
-            displayMessage("<strong>Moved Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
-        },
-        eventResize: function (calEvent, $event) {
-            //set the font sizes here
-            displayMessage("<strong>Resized Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
-        },
-        eventClick: function (calEvent, $event) {
-            displayMessage("<strong>Clicked Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
-        },
-        eventMouseover: function (calEvent, $event) {
-            displayMessage("<strong>Mouseover Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
-        },
-        eventMouseout: function (calEvent, $event) {
-            displayMessage("<strong>Mouseout Event</strong><br/>Start: " + calEvent.start + "<br/>End: " + calEvent.end);
-        },
-        noEvents: function () {
-            displayMessage("There are no events for this week");
-        },
-        data: eventData
-    });
 
     function displayMessage(message) {
         $("#message").html(message).fadeIn();
@@ -72,53 +35,10 @@ $(window).load(function (e) {
 
     //$calendar.weekCalendar("refresh");
 
-    var smElementCounter = 0;
-    for (var smcounter = 0; smcounter < tempSocialMediaNames.length; smcounter++) {
-        SocialMediaGroupsAndPages[tempSocialMediaNames[smcounter]].getPostableLocs(function (data) {
-            if (data ) {
-                SocialMediaGroupsAndPages[data.sm_name].postableLocs = data;
-                setupAutoCompleteList(autoCompleteList, data.sm_name);
-                smElementCounter++;
-                if (smElementCounter == tempSocialMediaNames.length) {
-                    // prepare List for auto complete
-                    // setup auto complete list values
-                    
-                    $("#sm-options-type-name").magicsearch({
-                        dataSource: autoCompleteList,
-                        fields: ['sm_name', 'type', 'desc'],
-                        format: '%sm_name% · %type% · %desc%',                    
-                        id: 'id',
-                        type: '',
-                        ajaxOptions: {},
-                        hidden: false,
-                        maxShow: 5,
-                        isClear: true,
-                        showSelected: true,
-                        dropdownBtn: false,
-                        dropdownMaxItem: 8,
-                        multiple: true,
-                        focusShow: false,
-                        multiField: 'desc',
-                        multiStyle: {space:5},
-                        maxItem: true,
-                        noResult: 'no such postable location found.'
-                    });
-                    $("#sm-options-type-name").attr('data-id', 'id, desc');
-                    //fillCombo('sm-options-type-name', autoCompleteList);
-                    //var fbPostableLocs = SocialMediaGroupsAndPages.facebook.; // update it on save as well.
-                    // save PostableLocs
-                    //$('#options-type-name').redraw();
-                    //setPostableLocs(selectedPostableLocs, function (message) {
-                        //manageServerResponse(message);
-                    //});
-                }//if (smElementCounter == tempSocialMediaNames.length) {
-            } //if (data) {
-        });//SocialMediaGroupsAndPages[tempSocialMediaNames[smcounter]].getPostableLocs(function (data) {
-    }//for (var smcounter = 0; smcounter < tempSocialMediaNames.length; smcounter++) {
 }); //$(window).load(function () { 
 
 $(document).ready(function () {
-    initFacebookAPI();
+        fillAutoCompleteList();
     $("#divSetCalendar").hide();
     $("#btnLogin").click(function (e) {       
         e.stopPropagation();
@@ -207,13 +127,12 @@ var SocialMediaGroupsAndPages = {
                                 } else {
                                     //return postableLocs;
                                 }
-                            });
+                            }, true);
                         } else {
                             var message = { status: "ERROR", message: "ERROR while automatically updating Postable locations : " + JSON.stringify(response.error) }
                             manageServerResponse(message);
                         }//if (response && !response.error) {
-                    } //function (response) {
-                ); //FB.api("/" + user_id+"/groups",
+                    },true); //FB.api("/" + user_id+"/groups",
             });//$nectorrFacebookLogin("", function (data) {
             
         }//getPostableLocs: function (userInfo) { 
@@ -613,3 +532,50 @@ var getElementFromArray = function (valArray, field, value) {
     }//for (var arrCounter = 0; arrCounter < valArray; arrCounter++) {
     return returnValue;
 }//var getElementFromArray = function (valArray, field, value) {
+
+var fillAutoCompleteList = function () {
+    var smElementCounter = 0;
+    for (var smcounter = 0; smcounter < tempSocialMediaNames.length; smcounter++) {
+        SocialMediaGroupsAndPages[tempSocialMediaNames[smcounter]].getPostableLocs(function (data) {
+            if (data) {
+                SocialMediaGroupsAndPages[data.sm_name].postableLocs = data;
+                setupAutoCompleteList(autoCompleteList, data.sm_name);
+                smElementCounter++;
+                if (smElementCounter == tempSocialMediaNames.length) {
+                    // prepare List for auto complete
+                    // setup auto complete list values
+
+                    $("#sm-options-type-name").magicsearch({
+                        dataSource: autoCompleteList,
+                        fields: ['sm_name', 'type', 'desc'],
+                        format: '%sm_name% · %type% · %desc%',
+                        id: 'id',
+                        type: '',
+                        ajaxOptions: {},
+                        hidden: false,
+                        maxShow: 5,
+                        isClear: true,
+                        showSelected: true,
+                        dropdownBtn: false,
+                        dropdownMaxItem: 8,
+                        multiple: true,
+                        focusShow: false,
+                        multiField: 'desc',
+                        multiStyle: { space: 5 },
+                        maxItem: true,
+                        noResult: 'no such postable location found.'
+                    });
+                    $("#sm-options-type-name").attr('data-id', 'id, desc');
+                    //fillCombo('sm-options-type-name', autoCompleteList);
+                    //var fbPostableLocs = SocialMediaGroupsAndPages.facebook.; // update it on save as well.
+                    // save PostableLocs
+                    //$('#options-type-name').redraw();
+                    //setPostableLocs(selectedPostableLocs, function (message) {
+                    //manageServerResponse(message);
+                    //});
+                }//if (smElementCounter == tempSocialMediaNames.length) {
+            } //if (data) {
+        });//SocialMediaGroupsAndPages[tempSocialMediaNames[smcounter]].getPostableLocs(function (data) {
+    }//for (var smcounter = 0; smcounter < tempSocialMediaNames.length; smcounter++) {
+
+}

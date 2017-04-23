@@ -30,21 +30,21 @@ router.post('/config/set', function (req, res) {
 });
 
 router.post('/user-config/set', function (req, res) {
-    var callback = req.query.callback;
-    if (callback) {
-        var paramsToSet = JSON.parse(req.query.StreamObject);
+    //var callback = req.query.callback;
+    //if (callback) {
+        var paramsToSet = JSON.parse(req.body.StreamObject);
         if (paramsToSet) {
-            var email = req.query.email;
+            var email = req.body.email;
             setConfigObject(email, paramsToSet, function (data) {
                 //var message = { status: 'SUCCESS', message: 'There was an error locating your preferences. ', 'data' : data }
-                var returnValue = callback + '(' + JSON.stringify(data) + ')';
+                var returnValue = callback + JSON.stringify(data);//'(' + JSON.stringify(data) + ')';
                 res.send(returnValue);
                 res.end();
                 return;
             });//setConfigObject(email, sm_name, configObject, function (data) {
 
         }//if (paramsToSet){
-    }//if (callback)
+    //}//if (callback)
 });//router.get('/user-config/set', function (req, res) { 
 
 router.get('/user-config/get', function (req, res) {

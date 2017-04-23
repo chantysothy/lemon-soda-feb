@@ -1,10 +1,10 @@
 module.exports = {
 
 	twitter: {
-        'consumer_key': 'wj888T3jlauiQIjcdu751AELB'
-        , 'consumer_secret': 'oFTPhjo0TN7myprULXrk4Wl1WtY2H9lYu9wrIrQkicXtljwwii'
-        , 'access_token': '103259010-UclsxWUAkcGd5qJfmyTYCjk0YP2374Yc5vFUkoJy'
-        , 'access_token_secret': 'VpBSnoXLxMqz3vZ9Xjnp5MaoQwkbbJPsx0uKtksyJWux5'
+        'consumer_key': 'tf3dm7LlhHPeYOmNpEL3yNJe7'
+        , 'consumer_secret': 'Ii1hkP9e9kx91DL1CWg0oD88h13cfxdqu46L2Yj92XjIoqnsdm'
+        , 'access_token': '789724956850462720-YvR6TlMs9PNbotV6n0ub4cNmo5u2TH3'
+        , 'access_token_secret': 'bAuiK9JNNylqIQv5jwOiku3qiXU45KYhhrCp70HlUKUP9'
         , 'redirect_url': 'https://nectorr.com/auth/twitter/callback'
         // for updating to git once again and again
         //,

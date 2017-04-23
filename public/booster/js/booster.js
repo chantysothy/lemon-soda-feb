@@ -13,10 +13,7 @@ $(window).load(function (e) {
     $('#currentImg').height(250).width(470);
     //$('#boosterPreview').left();
     $('#boosterPreview').height('auto');
-    $nectorrFacebookLogin(null, function (fbResponse) {
-        
-    });//$nectorrFacebookLogin(['user_posts', 'manage_pages'], null, function (fbResponse) {
-    getAccessTokens();
+    //getAccessTokens();
     $("#preloader").fadeOut("fast");
     $("#preloader").hide();
 
@@ -153,267 +150,7 @@ $(document).ready(function () {
             uploadedFiles.push({ fileDetails: file });
         }
     }; //Dropzone.options.uploadWidget = {
-    //});
-    //createBoostingProfile();
-  //  // Send file starts
-  //  nectorrDropzone.on("sending", function (file, xhr, formData) {
-  //      $(formData).append('fileDetails', { originalName: file.name });
-  //      $(formData).append('email', { data: $getClientEmail() });
-  //      console.log('upload started', file);
-  //      //$('.meter').show();
-  //  });//this.on("sending", function (file, xhr, formData) {
-  //  nectorrDropzone.accept = function (file, done) {
-  //      file.acceptDimensions = done;
-  //      file.rejectDimensions = function () {
-  //          if (file.type != "image/jpeg" && file.type != "image/png") {
-  //              done('The image must be at least 250 x 250px')
-  //              return;
-  //          } else if ((file.type != 'video/mp4') || (file.type != 'video/mp4') || (file.type != 'video/quicktime') || (file.type != 'video/x-ms-wmv') || (file.type = 'video/x-msvideo')) {
-  //              done('Invalid video format or size exceed 50 mb.')
-  //              return;
-  //          } else {
-  //              done('file format not supported by nectorr.');
-  //              return;
-  //          }//if (file.type != "image/jpeg" && file.type != "image/ png") {
-  //      };
-  //      uploadedFiles.push({ fileDetails: file });
-  //  }
-
-    //nectorrDropzone.init = function () {
-    //    this.options.dictRemoveFile = "Delete";
-    //    this.options.maxFilesize = 10;
-    //    this.options.maxThumbnailFilesize = 10;
-    //    this.options.clickable = true;
-    //    this.on("selectedFiles", function (files) {
-    //        console.log("selected files : " + files);
-    //    });
-    //    //New file added
-    //    this.on("addedfile", function (file) {
-    //        console.log('new file added ', file);
-    //        addHiddenFields(file);
-    //    });
-
-    //    this.on("maxfilesexceeded", function (file) {
-    //        manageServerResponse({ status: "ERROR", message: "No more files please!" });
-    //        this.removeFile(file);
-    //    });// remove file starts
-
-    //    this.on("removedfile", function (file) {
-    //        // remove file from array
-    //        $.ajax({
-    //            headers: { "Accept": "application/json" }
-    //            , type: 'GET'
-    //            , url: '/upload/delete'
-    //            , data: "file=" + file.serverFileName
-    //            , dataType: "jsonp"
-    //            , jsonp: "callback"
-    //            , crossDomain: true
-    //            , beforeSend: function (xhr) {
-    //                xhr.withCredentials = true;
-    //            }
-    //            , jsonPCallback: "jsonpCallback"
-    //            , success: function (data) {
-    //                //var elementList = $(html).find(element);
-    //                manageServerResponse(data);
-    //            }//success: function (data) {
-    //            , error: function (jqXHR, textStatus, errorThrown) {
-    //                //var msgBox = $('#butrfly-login').find();
-    //                alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
-    //            }//error: function (jqXHR, textStatus, errorThrown) {
-    //        });
-
-    //    });
-
-    //    // Send file starts
-    //    this.on("sending", function (file, xhr, formData) {
-    //        $(formData).append('fileDetails', { originalName: file.name });
-    //        $(formData).append('email', { data: $getClientEmail() });
-    //        console.log('upload started', file);
-    //        //$('.meter').show();
-    //    });//this.on("sending", function (file, xhr, formData) {
-
-    //    this.on('sendingmultiple', function (files, xhr, formData) {
-
-    //    });//this.on('sendingmultiple', function (data, xhr, formData) {
-
-    //    this.on("totaluploadprogress", function (progress) {
-    //        console.log("progress ", progress);
-    //        //$('.roller').width(progress + '%');
-    //    });//this.on("totaluploadprogress", function (progress) {
-
-    //    this.on("queuecomplete", function (progress) {
-    //        //$('.meter').delay(999).slideUp(999);
-    //        console.log("Queue complete ", progress);
-    //    });//this.on("queuecomplete", function (progress) {
-
-    //    // On removing file
-    //    this.on('success', function (file, resp) {
-    //        console.log(file);
-    //        console.log(resp);
-    //        var response = JSON.parse(resp);
-    //        var serverInfo = absolutePath(response.data.fileName.path);
-    //        file['serverFileName'] = serverInfo;
-    //        imageList.push(serverInfo);
-    //        $("#currentImg").attr('src', imageList[imageList.length - 1]);
-    //        $('#boosterPreview').show();
-    //        $('#buttonPanel').show();
-    //    });//this.on('success', function (file, resp) {
-    //    this.on('thumbnail', function (file) {
-    //        if (file.type == "image/jpeg" || file.type == "image/png") {
-    //            if (file.width < 250 || file.height < 250) {
-    //                file.rejectDimensions();
-    //            } else {
-    //                file.acceptDimensions();
-    //            }
-    //        } else if ((file.type != 'video/mp4') || (file.type != 'video/mp4') || (file.type != 'video/quicktime') || (file.type != 'video/x-ms-wmv') || (file.type = 'video/x-msvideo')) {
-    //            if (file.size > 50) {
-    //                file.rejectDimension();
-    //            }
-    //        } else {
-    //            file.rejectDimensions();
-    //        }
-    //    });
-    //},
-    //nectorrDropzone.accept= function (file, done) {
-    //    file.acceptDimensions = done;
-    //    file.rejectDimensions = function () {
-    //        if (file.type != "image/jpeg" && file.type != "image/png") {
-    //            done('The image must be at least 250 x 250px')
-    //            return;
-    //        } else if ((file.type != 'video/mp4') || (file.type != 'video/mp4') || (file.type != 'video/quicktime') || (file.type != 'video/x-ms-wmv') || (file.type = 'video/x-msvideo')) {
-    //            done('Invalid video format or size exceed 50 mb.')
-    //            return;
-    //        } else {
-    //            done('file format not supported by nectorr.');
-    //            return;
-    //        }//if (file.type != "image/jpeg" && file.type != "image/ png") {
-    //    };
-    //    uploadedFiles.push({ fileDetails: file });
-    //}
-
-//    nectorrDropzone.options.uploadWidget = {
-////        Dropzone.options.uploadWidget = {
-//        paramName: 'file',
-//        maxFilesize: 10, // MB
-//        maxFiles: 4,
-//        addRemoveLinks: true,
-//        dictDefaultMessage: 'Click to add photos or videos to your post.',
-//        dictResponseError: 'nectorr server configuration error.',
-//        //headers: {
-//        //    'x-csrf-token': "vidurkohli"
-//        //},
-//        acceptedFiles: 'image/*, video/*,.mp4,.mov,.wmv',
-//        init: function () {
-//            this.options.dictRemoveFile = "Delete";
-//            this.options.maxFilesize = 10;
-//            this.options.maxThumbnailFilesize = 10;
-//            this.options.clickable = true;
-//            this.on("selectedFiles", function (files) {
-//                console.log("selected files : " + files);
-//            });
-//            //New file added
-//            this.on("addedfile", function (file) {
-//                console.log('new file added ', file);
-//                addHiddenFields(file);
-//            });
-//            this.on("maxfilesexceeded", function (file) {
-//                //alert("No more files please!");
-//                manageServerResponse({status: "ERROR",message : "No more files please!"});
-//                this.removeFile(file);
-//            });// remove file starts
-//            this.on("removedfile", function (file) {
-//                // remove file from array
-//                $.ajax({
-//                    headers: { "Accept": "application/json" }
-//                    , type: 'GET'
-//                    , url: '/upload/delete'
-//                    , data: "file=" + file.serverFileName
-//                    , dataType: "jsonp"
-//                    , jsonp: "callback"
-//                    , crossDomain: true
-//                    , beforeSend: function (xhr) {
-//                        xhr.withCredentials = true;
-//                    }
-//                    , jsonPCallback: "jsonpCallback"
-//                    , success: function (data) {
-//                            //var elementList = $(html).find(element);
-//                            manageServerResponse(data);
-//                    }//success: function (data) {
-//                    , error: function (jqXHR, textStatus, errorThrown) {
-//                        //var msgBox = $('#butrfly-login').find();
-//                        alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
-//                    }//error: function (jqXHR, textStatus, errorThrown) {
-//                });
-
-//            });
-//            // Send file starts
-
-//            this.on("sending", function (file, xhr, formData) {
-//                formData.append('fileDetails', { originalName: file.name });
-//                formData.append('email', { data: $getClientEmail() });
-//                console.log('upload started', file);
-//                //$('.meter').show();
-//            });//this.on("sending", function (file, xhr, formData) {
-
-//            this.on('sendingmultiple', function (data, xhr, formData) {
-
-//            });//this.on('sendingmultiple', function (data, xhr, formData) {
-
-//            this.on("totaluploadprogress", function (progress) {
-//                console.log("progress ", progress);
-//                //$('.roller').width(progress + '%');
-//            });//this.on("totaluploadprogress", function (progress) {
-
-//            this.on("queuecomplete", function (progress) {
-//                //$('.meter').delay(999).slideUp(999);
-//                console.log("Queue complete ", progress);
-//            });//this.on("queuecomplete", function (progress) {
-
-//            // On removing file
-//            this.on('success', function (file, resp) {
-//                console.log(file);
-//                console.log(resp);
-//                var response = JSON.parse(resp);
-//                var serverInfo = absolutePath(response.data.fileName.path);
-//                file['serverFileName'] = serverInfo;
-//                imageList.push(serverInfo);
-//                $("#currentImg").attr('src', imageList[imageList.length - 1]);
-//                $('#boosterPreview').show();
-//                $('#buttonPanel').show();
-//            });//this.on('success', function (file, resp) {
-//            this.on('thumbnail', function (file) {
-//                if (file.type == "image/jpeg" || file.type == "image/png") {
-//                    if (file.width < 250 || file.height < 250) {
-//                        file.rejectDimensions();
-//                    } else {
-//                        file.acceptDimensions();
-//                    }
-//                } else if ((file.type != 'video/mp4') || (file.type != 'video/mp4') || (file.type != 'video/quicktime') || (file.type != 'video/x-ms-wmv') || (file.type = 'video/x-msvideo')) {
-//                    if (file.size > 50) {
-//                        file.rejectDimension();
-//                    }
-//                } else {
-//                    file.rejectDimensions();
-//                }
-//            });
-//        },
-//        accept: function (file, done) {
-//            file.acceptDimensions = done;
-//            file.rejectDimensions = function () {
-//                if (file.type != "image/jpeg" && file.type != "image/png") {
-//                    done('The image must be at least 250 x 250px')
-//                    return;
-//                } else if ((file.type != 'video/mp4') || (file.type != 'video/mp4') || (file.type != 'video/quicktime') || (file.type != 'video/x-ms-wmv') || (file.type = 'video/x-msvideo')) {
-//                    done('Invalid video format or size exceed 50 mb.')
-//                    return;
-//                } else {
-//                    done('file format not supported by nectorr.');
-//                    return;
-//                }//if (file.type != "image/jpeg" && file.type != "image/ png") {
-//            };
-//            uploadedFiles.push({ fileDetails: file });
-//        }
-//    };
+    
 
     $('#boosterPreview').hide();
     $('#buttonPanel').hide();
@@ -422,9 +159,9 @@ $(document).ready(function () {
         $('#boosterTextArea').markRegExp(/([@]|[#])([a-z])\w+/gmi);
     });
 
-    $nectorrFacebookLogin(facebookDefaults.scope, null, function (fbResponse) {
-        console.log(fbResponse);    
-    });
+    //$nectorrFacebookLogin(facebookDefaults.scope, null, function (fbResponse) {
+    //    console.log(fbResponse);    
+    //});
     $("#postNowVignette").animatedModal({
         modalTarget: 'postNowVignetteModal',
         animatedIn: 'fadeIn',
@@ -456,7 +193,8 @@ $(document).ready(function () {
         // Callbacks
         beforeOpen: function () {
             var src = $("#iFrameSettings").attr('src');
-            setTimeout(settingIframeSrc("#iFramePostNow", "./select/index.html"), 5);
+            $("#iFrameSelectVignette").attr("src", "./select/index.html");
+
             console.log("The selectVignetteModal animation before open was called");
         },
         afterOpen: function () {
@@ -480,6 +218,7 @@ $(document).ready(function () {
         //color:'#3498db',
         // Callbacks
         beforeOpen: function () {
+            $("#iFrameManageVignette").attr("src" , "./manage/index.html");
             console.log("The animation before open was called");
         },
         afterOpen: function () {
@@ -493,91 +232,82 @@ $(document).ready(function () {
         }
     });
 
-    $('#postNow-old').click(function (e) {
-        // get Url, get imgUrl, get Caption, get Text
-        //var originalUrl, shortUrlForServer, imageUrlForServer, headingForServer, textForServer
-        $nectorrFacebookLogin(facebookDefaults.scope, null, function (fbResponse) {
-            fbAccessToken = fbResponse.authResponse.accessToken;
-            var dataForPost = { userId: { facebook: nectorrFacebookId }, url: shortUrlForServer, imgUrl: (!imageUrlForServer) ? null : imageUrlForServer, caption: headingForServer, text: textForServer, sm_names: ['facebook', 'twitter'], accessToken: fbResponse.authResponse.accessToken }
-            boostNow(dataForPost, function (serverMessage) {
-                manageServerResponse(serverMessage);
-              });//boostNow(dataForPost, function (data) {
-        });//$nectorrFacebookLogin(['user_posts', 'manage_pages'], null, function (fbResponse) {
-        e.preventDefault();
-    });//$('#postNow').click(function (e) {
-
     $('#boosterTextArea').bind("paste", function (e) {
-        // access the clipboard using the api
         $('#serverResponse').hide();
-        $('#preloader').fadeIn('fast');
+//        $('#preloader').fadeIn('fast');
         var pastedData = e.originalEvent.clipboardData.getData('text');
         //, , imageUrlForServer, headingForServer, textForServer
         //$('#boosterTextArea').val(pastedData);
         // preview pane
         //var baseUrl = getBaseUrl(pastedData); original
-        linkify(pastedData, function (extractedUrl) {
-            shortenUrl(extractedUrl.url, function (data) {
-                if (data.shortUrl) {
-                    var shortUrl = data.shortUrl;
-                    shortUrlForServer = shortUrl; //used for server comm
-                    var postData = pastedData;
-                    postData = postData.replace(extractedUrl.url, shortUrl + "\n");
-                    var hashTags = hashify(postData);
-                    textForServer = hashTags;
-                    $('#boosterTextArea').val(postData);
-                    $("#boosterPreview").attr("src", shortUrl);
-                    // get list of images
-                    getHTML(extractedUrl.url, function (html) {
-                        var h1Data = html.h1Tags
-                        $("#h1Text").text(h1Data[0]);
-                        headingForServer = h1Data[0];
+        //initializeGoogle(true, function (googleResponse) {
+        //    if (googleResponse){
+                linkify(pastedData,function (extractedUrl) {
+                shortenUrl(extractedUrl.url, function (data) {
+                    if (data.shortUrl) {
+                        var shortUrl = data.shortUrl;
+                        shortUrlForServer = shortUrl; //used for server comm
+                        var postData = pastedData;
+                        postData = postData.replace(extractedUrl.url, shortUrl + "\n");
+                        var hashTags = hashify(postData);
+                        textForServer = hashTags;
+                        $('#boosterTextArea').val(postData);
+                        $("#boosterPreview").attr("src", shortUrl);
+                        // get list of images
+                        getHTML(extractedUrl.url, function (html) {
+                            var h1Data = html.h1Tags
+                            $("#h1Text").text(h1Data[0]);
+                            headingForServer = h1Data[0];
 
-                        var paras = html.pTags;
+                            var paras = html.pTags;
 
-                        var para = paras[0], strLen;
-                        if (para) {
-                            if (paras[0] || paras[0] == "") para = paras[1];
-                            if (para.length > 97) { strLen = 97 } else { strLen = para.length - 1 }
-                            para = para.substr(0, strLen);
-                            para += '...';
-                            $('#paraText').text(para);
-                            if (!textForServer) {
-                                textForServer = para;
-                            } else {
-                                textForServer += "/n" + para;
+                            var para = paras[0], strLen;
+                            if (para) {
+                                if (paras[0] || paras[0] == "") para = paras[1];
+                                if (para.length > 97) { strLen = 97 } else { strLen = para.length - 1 }
+                                para = para.substr(0, strLen);
+                                para += '...';
+                                $('#paraText').text(para);
+                                if (!textForServer) {
+                                    textForServer = para;
+                                } else {
+                                    textForServer += "/n" + para;
+                                }
+                                $('#buttonPanel').show();
                             }
-                            $('#buttonPanel').show();
-                        }
-                        slideIndex = 0;
-                        if (imageList.length > 0) {
-                            imageList = imageList.push(html.imgTags);
-                        } else {
-                            imageList = html.imgTags;
-                        }
-                        //imageList = cleanImageList(imageList);
-                        //imageList = $(parentDiv).children('img').map(function () { return $(this) }).get();
-                        if (imageList) {
-                            plusDivs(slideIndex);// display images
-                            $('#boosterPreview').show();
+                            slideIndex = 0;
+                            if (imageList.length > 0) {
+                                imageList = imageList.push(html.imgTags);
+                            } else {
+                                imageList = html.imgTags;
+                            }
+                            //imageList = cleanImageList(imageList);
+                            //imageList = $(parentDiv).children('img').map(function () { return $(this) }).get();
+                            if (imageList) {
+                                plusDivs(slideIndex);// display images
+                                $('#boosterPreview').show();
 
-                        }
-                        //addImageListToDiv("", imageList);
-                        //showDivs(slideIndex);
+                            }
+                            //addImageListToDiv("", imageList);
+                            //showDivs(slideIndex);
 
-                    });
-                } else {
-                    manageServerResponse({ status: "ERROR", message: "An error occured while shortening Url." });
-                } //if (data){
+                        });
+                    } else {
+                        manageServerResponse({ status: "ERROR", message: "An error occured while shortening Url." });
+                    } //if (data){
                 });//shortenUrl(pastedData, function (data) {
 
-        
-            $('#preloader').hide()
-            $('#boosterTextArea').markRegExp(/([@]|[#])([a-z])\w+/gmi);
 
-        });
+                $('#preloader').hide()
+                $('#boosterTextArea').markRegExp(/([@]|[#])([a-z])\w+/gmi);
+
+            });
+        //    }//if (googleResponse) {
+        //}, googlePlusDefaults.scopes.urlShortnerAuth, 'urlShortner', 'v1');       
 
         //originalUrl = url;function
         // google shortner
+
     }); //$('booster')..bind("paste", function (e) {
 
     validateLogin();
@@ -692,7 +422,12 @@ var manageServerResponse = function (data, multipleRecords = false) {
 }//var manageServerResponse = function(data) {
 
 var shortenUrl = function (longUrl, callback) {
-    gapi.client.setApiKey(googlePlusDefaults.apiKey); 
+    //gapi.client.init({
+    //    apiKey: googlePlusDefaults.apiKey
+    //    , clientId: googlePlusDefaults.clientId
+    //    , scope: googlePlusDefaults.scopes.urlShortnerAuth
+    //})
+    gapi.client.setApiKey(googlePlusDefaults.apiKey); // not using the standard key using GooglePlusDefault variable due to tech issue. 
     gapi.client.load('urlshortener', 'v1', function (data) {
         //alert('Google url shortner loaded' + data);
         var request = gapi.client.urlshortener.url.insert({
