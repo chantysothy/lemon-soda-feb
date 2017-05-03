@@ -16,9 +16,13 @@ var vignetteModel = require('../models/vignettes');
 var userUtils = require('../utils/userUtils');
 var userPosts = require('../models/userposts');
 var config = require('../config/config');
+var emitter = require('events').EventEmitter;
+var inherits = require('util').inherits;
 
+var self
 var PostManager = function () { //constructor
-    this.self = this;
+    isFreeForFacebook = true;
+    self = this;
 } 
 
 
@@ -91,15 +95,15 @@ PostManager.prototype.postToInstagram = function (dataToPost, callback) {
 }//var postToInstagram = function (dataToPost, callback) {
 
 PostManager.prototype.postUsingVignette = function (dataToPost, callback) {
-    for (var postCounter = 0; postCounter < dataToPost.length; postCounter++) {
-        var postElement = dataToPost[postCounter];
+    //self.isFreeForFacebook = false;
+    var postElement = dataToPost;
+    var postableLocations
         var email = postElement.email;
-            if (email) {
-                var task = dataToPost[postCounter].task;
+        if (email) {
+            var task = postElement.task;
                 var vignettes = task.vignettes;
-
-            for (var vignetteCounter = 0; vignetteCounter < vignettes.length; vignetteCounter++) {
-                var vignette = vignettes[vignetteCounter];
+//            for (var vignetteCounter = 0; vignetteCounter < vignettes.length; vignetteCounter++) {
+                var vignette = vignettes[0];
                 var condition = { _id: vignette.id }
                 vignetteModel.findOne(condition, function (err, doc) {
                     if (err) {
@@ -111,42 +115,42 @@ PostManager.prototype.postUsingVignette = function (dataToPost, callback) {
                         }//if (callback) {
                     }
                     if (doc) {
-                            var postableLocs = doc.data.locs
-                            //for (var postableLocLen = 0; postableLocLen < postableLocs.length(); postableLocLen++) {
-                    //            var postableLocs = postableLoc[postableLocLen];
-                                for (var postableLocNum = 0; postableLocNum < postableLocs.length; postableLocNum++) {
-                                    var postableLoc = postableLocs[postableLocNum];
-                                    var smName = postableLoc.sm_name;
-                                    var locType = postableLoc.type;
-                                    var locId = postableLoc.postableLocId;
-                                    postableLoc['postableLoc'] = { 'locType': locType, 'locId': locId }
-                                    postableLocs[postableLocNum] = postableLoc;
-                                    switch (smName) {
-                                        case "facebook":
-                                            postToFacebook(dataToPost, callback);
-                                            break;
-                                        case "twitter":
-                                            this.postToTwitter(dataToPost, callback);
-                                            break;
-                                        case "googlePlus":
-                                            postToGooglePlus(dataToPost, callback);
-                                            break;
-                                    }//switch (smName) {
-                                }//for (var postableLocNum = 0; postableLocNum < postableLocs.length(); postableLocNum++) {
-                            //}//for (var postableLocLen = 0; postableLocLen < doc.length(); postableLocLen++) {
+                        var postableLocs = doc.data.locs
+                        postableLocations = postableLocs;
+                            for (var postableLocLen = 0; postableLocLen < postableLocs.length; postableLocLen++) {
+                                var postableLoc = postableLocs[postableLocLen];
+                                var smName = postableLoc.sm_name;
+                                var locType = postableLoc.type;
+                                var locId = postableLoc.postableLocId;
+                                postableLoc['postableLoc'] = { 'locType': locType, 'locId': locId }
+                                postableLocs[0] = postableLoc;
+                                switch (smName) {
+                                    case "facebook":
+                                        postToFacebook(dataToPost, postableLoc, callback);
+                                        break;
+                                    case "twitter":
+                                        postToTwitter(dataToPost, callback);
+                                        break;
+                                    case "googlePlus":
+                                        postToGooglePlus(dataToPost, callback);
+                                        break;
+                                }//switch (smName) {
+                                //}//for (var postableLocNum = 0; postableLocNum < postableLocs.length(); postableLocNum++) {
+                            }//for (var postableLocLen = 0; postableLocLen < doc.length(); postableLocLen++) {
                         }//if (doc) {
                     //}//
                 });//vignetteModel.findOne(condition, function (err, doc) {
-            }//for (var vignetteCounter = 0; vignetteCounter < vignettes.length; vignetteCounter++) {
+//            }//for (var vignetteCounter = 0; vignetteCounter < vignettes.length; vignetteCounter++) {
             }//if (email) {
-        }//for (var postCounter = 0; postCounter < docs.length; postCounter++) {
+        //}//for (var postCounter = 0; postCounter < docs.length; postCounter++) {
 }//var postUsingVignette = function (dataToPost, callback) {
-postToFacebook = function (dataToPost, callback) { //dataToPost. postToString, caption, link, pictureLink
-    var message = {};
 
+postToFacebookNotBeingUsed = function (dataToPost, locations, callback) { //dataToPost. postToString, caption, link, pictureLink
+    var message = {};
+    var task = dataToPost.task;
     var params = {};
     fbGraph.extendAccessToken({
-        "access_token": dataToPost.accessToken
+        "access_token": task.accessCreds.facebook.authResponse.accessToken
         , "client_id": config.facebookAuth.client_id
         , "client_secret": config.facebookAuth.client_secret
     }, function (extendAccessTokenError, facebookRes) {
@@ -159,30 +163,152 @@ postToFacebook = function (dataToPost, callback) { //dataToPost. postToString, c
             params['link'] = dataToPost.url;
             params['picture'] = dataToPost.imgUrl;
             params['caption'] = dataToPost.caption;
+            var postProcessCounter = 0;
+            for (var locationCounter = 0; locationCounter < locations.length; locationCounter++){
 
-            var path = (dataToPost.urlToPost) ? dataToPost.urlToPost : '/me';
+                var path = (locations[postProcessCounter]) ? "/" + locations[postProcessCounter].postableLocId : '/me';
+                process.nextTick(function () {
+                    if (locations[postProcessCounter].type == 'group') {
+                        path += "/feed"
+                        fbGraph.post(path, params, function (postError, postResponse) {
+                            if (postError) {
+                                message['status'] = "ERROR";
+                                message['message'] = "An error occured while posting to facebook. Code - " + postError.code + " from facebook.";
+                                callback(message);
+                                setTimeout(function () { }, 300)
+                                return;
+                            }//if (err) {
+                            if (!postResponse.error) {
+                                message['status'] = "SUCCESS";
+                                message['message'] = "Successfully posted to facebook."
+                                message['data'] = { "postId": res, accessToken: facebookRes.access_token }
+                                //                            callback(message);
+                                //                            setTimeout(function () { }, 300)
+                                //return;
+                            }//if (res) {
+                        });//function (err, facebookRes) {
+                    } else {
+                        var a = locationCounter
+                        fbGraph.extendAccessToken({
+                            "access_token": locations[postProcessCounter].otherInfo.access_token
+                            , "client_id": config.facebookAuth.client_id
+                            , "client_secret": config.facebookAuth.client_secret
+                        }, function (extendAccessTokenError, facebookRes) {
+                            if (!extendAccessTokenError) {
+                                fbGraph.setAccessToken(facebookRes.access_token);
+                                fbGraph.post(path, params, function (postError, postResponse) {
+                                    if (postError) {
+                                        message['status'] = "ERROR";
+                                        message['message'] = "An error occured while posting to facebook. Code - " + postError.code + " from facebook.";
+                                        callback(message);
+                                        setTimeout(function () { }, 300)
+                                        return;
+                                    }//if (err) {
+                                    if (!postResponse.error) {
+                                        message['status'] = "SUCCESS";
+                                        message['message'] = "Successfully posted to facebook."
+                                        message['data'] = { "postId": res, accessToken: facebookRes.access_token }
+                                        callback(message);
+                                        setTimeout(function () { }, 300)
+                                        //return;
+                                    }//if (res) {
+                                });//function (err, facebookRes) {
 
-            fbGraph.post(path, params, function (postError, postResponse) {
-                if (postError) {
-                    message['status'] = "ERROR";
-                    message['message'] = "An error occured while posting to facebook. Code - " + postError.code + " from facebook.";
-                    callback(message);
-                    setTimeout(function () { }, 300)
-                    return;
-                }//if (err) {
-                if (!postResponse.error) {
-                    message['status'] = "SUCCESS";
-                    message['message'] = "Successfully posted to facebook."
-                    message['data'] = { "postId": res, accessToken: facebookRes.access_token }
-                    callback(message);
-                    setTimeout(function () { }, 300)
-                    //return;
-                }//if (res) {
-            });//function (err, facebookRes) {
+                            }//if (!extendAccessTokenError) {
+
+                        });
+                    }//                if (locations[locationCounter].type == 'group') {
+
+                });//process.nextTick(function(){
+            }//for (var locationCounter = 0; locationCounter < locations.length, locationCounter++){
         } else {
             callback({ status: "ERROR", message: "facebook error while obtaining access token " + extendAccessTokenError.code + ". " + extendAccessTokenError.message });
         }
     })//fbGraph.extendAccessToken({;
 }//var postToFacebook = function (options, accessToken) {
 
+var postToFacebook = function (dataToPost, postableLocation, callback) {
+    
+        var processTickCounter = 0;
+        //for (var locCounter = 0; locCounter < postableLocations.length; locCounter++) {
+
+            //var postableLocation = postableLocations[processTickCounter];
+            var token
+            process.nextTick(function () {
+                var path;
+                var params = {};
+                var message = {};
+                (postableLocation.postableLocId) ? path = "/" + postableLocation.postableLocId : path = '/me';
+                path += "/feed";
+                    (postableLocation.type == "page") ? token = postableLocation.otherInfo.access_token : token = dataToPost.task.accessCreds.facebook.authResponse.accessToken;
+
+                    if (postableLocation.type == 'page') {
+                        var fbAccessToken = dataToPost.task.accessCreds.facebook.authResponse.accessToken;
+                        getFacebookPageToken(fbAccessToken, postableLocation.postableLocId, function (fbPageTokenRes) {
+                            if (fbPageTokenRes.access_token) {
+                                fbGraph.setAccessToken(fbPageTokenRes.access_token);
+                                params['caption'] = dataToPost.task.caption;
+                                params['message'] = dataToPost.task.text;
+                                params['picture'] = dataToPost.task.imgUrl
+                                params['link'] = dataToPost.task.url
+
+                                fbGraph.post(path, params, function (fbError, fbResponse) {
+                                    if (!fbError) {
+                                        if (callback)
+                                            callback(fbError);
+                                    } else {
+                                        if (callback)
+                                            callback(fbResponse);
+                                    }//if (!fbError) {
+                                });//fbGraph.post(path, params, function (fbError, fbResponse) {
+                            } else {
+                                callback({status : "ERROR", message: "An error occured while renewing page token."});
+                            }//if (fbPageTokenRes.access_token) {
+                        });//getFacebookPageToken(fbAccessToken, postableLocation.postableLocId, function (fbPageTokenRes) {
+                    } else {//(postableLocation.tye = 'group') { //groups
+                        fbGraph.setAccessToken(token);
+                        params['caption'] = dataToPost.task.caption;
+                        params['message'] = dataToPost.task.text;
+                        params['picture'] = dataToPost.task.imgUrl
+                        params['link'] = dataToPost.task.url
+                        fbGraph.post(path, params, function (fbError, fbResponse) {
+                            if (!fbError) {
+                                if (callback)
+                                    callback(fbError);
+                            } else {
+                                if (callback)
+                                    callback(fbResponse);
+                            }//if (!fbError) {
+                        });//fbGraph.post(path, params, function (fbError, fbResponse) {
+
+                    } //if (postableLocation.type == 'page') {
+
+            });//process.nextTick(function () {
+
+        //}//for (var locCounter = 0; locCounter < postableLocations.length; locCounter++) {
+}//var postToFacebook = function(dataToPost, postableLocations, callback){
+
+var renewFacebookToken = function (token, callback) {
+    fbGraph.extendAccessToken({
+        "access_token": token
+        , "client_id": config.facebookAuth.client_id
+        , "client_secret": config.facebookAuth.client_secret
+    }, function (extendAccessTokenError, facebookRes) {
+        if (extendAccessTokenError) {
+            callback(facebookRes);
+        }//if (extendAccessTokenError) {
+    });//fbGraph.extendAccessToken({
+}//var renewFacebookToken = function (token, callback) {
+
+var getFacebookPageToken = function (fbAccessToken, pageId, callback) {
+    fbGraph.setAccessToken(fbAccessToken);
+    fbGraph.get("/"+pageId + "?fields=access_token", function (err, fbRes) {
+        if (!err) {
+            callback(fbRes)
+        } else {
+            callback(err);
+        }
+    });
+}//var getFacebookPageToken = function (pageId, callback) {
+inherits(PostManager, emitter);
 module.exports = PostManager;

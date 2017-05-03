@@ -46,20 +46,28 @@ window.closeModal = function () {
 };
 $(document).ready(function () {
     $('body').attr('color', '#333333');
+    $('#broadcastBtn').hide();
     $("#preloader").fadeOut("slow");
     //getLoginObject
     //getAccessTokens();
     $('#newDateTime').click(function (ev) {
         ev.preventDefault();
         var divId = Date.now().toString();
-        var newDiv = $('<div/>').insertAfter("#selectedTime");
+        var newDiv = $('<div/>').insertBefore("#selectedTime");
         //newDiv.attr('class', 'input-group date col-xs-3');
         newDiv.attr('class', 'col-xs-3');      
+        newDiv.attr('style', 'color:#000000');      
         var newInput = $("<input type=\"text\" id=\"" + divId + "\" name=\"" + divId + '_input' + "\" class=\"timeline\" />").appendTo(newDiv);
         newInput.attr('placeholder', 'click to add timeline');
         //newInput.attr('color', '#ffffff');
-        newInput.datetimepicker();
+        newInput.datetimepicker(
+            //{
+            //showOtherMonths: true
+            //, dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 
+            //}
+        );
+        $('#broadcastBtn').show();
     });
     $('broadcastNow').hide();
     $('broadcastBtn').hide();
@@ -91,7 +99,7 @@ $(document).ready(function () {
                 noResult: 'no such vignette found.'
             });
             //$("#vignette-name").attr('id, desc');
-            $("#vignette-name").attr('data-id', 'id, desc');
+            $("#vignette-name").attr('data-id', 'desc,id');
         } else {
             //display error message
         }//if (data.status = "SUCCESS") {
@@ -112,37 +120,22 @@ $('#go-back').click(function (e) {
 
 });//$('#set-time').click(function (e) {
 
+$('#boostNowWithVignette').click(function (e) {
+    e.preventDefault();
+    if (confirm('Do you want to post now?')) {
+        timeLines = [];
+        postNowUsingVignettes();
+    } //if (confirm('You want to post now ?')) {
+});//$('#boostNowWithVignette').click(function (e) {
+
 $('#broadcastNow').click(function (e) {
 
     selectedVignettes = [];
     selectedVignettes = getSelectedVignettes();
     timeLines= getTimeLines();// filled into global variable timeline.
-    if (confirm('Do you want to post now ?')) {
+    if (confirm('Do you want to schedule posting now ?')) {
         // Save it!
-        if (timeLines.length > 0) {
-            var dataForPost = { url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
-            var itemsToPost = { "vignettes": { vignettes: selectedVignettes }, "dataToPost": dataForPost, "timelines": { timeline: timeLines }, "accessCreds": accessCredsForBooster }
-            postUsingVignette(itemsToPost, function (data) {
-                if (data.status == "SUCCESS") {
-                    manageServerResponse(data);
-                } else {
-                    manageServerResponse(data);
-                }
-            });
-        } else {
-            var postNowTimeLine = []; var postTime = Date.now() + (20 * 1000); postNowTimeLine.push(postTime);
-
-            var dataForPost = { url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
-            var itemsToPost = { "vignettes": { vignettes: selectedVignettes }, "dataToPost": dataForPost, "timelines": { timeline: postNowTimeLine } }
-            postUsingVignette(itemsToPost, function (data) {
-                if (data.status == "SUCCESS") {
-                    manageServerResponse(data);
-                } else {
-                    manageServerResponse(data);
-                }//if (data.status == "SUCCESS") {
-                // post now
-            });//postUsingVignette(itemsToPost, function (data) {
-        }//        if (timeLines.length > 0) {
+        postNowUsingVignettes();
     } //if (confirm('You want to post now ?')) {
 
 });//$('#btnPostNow').click(function (e) {
@@ -251,3 +244,56 @@ var getAccessTokens = function (callback) {
         });//$nectorrFacebookLogin(facebookDefaults.scope, null, function (fbAuthResponse) {
         //gapi.load('client:auth2', $initializeGoogleAuth2);
 }
+
+var postNowUsingVignettes = function () {
+    $('#serverResponse').hide();
+    var tempVignettes = getSelectedVignettes();
+    if (tempVignettes.length <= 0) {
+        manageServerResponse({ status: "ERROR", message: "One or more vignettes is required to boost. Please select one." }, false);
+        return;
+    } else {
+        getAccessTokens(function (accessTokens) {
+            if (accessTokens) {
+                if (timeLines.length > 0) {
+                    if (validTimeLine(timeLines)) {
+                        var dataForPost = { url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
+                        var itemsToPost = { "vignettes": { vignettes: selectedVignettes }, "dataToPost": dataForPost, "timelines": { timeline: timeLines }, "accessCreds": accessTokens }
+                        postUsingVignette(itemsToPost, function (data) {
+                            manageServerResponse(data);
+                        }); //postUsingVignette(itemsToPost, function (data) {
+                    } else {
+                        alert('Invalid value(s) in timeline.');
+                        return;
+                    }//if (validTimeLine(){
+                } else {
+                    var postNowTimeLine = []; var postTime = Date.now() + (20 * 1000); postNowTimeLine.push(postTime);
+
+                    var dataForPost = { url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
+                    var itemsToPost = { "vignettes": { vignettes: selectedVignettes }, "dataToPost": dataForPost, "timelines": { timeline: postNowTimeLine } }
+                    postUsingVignette(itemsToPost, function (data) {
+                        if (data.status == "SUCCESS") {
+                            manageServerResponse(data);
+                        } else {
+                            manageServerResponse(data);
+                        }//if (data.status == "SUCCESS") {
+                        // post now
+                    });//postUsingVignette(itemsToPost, function (data) {
+                }// if (timeLines.length > 0) {
+            }//if (accessTokens) {
+        }); //getAccessTokens(function (accessTokens) {
+    }//if (tempVignettes.length <= 0) {
+
+} //var postNowUsingVignettes = function(){
+var validTimeLine = function (timeline) {
+    if (!timeline || (timeline.length <= 0)) return false;
+    var returnValue = true;
+    var timeNow = Date.now();
+
+    for (var counter = 0; counter < timeline.length; counter++) {
+        if (timeNow > timeline[counter]) {
+            returnValue = false;
+            break;
+        }//if (timeNow > timeline[counter]) {
+    }//for (var counter = 0; counter < timeline.length; counter++) {
+    return returnValue;
+}//var validTimeLine = function (timeline) {

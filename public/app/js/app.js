@@ -82,7 +82,7 @@ $(window).load(function () {
                         moderation: function (content) {
                             return (content.text) ? content.text.indexOf('fuck') == -1 : true;
                         },
-                        update_period: 5000,
+                        update_period: 10*1000,
                         // When all the posts are collected and displayed - this function is evoked
                         callback: function () {
                             console.log('all posts are collected');
@@ -262,21 +262,24 @@ $(document).ready(function () {
             });//$getInstagramLogin(function (data) 
         });
         $('#icon_twitter').click(function (e) {
-            var twitterLoginUrl = $twitterUrls.access_token_url;
-            e.preventDefault();
+            twitterLoginUsingFirebase(function (twitterLoginResult) {
+                var a = twitterLoginResult;
+            });
+            //var twitterLoginUrl = $twitterUrls.access_token_url;
+            //e.preventDefault();
 
-            $twitterLogin(function (response) {
-                switch (response.status) {
-                    case "SUCCESS":
-                        if (response.data) {
-                            window.open(response.data, "Ratting", "toolbar = 0, status = 0,")
-                            console.log('twitter window is open or closed?');
-                        } else {
-                            manageServerResponse(response);
-                        }
-                        break;
-                }//switch (response.status) {
-            }); //$twitterLogin(function (redirectData) {
+            //$twitterLogin(function (response) {
+            //    switch (response.status) {
+            //        case "SUCCESS":
+            //            if (response.data) {
+            //                window.open(response.data, "Ratting", "toolbar = 0, status = 0,")
+            //                console.log('twitter window is open or closed?');
+            //            } else {
+            //                manageServerResponse(response);
+            //            }
+            //            break;
+            //    }//switch (response.status) {
+            //}); //$twitterLogin(function (redirectData) {
         }); //$('#icon_twitter').click(function (e) { 
         $('#icon_youtube').click(function (e) {
             e.preventDefault();
@@ -291,10 +294,10 @@ $(document).ready(function () {
 
 //            $nectorrFacebookLogin(facebookDefaults.scope, e, function (data) {
             $nectorrFacebookLogin("email", e, function (data) {
-                $("#icon_fb").html('&#10003;')
+                //$("#icon_fb").html('&#10003;')
                 //$("icon_fb_img").fadeIn('fast');
                 if (data) {
-                    $saveLoginInfo('facebook', data, null, function (serverResponse) {
+                    $saveLoginInfo('facebook', data.authResponse, null, function (serverResponse) {
                         manageServerResponse(serverResponse);
                     });//$saveLoginInfo(linkedInProfile, event, function (res) {
 
@@ -306,10 +309,10 @@ $(document).ready(function () {
 
         $('#icon_linkedin').click(function () {
             $nectorrLinkedInLogin('', 'auth', function (data) {
-                linkedInProfileData = data.values[0];//g
+                //linkedInProfileData = data.values[0];//g
                 var email = $getClientEmail();
                 var linkedInProfile = { registeredEmail: email, sm_name: 'linkedIn', loginInfo: linkedInProfileData };
-                $saveLoginInfo('linkedIn', linkedInProfile, event, function (res) {
+                $saveLoginInfo('linkedIn', linkedInProfileData, event, function (res) {
                     manageServerResponse(res);
                 });//$saveLoginInfo(linkedInProfile, event, function (res) {
                 //save profile data
@@ -319,6 +322,7 @@ $(document).ready(function () {
         $('#icon_google_plus').click(function () {
             //var profile;
             console.log('loggin in to Google');
+
             gapi.load('client:auth2', $initializeGoogleAuth2);
             // Initialize google authorization
             //initializeGoogleAuth2();

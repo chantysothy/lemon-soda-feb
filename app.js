@@ -10,7 +10,6 @@ var google = require('./routes/google');
 var streamer = require('./routes/streamer.js');
 var vignette = require('./routes/vignette.js');
 var scheduler = require('./routes/scheduler.js');
-var postManager = require('./routes/postmanager.js');
 var fileManager = require('./routes/fileManager.js');
 var fs = require('fs');
 var busboy = require('connect-busboy');
@@ -102,7 +101,7 @@ app.use(userConfig);
 app.use(streamer);
 app.use(vignette);
 app.use(scheduler);
-app.use(postManager);
+//app.use(postManager);
 app.use(fileManager);
 
 

@@ -4,6 +4,7 @@ var nts = require('node-task-scheduler');
 var schedulerModel = require('../models/schedulerData');
 //var Scheduler= require('../utils/scheduler');
 var PostManager = require('../utils/postmanager');
+var UserPost = require('../models/userposts');
 var postManager = new PostManager();
 var config = require('../config/config');
 var userModel = require('../models/user');
@@ -39,39 +40,10 @@ router.post('/scheduler/add', function (req, res) {
     }//if (callback) {
 });//router.post('/scheduler/add', function (req, res) {
 
-router.post("/scheduler/now", function (req, res) {
-    var callback = req.body.callback;
-    if (callback) {
-        var schedulerId = req.body.scheduler_id;
-        if (schedulerId) {
-            var condition = { _id: schedulerId };
-            schedulerModel.findOne(condition, function (err, doc) {
-                if (err) {
-                    sendMessageToServer({ status: "ERROR", message: "An error occured while fetching data for scheduling. Please try after sometime" }, callback, res);
-                    return;
-                }//if (err) {
-
-                if (doc) {
-                    //scheduler
-                    setScheduler();
-                    var schedulerId = new Date().getTime().toString();
-                    scheduler.addTask(schedulerId, { hello: 'world' }, function (args, callback) {
-                        console.log("Hello from hello! ", "ARGS: " + args[schedulerId]);
-                        callback();
-                    }, "0 * * * * *", endDate);
-
-                }//if (doc) {
-            });//schedulerModel.findOne(condition, function (err, doc) {
-        } else {
-            sendMessageToServer({ status: "ERROR", message: "Invalid scheduler id. Cannot schedule this object" }, callback, res);
-        }//if (schedulerId) {
-    }//if (callback) {
-});//router.post("/scheduler/post-now", function (req, res) {
-
 router.post('/scheduler/new', function (req, res) {
     var email = req.body.email;
     var message;
-    var a = itener.isRunning()
+    //var a = itener.isRunning()
     if (email) {
         var condition = { "local.email": email };
         userModel.findOne(condition, function (err, doc) {
@@ -88,16 +60,35 @@ router.post('/scheduler/new', function (req, res) {
                 var vignetteTimelines = JSON.parse(req.body.timelines);
                 var vignettes = JSON.parse(req.body.vignettes).vignettes;
                 var accessCreds = JSON.parse(req.body.accessCreds);
-
+                
                 //var email = req.body.email;
             //    if (vignetteTimelines.timeline.length > 0) {
                 //        vignetteTimelines.timeline = quickSort(vignetteTimelines.timeline, 0, vignetteTimelines.timeline.length - 1);
-                    dataToPost['email'] = email;
-                    dataToPost['executeAt'] = vignetteTimelines.timeline[0];
-                    dataToPost['timeLine'] = vignetteTimelines;
-                    dataToPost['vignettes'] = vignettes;
-                    dataToPost['accessCreds'] = accessCreds;
-                    itener.on('Itener_TaskStart', function (taskData) {
+
+                var userpost = new UserPost();
+
+                dataToPost['email'] = email;
+                dataToPost['executeAt'] = vignetteTimelines.timeline[0];
+                dataToPost['timeLine'] = vignetteTimelines;
+                dataToPost['vignettes'] = vignettes;
+                dataToPost['accessCreds'] = accessCreds;
+
+                userpost.email = email;
+                userpost.postData = dataToPost;
+                userpost.schedule = { "timelines": vignetteTimelines }
+
+                userpost.save(function (err, doc, numRows) {
+                    if (err) {
+                        sendMessageToServer({status : "ERROR", message:"There was an error persisting this post."}, null, res, false, true);
+                        return;
+                    }
+                    dataToPost['userPostId'] = doc._id;
+                    itener.saveTask(email, dataToPost, null, function (data) {
+                        sendMessageToServer(data, null, res, true, true);
+                    });
+                });
+
+                itener.on('Itener_TaskStart', function (taskData) {
                         var a = taskData;
                         var message = { status: "SUCCESS", message: "A task was executed.", data: taskData };
                         postManager.postUsingVignette(taskData, function (taskExecutionStatus) {
@@ -109,16 +100,29 @@ router.post('/scheduler/new', function (req, res) {
 
                     itener.on('Itener_Error', function (err) {
                         var message = { status: "ERROR", message: " An error occured while scheduling your post(s.) " + JSON.stringify(err) }
+                        sendMessageToServer(message, null, res, true, true);
                     });//itener.on('Itener_Error', function (err) {
 
                     itener.on('Itener_Task_Scheduled', function (taskData) {
                         sendMessageToServer({ status: "SUCCESS", message: "Post scheduled successfully." }, null, res, true, false);
                     });
             //Itener_TaskSaved
-                    itener.on('Itener_Task_Saved', function (taskData) {
-                        sendMessageToServer({ status: "SUCCESS", message: "Post saved successfully.", data : taskData }, null, res, true,false);
+                    itener.on('Itener_Task_Execute', function (taskData) {
+                        process.nextTick(function () {
+                            postManager.postUsingVignette(taskData, function (taskExecutionStatus) {
+                                sendMessageToServer(taskExecutionStatus, null, res, true, false);
+                            });//postManager.postUsingVignette(taskData, function (taskExecutionStatus) {
+                        });//process.nextTick(function () {
+                    });//itener.on('Itener_Task_Execute', function (taskData) {
+                    postManager.on('NECTR_POST_MANAGER_FREE', function (dataToPost, lastPostedLocation) {
+                        getNewPostableLocation(dataToPost, lastPostedLocation, function (newLocation) {
+                            if (newLocation) {
+                                postManager.executeNextTask(dataToPost, newLocation, function (result) {
+                                    console.log(result);
+                                });//postManager.executeNextTask(dataToPost, newLocation, function (result) {
+                            }//if (newLocation) {
+                        });//getNewPostableLocation(dataToPost, lastPostedLocation, function (newLocation) {
                     });
-                    itener.schedule(email, dataToPost, null);
         });//userModel.findOne(condition, function (err, doc) {
 
     } else {
@@ -165,6 +169,7 @@ var getSchedulerObjectFromDatabase = function (schedulerInfo, callback) {
         });//schedulerModel.findOne(condition, function (err, doc) {
     }//if (callback) {
 }; //var getSchedulerObjectFromDatabase = function(schedulerInfo, callback) {
+
 var setScheduler = function () {
     scheduler = nts.init();
     global.scheduler = scheduler;
@@ -186,18 +191,23 @@ var setScheduler = function () {
         }
     })//scheduler.on('scheduler', function (type, pid, msg) {
 }//var setScheduler = function () {
+
 var deleteScheduler = function(schedulerInfo, callback) {
 
 }//var deleteScheduler = function (schedulerInfo, callback) {
+
 var manageSchedulerTaskLoop = function (type, pid, msg) {
 }//var manageSchedulerTaskLoop = function(type, pid, msg){
+
 var manageSchedulerTaskExit = function (type, pid, msg) {
     //save to database or update records with timelines
 }//var manageSchedulerTaskExit = function (type, pid, msg) {
+
 var manageSchedulerTaskError = function (type, pid, msg) {
     //
 }//var manageSchedulerTaskError = function (type, pid, msg) {
-var sendMessageToServer = function (msg, callback, res, post,endPost) {//= false) {
+
+var sendMessageToServer = function (msg, callback, res, post, endPost) {//= false) {
     // msg has to be a valid json object
     var payload = JSON.stringify(msg);
     payload = payload.replace(/\\n/g, "\\n")

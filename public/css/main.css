@@ -906,16 +906,18 @@ label:hover {
   cursor: pointer;
 }
 
-.image:hover {
--webkit-transform:scale(1.2);
-transform:scale(1.2);
-}
 .image {
 -webkit-transition: all 0.7s ease;
 transition: all 0.7s ease;
 margin-top: 10px;
 margin-bottom: 10px;
 }
+
+.image:hover {
+-webkit-transform:scale(1.2);
+transform:scale(1.2);
+}
+
 
 input:checked + label {
   color: #0feb9e;

@@ -233,10 +233,11 @@
     <Compile Include="routes\user-config.js" />
     <Compile Include="routes\vignette.js" />
     <Compile Include="utils\encryptor.js" />
+    <Compile Include="utils\googleManager.js" />
     <Compile Include="utils\itener.js" />
     <Compile Include="utils\postmanager.js" />
     <Compile Include="utils\scheduler-old.js" />
-    <Compile Include="utils\scheduler.js" />
+    <Compile Include="utils\scheduler-not-being-used.js" />
     <Compile Include="utils\userUtils.js" />
     <Content Include="favicon-1024.png" />
     <Content Include="package.json" />

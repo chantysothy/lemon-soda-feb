@@ -14,84 +14,15 @@ var userSchema = mongoose.Schema( {
         , name : String
         , referredBy: String
     },
-    facebook         : {
-        id              : String
-        , token         : String
-        , email         : String
-        , name          : String
-        , posts         : Object
-        , permsData     : String
-        , postableLocs: Object
-    },
-    twitter: {
-        profileInfo: Object
-        , postableLocs : Object
-    },
-    googlePlusUser: {
-        profileInfo: Object
-        , postableLoc : Object
-    },
-    linkedin: {
-        profileInfo: Object
-        , postableLocs    : Object
-    },
-    instagram           : {
-        id              : String
-        , token         : String
-        , email         : String
-        , name          : String
-        , perms         : { data : String, dontAsk : Boolean }
-        , posts: Object
-        , postableLocs : Object
-    },
-    vimeo              : {
-        id             : String
-        , token        : String
-        , email        : String
-        , name         : String
-        , perms : { data : String, dontAsk : Boolean }
-        , posts: Object
-        , postableLocs : Object
-    },
-    youtube            : {
-        id              : String
-        , token         :     String
-        , email         : String
-        , name          : String
-        , perms         : { data : String, dontAsk : Boolean }
-        , posts: Object
-        , postableLocs: Object
-    },
-    pinterest           : {
-        id              : String
-        , token         : String
-        , email         : String
-        , name          : String
-        , perms : { data : String, dontAsk : Boolean }
-        , posts: Object
-        , postableLocs : Object
-    },
-    telegram           : {
-        id             : String
-        , token        : String
-        , email        : String
-        , name         : String
-        , perms : { data : String, dontAsk : Boolean }
-        , posts: Object
-        , postableLocs: Object
-    },
-    vignettes: {
-        data: Object
-        /*
-        * data to hold each boosting profile.
-        each boosting profile to have the following field
-        id : string
-        element : {}
-        element to have sm_name :string,
-        type :  string 'page' group, list, circles,
-        element_parameters: {} credentials, keys etc
-        */
-    }
+    facebook         : Object,
+    twitter:Object,
+    googlePlusUser: Object,
+    linkedin: Object,
+    instagram           :Object,
+    vimeo              :Object,
+    youtube            :Object,
+    pinterest: Object,
+    telegram: Object,
 });
 
 // checking if password is valid using bcrypt
@@ -120,4 +51,4 @@ userSchema.methods.hashPassword = function(password) {
 //}
 // create the model for users and expose it to our app
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("users", userSchema);

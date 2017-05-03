@@ -501,48 +501,56 @@ router.post('/postable-loc/set', function (req, res) {
 });//router.get('', function (req, res) {
 
 router.post('/profile/save', function (req, res) { 
-    var callback = req.body.callback;
-if (callback) {
+//    var callback = req.body.callback;
+//if (callback) {
     var smProfileData = req.body.smProfile;
     var email = req.body.email;
         if (email) {
             if (smProfileData) {
-                var profileData = JSON.parse(smProfileData);//.fbLoginInfo;
+                var profileData = cleanClass(smProfileData);
+                //var profileData = JSON.parse(smProfileData);//.fbLoginInfo;
 
                 //var fbId = profileData.loginInfo.id;
                 //var userName = profileData.loginInfo.name;
                 var smName = req.body.sm_name;
                 var login = new userModel();
-                userModel.findOne({ 'local.email': email }, function (err, data) {
+                userModel.findOne({ 'local.email': email }, function (err, userData) {
                     if (err) {
                         var message = { status: 'ERROR', message: err.Message }
-                        sendMessageToServer(message, callback, res);
+                        sendMessageToServer(message,null, res,true );
                         return;
                     }//if (err) {
-                    if (data) {
+                    if (userData) {
                         //update profile
-                        var smInfo = data[smName];
-                        data[smName]['profileInfo'] = smProfileData;
-                        data.save(function (err, doc, rows) {
+                        userData._doc[smName]['profileInfo'] = profileData;
+                        //                        userData.save(function (err, doc, rows)                             
+                        var fieldName = smName + ".profileInfo";
+                        var userId = userData._id.toString();
+
+                        userModel.update({ _id: userId}, { "$set": userData }, function (err, rows) {
                             if (err) {
                                 var message = { status: 'ERROR', message: 'Unable to locate your nectorr id.' };
-                                sendMessageToServer(message, callback, res);
+                                sendMessageToServer(message, null, res, true);
                                 return;
                             }
-                            if (doc) {
+                            if (rows) {
                                 var message = { status: 'SUCCESS', message: 'Information updated at nectorr.' };
-                                sendMessageToServer(message, callback, res);
+                                sendMessageToServer(message, null, res, true);
+                            } else {
+                                var message = { status: 'ERROR', message: 'Unable to update your credentials to nectorr.' };
+                                sendMessageToServer(message, null, res, true);
+                                return;
                             }
-                        });
+                        });//userData.save(function (err, doc, rows) {
 
                     } else {
                         var message = { status: 'ERROR', message: 'Unable to locate your nectorr id.' };
-                        sendMessageToServer(message, callback, res);
+                        sendMessageToServer(message, null, res, true);
                     }//if (data)
                 }); //userModel.findOne({ 'local.email': email }, function (err, data) { 
             }//if (profileData) { 
         } //if (email)
-    } //if (callback) { 
+//    } //if (callback) { 
 });//router.get('', function (req, res) { 
 
 
@@ -1322,4 +1330,25 @@ var getBearer= function(callback) {
     return returnValue;
 }
 
+var cleanClass = function (oldClass) {
+    //var payload = oldClass;
+    if (typeof oldClass != 'string'){
+        payload = JSON.stringify(oldClass);
+    } else {
+        payload = oldClass;
+    }
+
+    payload = payload.replace(/\\n/g, "\\n")
+        .replace(/\\'/g, "\\'")
+        .replace(/\\"/g, '\\"')
+        .replace(/\\&/g, "\\&")
+        .replace(/\\r/g, "\\r")
+        .replace(/\\t/g, "\\t")
+        .replace(/\\b/g, "\\b")
+        .replace(/\\f/g, "\\f");
+    // remove non-printable and other non-valid JSON chars
+    //payload = payload.replace(/[\u0000-\u0019]+/g, "");
+    return JSON.parse(payload);
+
+}
 module.exports = router;

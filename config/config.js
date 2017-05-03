@@ -23,13 +23,23 @@ module.exports = {
         //test
     },
     google: {
-        "client_id": "288544546525-9c6un58f3omihkfdgkei9vn9e0e2duh2.apps.googleusercontent.com"
-        , "project_id": "nectorr-com-157807"
-        , "auth_uri": "https://accounts.google.com/o/oauth2/auth"
-        , "token_uri": "https://accounts.google.com/o/oauth2/token"
-        , "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs"
-        , "client_secret": "8AnAzFjLRXqUYilPCUvXayGo"
-        , "javascript_origins": ["https://nectorr.com", "https://www.nectorr.com"]
+        clientId: '288544546525-2j9eagljdg25ojrddm33cmcqplcvu3g0.apps.googleusercontent.com'
+        , clientSecret: 'iQpmP8C4RGQ21KZelGqrIqhu'
+        , apiKey: 'AIzaSyBwtfeYOCtESyR4F8FmX9I0NrqatD4FIuM'
+        //AIzaSyCPIvHA2J4mbhEcwCZHm06EKZ86o5PlnyY
+        , scopes: {
+            plusMe: 'https://www.googleapis.com/auth/plus.me'
+            , plusLogin: 'https://www.googleapis.com/auth/plus.login'
+            , profilesRead: 'https://www.googleapis.com/auth/plus.profiles.read'
+            , plusCirclesRead: 'https://www.googleapis.com/auth/plus.circles.read'
+            , plusStreamRead: 'https://www.googleapis.com/auth/plus.stream.read'
+            , plusStreamWrite: 'https://www.googleapis.com/auth/plus.stream.write'
+            , plusCirclesWrite: 'https://www.googleapis.com/auth/plus.circles.write'
+            , plusUserInfoProfile: 'https://www.googleapis.com/auth/userinfo.profile'
+            , plusMediaUpload: 'https://www.googleapis.com/auth/plus.media.upload'
+            , youTubeAuth: 'https://www.googleapis.com/auth/youtube'
+            , urlShortnerAuth: 'https://www.googleapis.com/auth/urlshortener'
+        }
     }
 
 };

@@ -13,7 +13,7 @@ var schedule = [];
 var dbConfig = require('../config/database');
 var Agenda = require('agenda');
 var agenda = new Agenda({ db: { address: dbConfig.url, collection: 'agenda-scheduler' } });
-var Scheduler = require('../utils/scheduler');
+//var Scheduler = require('../utils/scheduler');
 //var scheduler = Scheduler.getInstance();
 
 agenda.on('ready', function () {

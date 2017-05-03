@@ -25,7 +25,7 @@ var Itener = function () {
         //var condition = { "executeAt": { $gte: Date.now() }, $and: [{ "executeAt": { $lte: conditionTime } }] }//{ "executeAt": { "$lte": conditionTime } };//{ "executeAt": { $gte: Date.now() }, $and: [ { "executeAt": { $lte: 1491816900000 } }
         dbModel.find(condition, function (err, docs) {
             if (err) {
-                callback({ error: err });
+                callback({ error: "Itener find error : "+ err });
                 return;
             }
             if (docs.length>0) {
@@ -35,11 +35,11 @@ var Itener = function () {
                     docs[taskCounter].status = "COMPLETED";
                     docs[taskCounter].save(function (err, doc, rows) {
                         if (err) {
-                            self.emit('Itener_Error', err);
+                            self.emit('Itener_Error', { error: "Itener find error : " + err });
                             return;
                         }//if (err) {
                         if (doc) {
-                            self.emit('Itener_Task_Saved', currentTask);
+                            self.emit('Itener_Task_Execute', currentTask);
                         }//if (doc) {
                     });
                 }//for (var taskCounter = 0; taskCounter < docs.length; taskCounter++) {
@@ -59,7 +59,7 @@ var Itener = function () {
         if (!this._started) {
             this._itenerHandle = setInterval(function () {
                 self.execute(function (taskInfo) {
-                    self.emit('Itener_TaskStart', [taskInfo]);
+                    self.emit('Itener_TaskExecuted', [taskInfo]);
                 });
             }, this.TIMEOUT_TIME);
             this._started = true;
@@ -116,6 +116,7 @@ Itener.prototype.saveTask = function (userId, task, params, callback) {
                 dbModel['executeAt'] = timeline[0];
                 task.timeLine.timeline.splice(0, 1);
                 dbModel.task = task;
+                dbModel['status'] = 'NEW';
                 dbModel.save(function (err, doc, rows) {
                     if (err) {
                         callback({ 'Itener_Error': [{ error: err }]});

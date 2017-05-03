@@ -1,7 +1,7 @@
 ﻿var nectorrFacebookId, nectorrTwitterId, nectorrGoogleId,nectorrInstgramId, nectorrLinkedInId
 var fbUserLoggedIn = false;
 var $smPermissionSet = { email: "", sm_name: "", neverAsk: false };
-var loggedInUserId
+var loggedInUserId, globalLoginObject
 var googleCallback
 var googleScope = ['    '
     //, 
@@ -111,6 +111,13 @@ $nectorrLinkedInLogin = function (linkedInLoginScope, event, callback) {
     IN.Event.on(IN, "auth", getLinkedInUserDetails); 
     IN.User.authorize(function (data, metadata) {
             //save linkedin authorization
+        var returnValue = {
+            "data": data
+            , "metadata": metadata
+        }
+        if (callback)
+            callback(returnValue)
+
 
     });
     //getLinkedInUserDetails();
@@ -267,11 +274,12 @@ var $twitterLogin = function (callback) {
 
 $initializeGoogleAuth2 = function () {
     initializeGoogle(false, function (data) {
+        //data = cleanClass(data);
         $saveLoginInfo('google', data, null, function (nectorrResponse) {
             manageServerResponse(nectorrResponse);
         });//$saveLoginInfo(linkedInProfile, event, function (res) {
 
-    }, googlePlusDefaults.scopes.plusMe);
+    }, googlePlusDefaults.scopes.plusMe,"plus","v1");
 } // Google signIn
 
 $initializeGooglewithCallback = function (callback) {
@@ -343,26 +351,27 @@ var $saveLoginInfo = function (smName, loginInfo, event, callback) {
     var dataToPost = "smProfile=" + JSON.stringify(loginInfo) + "&email=" + $getClientEmail() + "&sm_name=" + smName;
     $.ajax({
         headers: { "Accept": "application/json" }
-        , type: 'POST'
+        , type: 'post'
         , url: '/profile/save'
         , data: dataToPost
-        ,dataType: "jsonp"
+        //,dataType: "jsonp"
         , jsonp: "callback"
         , crossDomain: true
         , beforeSend: function (xhr) {
             xhr.withCredentials = true;
         }
-        ,jsonPCallback: "jsonpCallback"
+        //,jsonPCallback: "jsonpCallback"
         , success: function (data) {
-            if (data.status == 'SUCCESS') {
-                // set global variable and move to the next tab for setup
-                //$showMessage(divId, msg, msgType, show);
-                if (callback) { 
-                    callback(data);
-                }
-            } else {
-                manageServerResponse(data);
-            } //if (data.status == 'SUCCESS') { 
+            if (callback) {
+                callback(data);
+            }//if (callback) {
+
+            //if (data.status == 'SUCCESS') {
+            //    // set global variable and move to the next tab for setup
+            //    //$showMessage(divId, msg, msgType, show);
+            //} else {
+            //    manageServerResponse(data);
+            //} //if (data.status == 'SUCCESS') { 
         }
         , error: function (jqXHR, textStatus, errorThrown) {
             //var msgBox = $('#butrfly-login').find();
@@ -779,7 +788,7 @@ var getSocialFeeds = function(callback) {
 
                 setPublishCredentials(data, function (publishCreds) {
                     feedsDiv.socialfeed(publishCredentials);
-                    callback({status: 'SUCCES'});
+                    callback({status: 'SUCCESS'});
                 });
             });
 
@@ -804,6 +813,7 @@ var getLoginObject = function (callback) {
         , jsonPCallback: "jsonpCallback"
         , success: function (data) {
             if (data.status == 'SUCCESS') {
+                globalLoginObject = data;
                 if (callback) {
                     callback(data.data);
                 }
@@ -974,6 +984,7 @@ var getGapiInfo = function (callback) {
     //});//gapi.load('auth2', 
 
 }
+
 var getVignetteFromDb = function (callback) {
     $.ajax({
         headers: { "Accept": "application/json" }
@@ -1268,3 +1279,43 @@ var $initializeYoutubeAuth2WithCallback = function (callback) {
         });//}).then(function () {
     });//var $initializeYoutubeAuth2 = function (callback) {
 }//var $initializeYoutubeAuth2WithCallback = function (callback) {
+
+var twitterLoginUsingFirebase = function (callback) {
+    // Initialize Firebase
+    var config = {
+        apiKey: "AIzaSyCWznjzknzij32xVu3tTw7oIdBcoeH2l-M",
+        authDomain: "nectorr-com-157807.firebaseapp.com",
+        databaseURL: "https://nectorr-com-157807.firebaseio.com",
+        projectId: "nectorr-com-157807",
+        storageBucket: "nectorr-com-157807.appspot.com",
+        messagingSenderId: "288544546525"
+    };
+    var twitterApp = firebase.initializeApp(config,'twitterApp');
+    var provider = new firebase.auth.TwitterAuthProvider();//twitterApp.auth;//.TwitterAuthProvider();
+    //provider.setCustomParameters({
+    //    'lang': 'en'
+    //});
+
+    firebase.auth().signInWithPopup(provider).then(function (result) {
+        // This gives you a the Twitter OAuth 1.0 Access Token and Secret.
+        // You can use these server side with your app's credentials to access the Twitter API.
+        var token = result.credential.accessToken;
+        var secret = result.credential.secret;
+        // The signed-in user info.
+        var user = result.user;
+        if (callback)
+            callback(result);
+        // ...
+    }).catch(function (error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // The email of the user's account used.
+        var email = error.email;
+        // The firebase.auth.AuthCredential type that was used.
+        var credential = error.credential;
+        if (callback)
+            callback(error);
+        // ...
+    });
+} //var twitterLoginUsingFirebase = function (callback) {
