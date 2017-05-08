@@ -17,6 +17,7 @@ var userSchema = mongoose.Schema( {
     facebook         : Object,
     twitter:Object,
     googlePlusUser: Object,
+    google: Object,
     linkedin: Object,
     instagram           :Object,
     vimeo              :Object,

@@ -300,7 +300,7 @@ var streamHashTags = function (userInfo, config,  hashtags, callback) {
         //});
         //twitter.
         var streamConfig = {
-            screen_name : userInfo.twitter.profileInfo.screen_name
+            screen_name : userInfo.twitter.screen_name
             , track: hashtags
         };
         twitter.stream('statuses/filter', streamConfig , 

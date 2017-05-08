@@ -161,8 +161,34 @@ $nectorrFacebookLogin = function (fbScope, event, callback) {
 
 
 var $nectorrTwitterLogin = function (callback) {
-    var command = $twitterUrls.authorize_url;
-    $nectorrTwitterExecCommand(command, callback);
+    $.ajax({
+        headers: { "Accept": "application/json" }
+        , type: 'get'
+        //        , url: twitterUrls.request_token_url
+        , url: '/auth/twitter'
+        , data: "email=" + $getClientEmail()
+        , dataType: "jsonp"
+        , jsonp: "callback"
+        , crossDomain: true
+        , beforeSend: function (xhr) {
+            xhr.withCredentials = true;
+            //xhr.setRequestHeader(JSON.stringify(twitterDefaults.headers));
+        }
+        , jsonPCallback: "jsonpCallback"
+        , success: function (data) {
+            if (callback)
+                if (data.status == "SUCCESS") {
+                    manageTwitterActions(data);
+                } else {
+                }
+                //callback(data);
+
+            //$("#feeds").children().show();
+        }
+        , error: function (jqXHR, textStatus, errorThrown) {
+            alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
+        }
+    });
 }//var $nectorrTwitterLogin 
 $nectorrTwitterExecCommand = function(url,callback) {
     $.ajax({
@@ -260,7 +286,7 @@ var $twitterLogin = function (callback) {
             , jsonPCallback: "jsonpCallback"
             , success: function (data) {
                 if (callback) {
-
+                    manageTwitterActions(data);
                         callback(data);
                     } //if (callback) { 
             }
@@ -349,35 +375,46 @@ var $getTwitterLists = function (callback) {
 
 var $saveLoginInfo = function (smName, loginInfo, event, callback) {
     var dataToPost = "smProfile=" + JSON.stringify(loginInfo) + "&email=" + $getClientEmail() + "&sm_name=" + smName;
-    $.ajax({
-        headers: { "Accept": "application/json" }
-        , type: 'post'
-        , url: '/profile/save'
-        , data: dataToPost
-        //,dataType: "jsonp"
-        , jsonp: "callback"
-        , crossDomain: true
-        , beforeSend: function (xhr) {
-            xhr.withCredentials = true;
-        }
-        //,jsonPCallback: "jsonpCallback"
-        , success: function (data) {
-            if (callback) {
-                callback(data);
-            }//if (callback) {
+    $.post('/profile/save',
+        {
+            email: $getClientEmail()
+            , smProfile: loginInfo
+            , sm_name :smName
+        },
+        function (data, status) {
+            var a = data;
+            var b = status;
+        });//$.post('/profile/save',
+    //$.ajax({
+    //    headers: { "Accept": "application/json" }
+    //    , type: 'post'
+    //    , url: '/profile/save'
+    //    , data: dataToPost
+    //    //,dataType: "jsonp"
+    //    , jsonp: "callback"
+    //    , crossDomain: true
+    //    , beforeSend: function (xhr) {
+    //        xhr.withCredentials = true;
 
-            //if (data.status == 'SUCCESS') {
-            //    // set global variable and move to the next tab for setup
-            //    //$showMessage(divId, msg, msgType, show);
-            //} else {
-            //    manageServerResponse(data);
-            //} //if (data.status == 'SUCCESS') { 
-        }
-        , error: function (jqXHR, textStatus, errorThrown) {
-            //var msgBox = $('#butrfly-login').find();
-            alert("ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
-        }
-    }); //$.ajax({
+    //    }
+    //    //,jsonPCallback: "jsonpCallback"
+    //    , success: function (data) {
+    //        if (callback) {
+    //            callback(data);
+    //        }//if (callback) {
+
+    //        //if (data.status == 'SUCCESS') {
+    //        //    // set global variable and move to the next tab for setup
+    //        //    //$showMessage(divId, msg, msgType, show);
+    //        //} else {
+    //        //    manageServerResponse(data);
+    //        //} //if (data.status == 'SUCCESS') { 
+    //    }
+    //    , error: function (jqXHR, textStatus, errorThrown) {
+    //        //var msgBox = $('#butrfly-login').find();
+    //        alert("ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
+    //    }
+    //}); //$.ajax({
 }//var saveFacebookData = function (data) { 
 
 var $getCredsFromServer = function (email, callback) {
@@ -1319,3 +1356,15 @@ var twitterLoginUsingFirebase = function (callback) {
         // ...
     });
 } //var twitterLoginUsingFirebase = function (callback) {
+
+var manageTwitterActions = function (data) {
+    switch (data.action) {
+        case "init_login":
+            window.twitterLoginWinId = window.open(data.url);
+            break;
+        case "close_login":
+            
+            break;
+    }//switch (data.action) {
+    //
+}//var manageTwitterActions = function (data) {

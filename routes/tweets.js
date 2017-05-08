@@ -8,12 +8,17 @@ var passport = require('passport');
 var twitterStrategy = require('passport-twitter').Strategy; 
 var userModel = require('../models/user');
 // instantiate Twit module
-var twitter = new Twit(config.twitter);
+var twitter = new Twit({
+    'consumer_key': config.twitter.keys.consumer_key
+    , 'consumer_secret': config.twitter.keys.consumer_secret
+    , 'access_token': config.twitter.keys.access_token
+    , 'access_token_secret': config.twitter.keys.access_token_secret
+});
 var nt = new nTwitter({
-    consumer_key: config.twitter.consumer_key
-    , consumer_secret: config.twitter.consumer_secret
-    , access_token_key: config.twitter.access_token
-    , access_token_secret: config.twitter.access_token_secret
+    consumer_key: config.twitter.keys.consumer_key
+    , consumer_secret: config.twitter.keys.consumer_secret
+    , access_token_key: config.twitter.keys.access_token
+    , access_token_secret: config.twitter.keys.access_token_secret
 });
 
 //var config = twitter.getAuth();
@@ -144,7 +149,7 @@ router.get('/auth/twitter/', function (req, res) {
                     sendMessageToServer(messageForServer, callback, res);
                     return;
                 } else {
-                    dbData._doc.twitter.profileInfo = data;
+                    dbData._doc.twitter = data;
                     dbData.save(function (err) {
                         if (!err) {
                             messageForServer = { status: 'SUCCESS', message: "Twitter credentials verified by nectorr. " };

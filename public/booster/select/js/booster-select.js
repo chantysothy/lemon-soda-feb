@@ -31,19 +31,10 @@ var eventData = {
 
 var selectedPostableLocs = {};
 
-//$(document).load(function (e) {
-
-//    function displayMessage(message) {
-//        $("#message").html(message).fadeIn();
-//    }
-
-//    //$calendar.weekCalendar("refresh");
-
-//    var smElementCounter = 0;
-//}); //$(window).load(function () { 
 window.closeModal = function () {
     $('#iframeModal').modal('hide');
 };
+
 $(document).ready(function () {
     $('body').attr('color', '#333333');
     $('#broadcastBtn').hide();
@@ -99,7 +90,7 @@ $(document).ready(function () {
                 noResult: 'no such vignette found.'
             });
             //$("#vignette-name").attr('id, desc');
-            $("#vignette-name").attr('data-id', 'desc,id');
+            $("#vignette-name").attr('data-id', 'desc , id');
         } else {
             //display error message
         }//if (data.status = "SUCCESS") {

@@ -230,6 +230,7 @@
     <Compile Include="routes\google.js" />
     <Compile Include="routes\scheduler.js" />
     <Compile Include="routes\streamer.js" />
+    <Compile Include="routes\twitter.js" />
     <Compile Include="routes\user-config.js" />
     <Compile Include="routes\vignette.js" />
     <Compile Include="utils\encryptor.js" />

@@ -36,6 +36,7 @@
     "nodemailer": "^2.7.0",
     "nodemon": "^1.11.0",
     "ntwitter": "^0.5.0",
+    "oauth": "^0.9.15",
     "passport": "^0.3.2",
     "passport-facebook": "^2.1.1",
     "passport-google-oauth": "^1.0.0",
@@ -47,7 +48,6 @@
     "socket.io": "^1.7.2",
     "twit": "^2.2.5",
     "twitter": "^1.7.0",
-    "uglify-js": "~2.4.15",
     "url": "^0.11.0",
     "util": "^0.10.3",
     "watchify": "^3.8.0"

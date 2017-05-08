@@ -18,13 +18,13 @@ $(window).load(function () {
                     var publishCredentials = {
                         // FACEBOOK
                         facebook: {
-                            accounts: ['10210758811476360'],
+                            accounts: [loggedInUserInfo.data.facebook.userID],
                             limit: 2,
                             access_token: '150849908413827|a20e87978f1ac491a0c4a721c961b68c'
                         },
                         // Twitter
                         twitter: {
-                            accounts: ['@' + loggedInUserInfo.data.twitter.profileInfo.screen_name, '#startup', '#fund'],
+                            accounts: ['@' + loggedInUserInfo.data.twitter.screen_name],
                             limit: 2,
                             consumer_key: 'zR30W1z6cTQfYKaeMMrUdbXKm', // make sure to have your app read-only
                             consumer_secret: 'W3k4tedpDKJ0hM6Hnn2I4hAHWag1INFw2ipaBOhgYBqt5zaxL2', // make sure to have your app read-only
@@ -123,7 +123,7 @@ $(window).load(function () {
                                             access_token: facebookAuthObject.authResponse.accessToken, // make sure to have your app read-only
                                         },
                                         twitter: {
-                                            accounts: ['@' + loggedInUserInfo.data.twitter.profileInfo.screen_name],  //Array: Specify a list of accounts from which to pull posts
+                                            accounts: ['@' + loggedInUserInfo.data.twitter.screen_name],  //Array: Specify a list of accounts from which to pull posts
                                             limit: 5,                                    //Integer: max number of posts to load
                                             consumer_key: 'zR30W1z6cTQfYKaeMMrUdbXKm', // make sure to have your app read-only
                                             consumer_secret: 'W3k4tedpDKJ0hM6Hnn2I4hAHWag1INFw2ipaBOhgYBqt5zaxL2', // make sure to have your app read-only
@@ -262,9 +262,13 @@ $(document).ready(function () {
             });//$getInstagramLogin(function (data) 
         });
         $('#icon_twitter').click(function (e) {
-            twitterLoginUsingFirebase(function (twitterLoginResult) {
-                var a = twitterLoginResult;
-            });
+            e.preventDefault();
+            $nectorrTwitterLogin(function (twitterObject) {
+                var a = twitterObject;
+            });//$nectorrTwitterLogin(function (twitterObject) {
+            //twitterLoginUsingFirebase(function (twitterLoginResult) {
+            //    var a = twitterLoginResult;
+            //});
             //var twitterLoginUrl = $twitterUrls.access_token_url;
             //e.preventDefault();
 
@@ -285,6 +289,9 @@ $(document).ready(function () {
             e.preventDefault();
             initializeGoogle(true, function (youTubeResponse) {
                 if (youTubeResponse) {
+                    $saveLoginInfo('youtube', youTubeResponse.currentUser, null, function (nectorrResponse) {
+                        manageServerResponse(nectorrResponse);
+                    });//$saveLoginInfo(linkedInProfile, event, function (res) {
                     //alert("Success");
                 }
             }, googlePlusDefaults.scopes.youTubeAuth, 'youtube', 'v3');
@@ -309,11 +316,13 @@ $(document).ready(function () {
 
         $('#icon_linkedin').click(function () {
             $nectorrLinkedInLogin('', 'auth', function (data) {
-                //linkedInProfileData = data.values[0];//g
+                var linkedInProfileData
+                if (data.data)
+                    linkedInLogin = data.values[0];//g
                 var email = $getClientEmail();
                 var linkedInProfile = { registeredEmail: email, sm_name: 'linkedIn', loginInfo: linkedInProfileData };
                 $saveLoginInfo('linkedIn', linkedInProfileData, event, function (res) {
-                    manageServerResponse(res);
+                    manageServerResponse(res)
                 });//$saveLoginInfo(linkedInProfile, event, function (res) {
                 //save profile data
             });//$nectorrLinkedInLogin('', 'auth', function (data) {

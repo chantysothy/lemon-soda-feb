@@ -108,9 +108,9 @@ module.exports = function (passport, app) {
     passport.use(new TwitterStrategy({
         
         // pull in our app id and secret from our auth.js file
-        consumerKey        : configAuth.twitter.consumer_key
-        , consumerSecret    : configAuth.twitter.consumer_secret
-        , callbackURL     : configAuth.twitter.redirect_uri
+        consumerKey: configAuth.twitter.keys.consumer_key
+        , consumerSecret: configAuth.twitter.keys.consumer_secret
+        , callbackURL: configAuth.twitter.urls.redirect_url//.redirect_uri
 
     },
 

@@ -108,6 +108,7 @@ $(document).ready(function () {
                 var serverInfo = absolutePath(response.data.serverFileName);
                 file['serverFileName'] = serverInfo;
                 imageList.push(serverInfo);
+                imageUrlForServer = serverInfo;
                 $("#currentImg").attr('src', imageList[imageList.length - 1]);
                 $('#boosterPreview').show();
                 $('#buttonPanel').show();
@@ -265,16 +266,12 @@ $(document).ready(function () {
                             if (para) {
                                 if (paras[0] || paras[0] == "") para = paras[1];
                                 if (para.length > 97) { strLen = 97 } else { strLen = para.length - 1 }
-                                para = para.substr(0, strLen);
-                                para += '...';
+                                    para = para.substr(0, strLen);
+                                    para += '...';
                                 $('#paraText').text(para);
-                                if (!textForServer) {
-                                    textForServer = para;
-                                } else {
-                                    textForServer += "/n" + para;
-                                }
-                                $('#buttonPanel').show();
+                                textForServer = para;
                             }
+                            $('#buttonPanel').show();
                             slideIndex = 0;
                             if (imageList.length > 0) {
                                 imageList = imageList.push(html.imgTags);

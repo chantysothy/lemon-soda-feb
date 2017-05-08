@@ -16,10 +16,6 @@ var agenda = new Agenda({ db: { address: dbConfig.url, collection: 'agenda-sched
 //var Scheduler = require('../utils/scheduler');
 //var scheduler = Scheduler.getInstance();
 
-agenda.on('ready', function () {
-    console.log("Agenda ready to start");
-    agenda.start();
-});// passport
 // agenda
 //vignettes
 var userModel = require('../models/user');

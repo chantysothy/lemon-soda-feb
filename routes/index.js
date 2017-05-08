@@ -13,7 +13,7 @@ var fbGraph = require('fbgraph');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy = require('passport-twitter').Strategy;
-var tweets = require('./tweets');
+//var tweets = require('./tweets');
 var cheerio = require("cheerio");
 var fbCode, twitterToken1, twitterToken2, twitterEmail;
 var redirectOptions = {
@@ -501,8 +501,6 @@ router.post('/postable-loc/set', function (req, res) {
 });//router.get('', function (req, res) {
 
 router.post('/profile/save', function (req, res) { 
-//    var callback = req.body.callback;
-//if (callback) {
     var smProfileData = req.body.smProfile;
     var email = req.body.email;
         if (email) {
@@ -522,9 +520,9 @@ router.post('/profile/save', function (req, res) {
                     }//if (err) {
                     if (userData) {
                         //update profile
-                        userData._doc[smName]['profileInfo'] = profileData;
                         //                        userData.save(function (err, doc, rows)                             
-                        var fieldName = smName + ".profileInfo";
+                        var fieldName = smName ;
+                        userData[smName] = profileData;
                         var userId = userData._id.toString();
 
                         userModel.update({ _id: userId}, { "$set": userData }, function (err, rows) {
@@ -533,14 +531,14 @@ router.post('/profile/save', function (req, res) {
                                 sendMessageToServer(message, null, res, true);
                                 return;
                             }
-                            if (rows) {
+                            if ((rows.n>0)&& (rows.nModified>0)&&(rows.ok>0)) {
                                 var message = { status: 'SUCCESS', message: 'Information updated at nectorr.' };
                                 sendMessageToServer(message, null, res, true);
                             } else {
                                 var message = { status: 'ERROR', message: 'Unable to update your credentials to nectorr.' };
                                 sendMessageToServer(message, null, res, true);
                                 return;
-                            }
+                            } 
                         });//userData.save(function (err, doc, rows) {
 
                     } else {
@@ -705,11 +703,11 @@ router.get('/twitter/get/lists', function (req, res) {
     if (callback) {
         var email = req.query.email;
         if (email) {
-            
+
             var condition = { 'local.email': email }
             userModel.findOne(condition, function (err, foundUser) {
                 if (!err) {
-                    var screenName = foundUser.twitter.profileInfo.screen_name;
+                    var screenName = foundUser.twitter.screen_name;
                     getBearer(function (bearer) {
                         if (bearer) {
                             var token = JSON.parse(bearer).access_token; // set for breakpoint... TBR
@@ -742,124 +740,6 @@ router.get('/twitter/get/lists', function (req, res) {
     //console.log("Instagram callback : " + JSON.stringify(req.query['#access_token']));
 });
 
- router.get('/auth/twitter', function (req, res) {
-    var callback = req.query.callback;
-    if (callback) {
-        twitterEmail = req.query.email;
-        if (twitterEmail) {
-            var twitterAPI = new Twitter({
-                consumerKey: config.twitter.consumer_key
-                , consumerSecret: config.twitter.consumer_secret
-                , callback: config.twitter.redirect_url
-            });//var twitterAPI = new Twitter(
-            twitterAPI.getRequestToken(function (error, requestToken, requestTokenSecret, results) {
-                if (error) {
-                    var message = { status: 'ERROR', message: 'Unable to reach twitter at the moment. Please try after some time.' }
-                    sendMessageToServer(message, callback, res);
-                } else {
-                    twitterToken1 = requestToken;
-                    twitterToken2 = requestTokenSecret;
-                    twitterEmail = req.query.email;
-                    var twitterAuthURL = twitterAPI.getAuthUrl(requestToken);
-                    var message = { status: "SUCCESS", message: "Get a child window with params in data.", data: twitterAuthURL }
-                    sendMessageToServer(message, callback, res);
-                }
-            });//twitterAPIgetRequestToken(function (error, requestToken, requestTokenSecret, results) {
-        }//if (twitterEmail
-   }//if (callback){
-}); //router.get('/auth/twitter',
-
-router.get('/auth/twitter/callback', function (req, res) {
-    var a = 1;// for debugger breakpoint. TBR
-    var callback = req.query.callback;
-    var twitterStream = [];
-    var twitterAPI = new Twitter({
-        consumerKey: config.twitter.consumer_key
-        , consumerSecret: config.twitter.consumer_secret
-        , callback: config.twitter.redirect_url
-    });//var twitterAPI = new Twitter(
-    twitterAPI.getAccessToken(twitterToken1, twitterToken2, req.query.oauth_verifier, function (error, accessToken, accessTokenSecret, results) {
-        if (error) {
-            var message = { status: 'ERROR', message: 'Twitter login error : ' + JSON.stringify(error) };
-            sendMessageToServer(message, callback, res);
-            //console.log(error);
-        } else {
-            //store accessToken and accessTokenSecret somewhere (associated to the user) 
-            var params = { include_entities: false, skip_status: false, include_email : true}
-            twitterAPI.verifyCredentials(accessToken, accessTokenSecret, params, function (error, data, response) {
-                if (error) {
-                    //something was wrong with either accessToken or accessTokenSecret 
-                    var message = { status: 'ERROR', message: 'Twitter verify login error : ' + JSON.stringify(error) };
-                    sendMessageToServer(message, callback, res);
-                    //start over with Step 1 
-                } else {
-                    //accessToken and accessTokenSecret can now be used to make api-calls (not yet implemented) 
-                    //data contains the user-data described in the official Twitter-API-docs 
-                    //you could e.g. display his screen_name 
-                    var condition = { 'local.email': twitterEmail };
-                    userModel.findOne(condition, function (err, foundUser) {
-                        if (err) {
-                            var msg = { status: 'ERROR', message: 'There was an error in locating your twitter information. Please try later.'}
-                            sendMessageToServer(msg, callback, res);
-
-                        } else {
-                            foundUser.twitter.profileInfo = data;
-                            foundUser.save(function (err, user, numRows) {
-                                if (err) {
-                                    var message = { status: 'ERROR', message: 'Twitter login save error : ' + JSON.stringify(error) };
-                                    sendMessageToServer(message, callback, res);
-                                } else {
-                                    console.log(data["screen_name"]);
-                                    var message = { status: 'SUCCESS', message: 'All good at twitter. Proceed to setup. ' };
-                                    sendMessageToServer(message, callback, res);
-                                    return;
-                                }//if (!err) {
-                            }); // foundUser.save
-                                var email = req.query.email;
-                                //getTwitterStream(twitterAPI,email, function (data) {
-                                //    if (!data.status) {
-                                //        twitterStream.push(data);
-                                //    } else {
-                                //        var status = data.status;
-                                //        var length = status.length;
-                                //        if (status.substr(length - 4, length - 1) == 'ALL') {
-                                //            var OEMBED_URL = 'statuses/oembed';
-                                //            for (counter = 0; counter < data.length; counter++) {
-                                //                var params = {
-                                //                    "id": twitterStream[counter].id_str,
-                                //                    "maxwidth": 350,
-                                //                    "hide_thread": true,
-                                //                    "omit_script": true
-                                //                };
-                                //                // request data 
-                                //                twitterAPI.get(OEMBED_URL, params, function (err, data, resp) {
-                                //                    var dataToSend = callback + '(' + data + ')';
-                                //                    res.send(dataToSend);
-                                //                    setTimeout(null, 200);
-
-                                //                });
-
-                                //            }//for (counter = 0; counter < data.length; counter++) {
-                                //            res.end();
-                                //        } else if (data.status == 'ERROR') {
-                                //            var dataToSend = callback + '(' + JSON.stringify(data) + ')';
-                                //            res.send(dataToSend);
-                                //            res.end();
-                                //        }//if (status.substr(length - 4, length - 1) == 'ALL') {
-                                //    }// if (!data.status
-                                //}); //getTwitterStream(email, function (data) {
-                            //} //if (callback) {
-
-                        }//if (err) {
-                    });
-                    res.send("/")
-                    res.end()
-                }
-            });
-        }
-    });
-
-});//router.get('auth/twitter/callback', function (req, res) {
 
 router.get('/user/get', function (req, res) {
     var callback = req.query.callback;
@@ -1081,7 +961,10 @@ var sendMessageToServer = function(msg, callback, res, post ){//= false) {
     //payload = payload.replace(/[\u0000-\u0019]+/g, "");
     var response = payload;//JSON.stringify(payload);
     //res.writeHead(200, { 'Content-Type': 'text/plain', 'Content-Length': +response.length + '' });
-    var returnValue = callback + '(' + response + ')';
+    var returnValue;
+
+    (callback) ? returnValue = callback + '(' + response + ')' : returnValue = response;
+
     if (!post) {
         res.send(returnValue);
         res.end();
@@ -1228,7 +1111,7 @@ var setFbPageData = function (pageData, dbData, callback) {
 }//var setFbPageData = function (pageData, dbData) {
  
 var setLinkedInProfileData = function (data, profileData, callback) {
-    data.linkedin.profileInfo = profileData;
+    data.linkedin = profileData;
     data.save(function (err) {
         var message 
         if (err) {
@@ -1246,7 +1129,7 @@ var setLinkedInProfileData = function (data, profileData, callback) {
     });//data.save(function (err) {
 } //var setLinkedInProfileData = function (data, profileData) {
 var setTwitterProfileData = function (data, profileData) {
-    data.twitter.profileInfo = profileData;
+    data.twitter = profileData;
     data.save(function (err) {
         if (!err) {
             var message = { status: 'SUCCESS', message: 'Twitter profile details updated in nectorr.' }
@@ -1323,7 +1206,7 @@ var getBearer= function(callback) {
 
 
             console.log("BODY :" + body)
-
+            
         }//        if (callback) {
         returnValue = body;
     });
@@ -1332,23 +1215,17 @@ var getBearer= function(callback) {
 
 var cleanClass = function (oldClass) {
     //var payload = oldClass;
-    if (typeof oldClass != 'string'){
-        payload = JSON.stringify(oldClass);
-    } else {
-        payload = oldClass;
-    }
+    try {
+        if (typeof oldClass != 'string') {
+            payload = JSON.stringify(oldClass);
+        } else {
+            payload = oldClass;
+        }
 
-    payload = payload.replace(/\\n/g, "\\n")
-        .replace(/\\'/g, "\\'")
-        .replace(/\\"/g, '\\"')
-        .replace(/\\&/g, "\\&")
-        .replace(/\\r/g, "\\r")
-        .replace(/\\t/g, "\\t")
-        .replace(/\\b/g, "\\b")
-        .replace(/\\f/g, "\\f");
-    // remove non-printable and other non-valid JSON chars
-    //payload = payload.replace(/[\u0000-\u0019]+/g, "");
-    return JSON.parse(payload);
-
+        payload = payload.replace(/\\"(<([^>]+)>)/ig, '');
+        return JSON.parse(payload);
+    } catch (ex) {
+        return { error: { message: "Unable to parse class" }}
+   }
 }
 module.exports = router;

@@ -5,7 +5,7 @@ var path = require('path');
 var busboy = require('connect-busboy');
 var expressSession = require('express-session');
 var router = require('./routes/index');
-var tweets = require('./routes/tweets');
+var tweetRouter = require('./routes/twitter');
 var google = require('./routes/google');
 var streamer = require('./routes/streamer.js');
 var vignette = require('./routes/vignette.js');
@@ -46,7 +46,7 @@ function ensureSecure(req, res, next) {
 }
 var bodyParser = require('body-parser');
 
-app.use(bodyParser.urlencoded({ extended: false, limit: '50mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 //app.use(express.limit('10mb'));    
 //app.route(router);
 // serve static assets from the public directory
@@ -96,14 +96,14 @@ app.set('view engine', 'ejs');
 app.use(busboy());
 app.use('/', router);
 app.use(google);
-app.use(tweets);
+//app.use(tweets);
 app.use(userConfig);
 app.use(streamer);
 app.use(vignette);
 app.use(scheduler);
 //app.use(postManager);
 app.use(fileManager);
-
+app.use(tweetRouter);
 
 var port = 1337;//process.env.PORT || 5000;
 app.set('port', port);

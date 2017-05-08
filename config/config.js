@@ -1,11 +1,26 @@
 module.exports = {
 
-	twitter: {
-        'consumer_key': 'tf3dm7LlhHPeYOmNpEL3yNJe7'
-        , 'consumer_secret': 'Ii1hkP9e9kx91DL1CWg0oD88h13cfxdqu46L2Yj92XjIoqnsdm'
-        , 'access_token': '789724956850462720-YvR6TlMs9PNbotV6n0ub4cNmo5u2TH3'
-        , 'access_token_secret': 'bAuiK9JNNylqIQv5jwOiku3qiXU45KYhhrCp70HlUKUP9'
-        , 'redirect_url': 'https://nectorr.com/auth/twitter/callback'
+    twitter: {
+        keys: {
+            'consumer_key': 'tf3dm7LlhHPeYOmNpEL3yNJe7'
+            , 'consumer_secret': 'Ii1hkP9e9kx91DL1CWg0oD88h13cfxdqu46L2Yj92XjIoqnsdm'
+            , 'access_token': '789724956850462720-YvR6TlMs9PNbotV6n0ub4cNmo5u2TH3'
+            , 'access_token_secret': 'bAuiK9JNNylqIQv5jwOiku3qiXU45KYhhrCp70HlUKUP9'
+            , 'redirect_url': 'https://localhost:8443/auth/twitter/callback'
+        }
+        , urls : {
+            'request_token_url': 'https://api.twitter.com/oauth/request_token'
+            , 'access_token_url': 'https://api.twitter.com/oauth/access_token'
+            , 'authenticate_url': 'https://api.twitter.com/oauth/authenticate'
+            , 'authorize_url': 'https://api.twitter.com/oauth/authorize'
+            , 'rest_base': 'https://api.twitter.com/1.1'
+            , 'search_base': 'https://search.twitter.com'
+            , 'stream_base': 'https://stream.twitter.com/1.1'
+            , 'user_stream_base': 'https://userstream.twitter.com/1.1'
+            , 'site_stream_base': 'https://sitestream.twitter.com/1.1'
+            , 'lists': 'https://api.twitter.com/1.1/lists/list.json'//?screen_name=edwardvarghese
+            , 'redirect_url': "https://localhost:8443/auth/twitter/callback"
+        }
         // for updating to git once again and again
         //,
         //bearer_token:''
