@@ -13,22 +13,36 @@ router.get('/auth/twitter', function (req, res) {
     var callback = req.query.callback
     if (callback) {
         var email = req.query.email;
-        var consumer = new oAuth.OAuth(
-            config.twitter.urls.request_token_url, config.twitter.urls.access_token_url,
-            config.twitter.keys.consumer_key, config.twitter.keys.consumer_secret, "1.0A", config.twitter.urls.redirect_url, "HMAC-SHA1");
-        consumer.getOAuthRequestToken(function (error, oauthToken, oauthTokenSecret, results) {
-            if (error) {
-                res.send(callback+"("+"{error: 'Error getting OAuth request token : " + util.inspect(error), 500+"'})");
+        var condition = { 'local.email': email }
+        userModel.findOne(condition, function (err, doc) {
+            if (err) {
+                var message = { status: "ERROR", message: "Error locating credentials on nectorr." }
+                res.send(callback + "(" + JSON.stringify(message) + ")");
             } else {
-                req.session.oauthRequestToken = oauthToken;
-                req.session.oauthRequestTokenSecret = oauthTokenSecret;
-                res.header('nectorr-login', email);
-                //res.redirect("https://twitter.com/oauth/authorize?oauth_token=" + oauthToken);
-                var returnValue = { status: "SUCCESS", url: "https://twitter.com/oauth/authorize?oauth_token=" + oauthToken, secret: oauthTokenSecret, action :"init_login" };
-                res.send(callback+"("+JSON.stringify(returnValue)+")");
-                res.end();
+                if (doc.twitter) {
+                    var returnValue = { status: "SUCCESS", message: "Twitter login located", data: doc.twitter };
+                    res.send(callback + "(" + JSON.stringify(returnValue) + ")");
+                    res.end();
+                } else {
+                    var consumer = new oAuth.OAuth(
+                        config.twitter.urls.request_token_url, config.twitter.urls.access_token_url,
+                        config.twitter.keys.consumer_key, config.twitter.keys.consumer_secret, "1.0A", config.twitter.urls.redirect_url, "HMAC-SHA1");
+                    consumer.getOAuthRequestToken(function (error, oauthToken, oauthTokenSecret, results) {
+                        if (error) {
+                            res.send(callback + "(" + "{error: 'Error getting OAuth request token : " + util.inspect(error), 500 + "'})");
+                        } else {
+                            req.session.oauthRequestToken = oauthToken;
+                            req.session.oauthRequestTokenSecret = oauthTokenSecret;
+                            res.header('nectorr-login', email);
+                            //res.redirect("https://twitter.com/oauth/authorize?oauth_token=" + oauthToken);
+                            var returnValue = { status: "SUCCESS", url: "https://twitter.com/oauth/authorize?oauth_token=" + oauthToken, secret: oauthTokenSecret, action: "init_login" };
+                            res.send(callback + "(" + JSON.stringify(returnValue) + ")");
+                            res.end();
+                        }
+                    });//consumer.getOAuthRequestToken(function (error, oauthToken, oauthTokenSecret, results) {
+                }
             }
-        });//consumer.getOAuthRequestToken(function (error, oauthToken, oauthTokenSecret, results) {
+        });
     }//if (email)
     //var auth = oAuth
     //var callback = req.query.callback;

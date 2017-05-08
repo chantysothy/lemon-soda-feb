@@ -44,7 +44,7 @@ var twitterDefaults = {
     , headers: {
         'Accept': '*/*',
         'Connection': 'close',
-        'User-Agent': 'localhost:1337/' + appVersion
+        'User-Agent': 'nectorr.com/' + appVersion
     }
     , secure: false // force use of https for login/gatekeepern
 };
@@ -178,7 +178,13 @@ var $nectorrTwitterLogin = function (callback) {
         , success: function (data) {
             if (callback)
                 if (data.status == "SUCCESS") {
-                    manageTwitterActions(data);
+                    if (data.action) {
+                        manageTwitterActions(data);
+                    } else {
+                        if (data.data) {
+                            callback(data.data);
+                        }
+                    }
                 } else {
                 }
                 //callback(data);

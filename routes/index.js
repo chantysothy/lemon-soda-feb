@@ -354,7 +354,7 @@ router.get('/perms/get', function (req, res) {
                 } //if (err) { 
                 
                     if (permsData) {
-                    var permissionData = { perm_email: email, facebook: permsData.facebook._doc.facebook, twitter: permsData.twitter._doc.twitter, linkedIn: permsData._doc.linkedin, google : permsData._doc.googlePlusUser };//googlePlusUser: permsData.googlePlusUser._doc.googlePlusUser, 
+                    var permissionData = { perm_email: email, facebook: permsData._doc.facebook, twitter: permsData._doc.twitter, linkedIn: permsData._doc.linkedin, google : permsData._doc.googlePlusUser };//googlePlusUser: permsData.googlePlusUser._doc.googlePlusUser, 
                     var message = { status: 'SUCCESS', message: 'requested data was found.', 'data': JSON.stringify(permissionData) }
                     sendMessageToServer(message, callback, res,false);
                     return;

@@ -19,7 +19,7 @@ module.exports = {
             , 'user_stream_base': 'https://userstream.twitter.com/1.1'
             , 'site_stream_base': 'https://sitestream.twitter.com/1.1'
             , 'lists': 'https://api.twitter.com/1.1/lists/list.json'//?screen_name=edwardvarghese
-            , 'redirect_url': "https://localhost:8443/auth/twitter/callback"
+            , 'redirect_url': "https://nectorr.com/auth/twitter/callback"
         }
         // for updating to git once again and again
         //,
