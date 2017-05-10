@@ -502,7 +502,8 @@ router.post('/postable-loc/set', function (req, res) {
 
 router.post('/profile/save', function (req, res) { 
     var smProfileData = req.body.smProfile;
-    var email = req.body.email;
+    if (smProfileData) {
+        var email = req.body.email;
         if (email) {
             if (smProfileData) {
                 var profileData = cleanClass(smProfileData);
@@ -512,42 +513,42 @@ router.post('/profile/save', function (req, res) {
                 //var userName = profileData.loginInfo.name;
                 var smName = req.body.sm_name;
                 var login = new userModel();
-                userModel.findOne({ 'local.email': email }, function (err, userData) {
+                //smName += ".profileInfo";
+                userModel.findOne({ 'local.email': email }, function (err, doc) {
                     if (err) {
-                        var message = { status: 'ERROR', message: err.Message }
-                        sendMessageToServer(message,null, res,true );
+                        res.send({ status: "ERROR", message: "Unable to locate user credentials." });
                         return;
-                    }//if (err) {
-                    if (userData) {
-                        //update profile
-                        //                        userData.save(function (err, doc, rows)                             
-                        var fieldName = smName ;
-                        userData[smName] = profileData;
-                        var userId = userData._id.toString();
-
-                        userModel.update({ _id: userId}, { "$set": userData }, function (err, rows) {
-                            if (err) {
-                                var message = { status: 'ERROR', message: 'Unable to locate your nectorr id.' };
-                                sendMessageToServer(message, null, res, true);
+                    }
+                    if (doc) {
+                        //                        doc[smName]['profileInfo'] = profileData;
+                        // smName += '.profileInfo';
+                        doc[smName].profileInfo = profileData;
+                        doc.save(function (err, prod, numRows) {
+                            if (err || (numRows <= 0)) {
+                                res.send({ status: "ERROR", message: "Unable to update credentials." });
                                 return;
+
                             }
-                            if ((rows.n>0)&& (rows.nModified>0)&&(rows.ok>0)) {
-                                var message = { status: 'SUCCESS', message: 'Information updated at nectorr.' };
-                                sendMessageToServer(message, null, res, true);
-                            } else {
-                                var message = { status: 'ERROR', message: 'Unable to update your credentials to nectorr.' };
-                                sendMessageToServer(message, null, res, true);
-                                return;
-                            } 
-                        });//userData.save(function (err, doc, rows) {
+                            if (numRows > 0) {
+                                res.send({ status: "SUCCESS", message: "Credentials updated successfully." });
+                            }
+                        });
+                    }//if (doc) {
+                });
+                //userModel.update(   
+                //userModel.findOneAndUpdate({ 'local.email': email }, { smName: profileData }, {new: true }, function (err, doc) {
+                //        if (err) {
+                //            sendMessageToServer({ status: "ERROR", message: "An error occured while updating docs." + JSON.stringify(err) });
+                //            return;
+                //        }
+                //        if (doc) {
 
-                    } else {
-                        var message = { status: 'ERROR', message: 'Unable to locate your nectorr id.' };
-                        sendMessageToServer(message, null, res, true);
-                    }//if (data)
-                }); //userModel.findOne({ 'local.email': email }, function (err, data) { 
+                //        }
+                //    });//login.findOneAndUpdate({ 'local.email': email }, {
+
             }//if (profileData) { 
         } //if (email)
+    }//if (smProfileData){
 //    } //if (callback) { 
 });//router.get('', function (req, res) { 
 
@@ -694,9 +695,6 @@ var getTagsFromHTML = function (tag, attrib, html, page_url) {
     return returnValue;
 }//var getTagsFromHTML = function (tag, html) {
 
-router.post('/post/twitter', function (req, res) {
-
-}); //router.post('/post / twitter', function (req, res) {
 
 router.get('/twitter/get/lists', function (req, res) {
     var callback = req.query.callback;

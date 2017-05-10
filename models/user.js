@@ -14,16 +14,16 @@ var userSchema = mongoose.Schema( {
         , name : String
         , referredBy: String
     },
-    facebook         : Object,
-    twitter:Object,
-    googlePlusUser: Object,
-    google: Object,
-    linkedin: Object,
-    instagram           :Object,
-    vimeo              :Object,
-    youtube            :Object,
-    pinterest: Object,
-    telegram: Object,
+    facebook: { profileInfo: {}, postableLocs: {}},
+    twitter: { profileInfo: {}, postableLocs: {}},
+    googlePlusUser: { profileInfo: {}, postableLocs: {}},
+    google: { profileInfo: {}, postableLocs: {}},
+    linkedin: { profileInfo: {}, postableLocs: {}},
+    instagram: { profileInfo: {}, postableLocs: {}},
+    vimeo: { profileInfo: {}, postableLocs: {}},
+    youtube: { profileInfo: {}, postableLocs: {}},
+    pinterest: { profileInfo: {}, postableLocs: {}},
+    telegram: { profileInfo: {}, postableLocs: {}}
 });
 
 // checking if password is valid using bcrypt

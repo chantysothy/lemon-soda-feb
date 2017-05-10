@@ -107,16 +107,21 @@ var linkedInScope;
 $nectorrLinkedInLogin = function (linkedInLoginScope, event, callback) {
     linkedInScope = linkedInLoginScope;
     linkedInCallback = callback;
-    
+    IN.init()
     IN.Event.on(IN, "auth", getLinkedInUserDetails); 
     IN.User.authorize(function (data, metadata) {
+        IN.API.Profile("me")
+            .fields("firstName", "lastName", "industry", "location:(name)", "picture-url", "headline", "num-connections", "public-profile-url", "email-address", "date-of-birth")
+            .result(linkedInCallback)
+            .error(linkedInCallback);
+
             //save linkedin authorization
-        var returnValue = {
-            "data": data
-            , "metadata": metadata
-        }
-        if (callback)
-            callback(returnValue)
+        //var returnValue = {
+        //    "data": data
+        //    , "metadata": metadata
+        //}
+        //if (callback)
+        //    callback(returnValue)
 
 
     });
@@ -388,8 +393,8 @@ var $saveLoginInfo = function (smName, loginInfo, event, callback) {
             , sm_name :smName
         },
         function (data, status) {
-            var a = data;
-            var b = status;
+            if (callback)
+                callback(data)
         });//$.post('/profile/save',
     //$.ajax({
     //    headers: { "Accept": "application/json" }

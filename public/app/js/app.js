@@ -265,6 +265,8 @@ $(document).ready(function () {
             e.preventDefault();
             $nectorrTwitterLogin(function (twitterObject) {
                 var a = twitterObject;
+                $saveLoginInfo('twitter', twitterObject.profileInfo, null, function (nectorrResponse) {
+                });
             });//$nectorrTwitterLogin(function (twitterObject) {
             //twitterLoginUsingFirebase(function (twitterLoginResult) {
             //    var a = twitterLoginResult;
@@ -314,16 +316,20 @@ $(document).ready(function () {
             //{ scope: 'email,public_profile, user_posts, manage_pages, user_managed_groups, user_location' });
         }); //$('#icon_fb').click(function () {
 
-        $('#icon_linkedin').click(function () {
+        $('#icon_linkedin').click(function (e) {
+            e.preventDefault();
             $nectorrLinkedInLogin('', 'auth', function (data) {
                 var linkedInProfileData
-                if (data.data)
+                if (data.values) {
                     linkedInLogin = data.values[0];//g
-                var email = $getClientEmail();
-                var linkedInProfile = { registeredEmail: email, sm_name: 'linkedIn', loginInfo: linkedInProfileData };
-                $saveLoginInfo('linkedIn', linkedInProfileData, event, function (res) {
-                    manageServerResponse(res)
-                });//$saveLoginInfo(linkedInProfile, event, function (res) {
+                    linkedInProfileData = linkedInLogin;
+                    var email = $getClientEmail();
+                    
+                    //var linkedInProfile = { registeredEmail: email, sm_name: 'linkedIn', loginInfo: linkedInProfileData };
+                    $saveLoginInfo('linkedin', linkedInProfileData, event, function (res) {
+                        manageServerResponse(res)
+                    });//$saveLoginInfo(linkedInProfile, event, function (res) {
+                }//if (data.values) {
                 //save profile data
             });//$nectorrLinkedInLogin('', 'auth', function (data) {
         }); //$('#icon_linkedIn').click(function () { 
