@@ -229,27 +229,38 @@ $nectorrTwitterExecCommand = function(url,callback) {
 
 }//$twitterLogin = function() {
 var setPostableLocs = function (newPostableLocs, sm_name, callback) {//'/user/get'
-    $.ajax({
-        headers: { "Accept": "application/json" }
-        , type: 'POST'
-        , url: '/postable-loc/set'
-        , data: "email=" + $getClientEmail() + "&sm_name=" + sm_name + "&postLoc=" + JSON.stringify(newPostableLocs)
-        //, dataType: "jsonp"
-        //, jsonp: "callback"
-        //, crossDomain: true
-        , beforeSend: function (xhr) {
-            xhr.withCredentials = true;
-        }
-        , jsonPCallback: "jsonpCallback"
-        , success: function (data) {
-            if (callback) {
-                callback(data);
-            } //if (callback) { 
-        }
-        , error: function (jqXHR, textStatus, errorThrown) {
-            alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
-        }
-    }); //$.ajax({
+    $.post('/postable-loc/set',
+        {
+            email: $getClientEmail()
+            , postLoc: JSON.stringify(newPostableLocs)
+            , 'sm_name': sm_name
+        },
+        function (data, status) {
+            if (callback)
+                callback(data)
+        });//$.post('/profile/save',
+
+    //$.ajax({
+    //    headers: { "Accept": "application/json" }
+    //    , type: 'POST'
+    //    , url: '/postable-loc/set'
+    //    , data: "email=" + $getClientEmail() + "&sm_name=" + sm_name + "&postLoc=" + JSON.stringify(newPostableLocs)
+    //    //, dataType: "jsonp"
+    //    //, jsonp: "callback"
+    //    //, crossDomain: true
+    //    , beforeSend: function (xhr) {
+    //        xhr.withCredentials = true;
+    //    }
+    //    , jsonPCallback: "jsonpCallback"
+    //    , success: function (data) {
+    //        if (callback) {
+    //            callback(data);
+    //        } //if (callback) { 
+    //    }
+    //    , error: function (jqXHR, textStatus, errorThrown) {
+    //        alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
+    //    }
+    //}); //$.ajax({
 }//var setPostableLocs = function (newPostableLocs, sm_name, callback) {
 
 var getLoggedInUserDetails = function (callback) {//'/user/get'

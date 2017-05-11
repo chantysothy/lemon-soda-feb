@@ -468,7 +468,7 @@ router.get('auth/facebook/callback', function (req, res) {
 
 router.post('/postable-loc/set', function (req, res) {
     var callback = req.body.callback;
-    if (callback) {
+    //if (callback) {
         var email = req.body.email;
         if (email) {
             var sm_name = req.body.sm_name;
@@ -481,23 +481,26 @@ router.post('/postable-loc/set', function (req, res) {
                 }
                 if (doc) {
                     var postableLoc = JSON.parse(req.body.postLoc);
-                    doc[sm_name].postableLocs = postableLoc; 
-                    doc.save(function (err, doc, numRows) {
-                        if (err) {
-                            var message = { status: "ERROR", message: "Unable to update postable locations on social media automatically. You may continue with your work." };
-                            sendMessageToServer(message, null, res);
-                        } else {
-                            var message = { status: "SUCCESS", message: "Postable locations automatically updated for -" + sm_name };
-                            sendMessageToServer(message, null, res);
-                        }//if (err) {
+                    //if (postableLoc.status == "SUCCESS") {
 
-                    });
+                        doc[sm_name].postableLocs = postableLoc;
+                        doc.save(function (err, doc, numRows) {
+                            if (err) {
+                                var message = { status: "ERROR", message: "Unable to update postable locations on social media automatically. You may continue with your work." };
+                                sendMessageToServer(message, null, res);
+                            } else {
+                                var message = { status: "SUCCESS", message: "Postable locations automatically updated for - " + sm_name };
+                                sendMessageToServer(message, null, res);
+                            }//if (err) {
+
+                        });//doc.save(function (err, doc, numRows) 
+                    //}
                     //var message = { status: "SUCCESS", message: "User data found and validated.", data: doc._doc }
                     //sendMessageToServer(message, callback, res);
                 }
             });//userModel.findOne(condition, function (err, doc) {
         }//if (email) {
-    }//if (callback) {
+    //}//if (callback) {
 });//router.get('', function (req, res) {
 
 router.post('/profile/save', function (req, res) { 

@@ -5,11 +5,11 @@ var selectedOptions = [];
 var autoCompleteList = [];
 var timeLines = [];
 var accessTokensForVignettes = {};
-var tempSocialMediaNames = ['facebook', 'twitter']//,'google'];//, 'linkedin','instagram','youtube', blogger','tumblr'];
+var tempSocialMediaNames = ['facebook']//, 'twitter']//,'google'];//, 'linkedin','instagram','youtube', blogger','tumblr'];
 //refer https://developers.google.com/+/domains/api/circles
 var plusDomain = {
     getCircleList: 'https://www.googleapis.com/plusDomains/v1/people/userId/circles' //get
-    , getACircle: 'https://www.googleapis.com/plusDomains/v1/circles/circleId' //get
+    , getACircle: 'https://www.googleapis.com/plusDomains/v1/circles/circleId' //getwitter
     , addACircle: 'https://www.googleapis.com/plusDomains/v1/people/userId/circles' //post
     , removeCircle: 'https://www.googleapis.com/plusDomains/v1/circles/circleId'//DELETE
 
@@ -118,6 +118,7 @@ var SocialMediaGroupsAndPages = {
                                 pushIntoArray(postableLocs.pages, pageData.data);
                                 if (callback) {
                                     setPostableLocs(postableLocs, 'facebook', function (data) {
+                                        data = JSON.parse(data);
                                         if (data.status == "SUCCESS") {
                                             callback({ sm_name: "facebook", data: postableLocs });
                                         } else {
@@ -146,7 +147,8 @@ var SocialMediaGroupsAndPages = {
                 //this.SocialMediaGroupsAndPages.twitter.postableLocs['lists'] = lists;
                 setPostableLocs(lists, 'twitter', function (data) {
                     if (data.status == "ERROR") {
-                        manageServerResponse(data)
+                        manageServerResponse(data);
+
                     } else {
                         if (callback) {
                             callback({ sm_name: 'twitter', data: lists })
@@ -581,3 +583,33 @@ var fillAutoCompleteList = function () {
     }//for (var smcounter = 0; smcounter < tempSocialMediaNames.length; smcounter++) {
 
 }
+var manageServerResponse = function (data, multipleRecords = false) {
+    if (!multipleRecords) {
+        if (data) {
+            if (data.status == 'ERROR') {
+                $('#serverResponse').css('background-color', 'rgba(224, 0, 0, 0.6)');
+                $('#serverResponse').css('color', '#ffffff');
+            } else if (data.status == 'SUCCESS') {
+                $('#serverResponse').css('background-color', 'rgba(10, 185, 5, 0.6)');
+                $('#serverResponse').css('color', '#ffffff');
+            } //if (data.status == 'ERROR') {
+            $('#serverResponse').text(data.message);
+            $('#serverResponse').show();
+
+        }//if (data) {
+    } else {
+        var serverResponse = $('#serverResponse');
+        var errorList = data;
+        $.each(errorList, function (element) {
+            var childDiv = $("<div>" + element.message + "</div>");
+            if (element.status == 'ERROR') {
+                childDiv.css('background-color', 'rgba(243, 0, 0, 0.6)');
+                childDiv.css('color', '#ffffff');
+            } else if (element.status == 'SUCCESS') {
+                childDiv.css('background-color', 'rgba(10, 185, 5, 0.6)');
+                childDiv.css('color', '#ffffff');
+            } //if (data.status == 'ERROR') {
+            $(childDiv).appendTo(serverResponse);
+        });//$.each(errorList, function (element) {
+    }//if (!multipleRecords) {
+}//var manageServerResponse = function(data) {
