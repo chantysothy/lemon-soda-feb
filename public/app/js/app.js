@@ -2,7 +2,7 @@
 $(window).load(function () {
     var googleAuthObject, facebookAuthObject, twitterAuthObject, instagramAuthObject, pinterestAuthObject, bloggerAuthObject, loggedInUserInfo;
     if (!$isLoggedIn()) {
-        $('#invite').hide();
+        $('#invite').hide(); 
         $('#logout').hide();   
         window.location.href = '../';
     } else {
@@ -18,13 +18,13 @@ $(window).load(function () {
                     var publishCredentials = {
                         // FACEBOOK
                         facebook: {
-                            accounts: [loggedInUserInfo.data.facebook.userID],
+                            accounts: [loggedInUserInfo.data.facebook.profileInfo.userID],
                             limit: 2,
                             access_token: '150849908413827|a20e87978f1ac491a0c4a721c961b68c'
                         },
                         // Twitter
                         twitter: {
-                            accounts: ['@' + loggedInUserInfo.data.twitter.screen_name],
+                            accounts: ['@' + loggedInUserInfo.data.twitter.profileInfo.screen_name],
                             limit: 2,
                             consumer_key: 'zR30W1z6cTQfYKaeMMrUdbXKm', // make sure to have your app read-only
                             consumer_secret: 'W3k4tedpDKJ0hM6Hnn2I4hAHWag1INFw2ipaBOhgYBqt5zaxL2', // make sure to have your app read-only
@@ -85,7 +85,7 @@ $(window).load(function () {
                         update_period: 10*1000,
                         // When all the posts are collected and displayed - this function is evoked
                         callback: function () {
-                            console.log('all posts are collected');
+                            console.log('all posts collected');
                         },
                         template_html: '../template.html'
                         //update_period : 300

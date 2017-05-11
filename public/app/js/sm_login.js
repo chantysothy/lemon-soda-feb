@@ -234,9 +234,9 @@ var setPostableLocs = function (newPostableLocs, sm_name, callback) {//'/user/ge
         , type: 'POST'
         , url: '/postable-loc/set'
         , data: "email=" + $getClientEmail() + "&sm_name=" + sm_name + "&postLoc=" + JSON.stringify(newPostableLocs)
-        , dataType: "jsonp"
-        , jsonp: "callback"
-        , crossDomain: true
+        //, dataType: "jsonp"
+        //, jsonp: "callback"
+        //, crossDomain: true
         , beforeSend: function (xhr) {
             xhr.withCredentials = true;
         }
@@ -456,35 +456,46 @@ var $getCredsFromServer = function (email, callback) {
 }//var getCredsFromServer = function (email) { 
 
 var setPostableLoc = function (postableLoc, callback) {
-    var queryParam = "email=" + $getClientEmail() + "&postableLocs=";
-    var postableLocLength = JSON.stringify(postableLoc).length;
-    var lengthOfParams = queryParam.length + postableLocLength
+    $.post('/profile/save',
+        {
+            email: $getClientEmail()
+            , 'postLoc' : postableLoc
+            , 'sm_name' : smName
+        },
+        function (data, status) {
+            if (callback)
+                callback(data)
+        });//$.post('/profile/save',
+
+    //var queryParam = "email=" + $getClientEmail() + "&postableLocs=";
+    //var postableLocLength = JSON.stringify(postableLoc).length;
+    //var lengthOfParams = queryParam.length + postableLocLength
    
-    if (callback) {
-        $.ajax({
-            headers: { "Accept": "application/json"}
-            , type: 'GET'
-            , url: '/postable-loc/set'
-            , data: "email=" + $getClientEmail() + "&postableLocs=" + JSON.stringify(postableLoc)
-            , dataType: "jsonp"
-            , jsonp: "callback"
-            , crossDomain: true
-            , beforeSend: function (xhr) {
-                xhr.withCredentials = true;
-                //                xhr.setRequestHeader('content-length', queryParam.length + postableLocLength);
-                //xhr.setRequestHeader('Content-Length', lengthOfParams.toString());
-            }
-            , jsonPCallback: "jsonpCallback"
-            , success: function (data) {
-                    if (callback) {
-                        callback(data);
-                    } //if (callback) { 
-            }
-            , error: function (jqXHR, textStatus, errorThrown) {
-                alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
-            }
-        }); //$.ajax({
-    } // if callback
+    //if (callback) {
+    //    $.ajax({
+    //        headers: { "Accept": "application/json"}
+    //        , type: 'GET'
+    //        , url: '/postable-loc/set'
+    //        , data: "email=" + $getClientEmail() + "&postableLocs=" + JSON.stringify(postableLoc)
+    //        , dataType: "jsonp"
+    //        , jsonp: "callback"
+    //        , crossDomain: true
+    //        , beforeSend: function (xhr) {
+    //            xhr.withCredentials = true;
+    //            //                xhr.setRequestHeader('content-length', queryParam.length + postableLocLength);
+    //            //xhr.setRequestHeader('Content-Length', lengthOfParams.toString());
+    //        }
+    //        , jsonPCallback: "jsonpCallback"
+    //        , success: function (data) {
+    //                if (callback) {
+    //                    callback(data);
+    //                } //if (callback) { 
+    //        }
+    //        , error: function (jqXHR, textStatus, errorThrown) {
+    //            alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
+    //        }
+    //    }); //$.ajax({
+    //} // if callback
 }//var setPostableLocs = function (callback) {
 
 var $setCredsToServer = function (creds, callback) {

@@ -539,7 +539,9 @@ var fillAutoCompleteList = function () {
         SocialMediaGroupsAndPages[tempSocialMediaNames[smcounter]].getPostableLocs(function (data) {
             if (data) {
                 SocialMediaGroupsAndPages[data.sm_name].postableLocs = data;
-                setupAutoCompleteList(autoCompleteList, data.sm_name);
+                if (SocialMediaGroupsAndPages[data.sm_name].postableLocs) {
+                    setupAutoCompleteList(autoCompleteList, data.sm_name);
+                } //if (SocialMediaGroupsAndPages[data.sm_name].postableLocs 
                 smElementCounter++;
                 if (smElementCounter == tempSocialMediaNames.length) {
                     // prepare List for auto complete

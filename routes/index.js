@@ -476,7 +476,7 @@ router.post('/postable-loc/set', function (req, res) {
             userModel.findOne(condition, function (err, doc) {
                 if (err) {
                     var message = { status: "ERROR", message: "There was an error in validating your profile. You may try after sometime." };
-                    sendMessageToServer(message, callback, res);
+                    sendMessageToServer(message, null, res);
                     return;
                 }
                 if (doc) {
@@ -485,10 +485,10 @@ router.post('/postable-loc/set', function (req, res) {
                     doc.save(function (err, doc, numRows) {
                         if (err) {
                             var message = { status: "ERROR", message: "Unable to update postable locations on social media automatically. You may continue with your work." };
-                            sendMessageToServer(message, callback, res);
+                            sendMessageToServer(message, null, res);
                         } else {
                             var message = { status: "SUCCESS", message: "Postable locations automatically updated for -" + sm_name };
-                            sendMessageToServer(message, callback, res);
+                            sendMessageToServer(message, null, res);
                         }//if (err) {
 
                     });
