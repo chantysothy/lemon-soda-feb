@@ -10,8 +10,8 @@ var userPosts = require('../models/userposts');
 
 var config = require('../config/config');
 
-var imageFileBasePath = '../lemon-soda-jan/public/upload/images', videoFileBasePath;
-var imagePublishPath = '../upload/images', videoFileBasePath;
+var imageFileBasePath = '../lemon-soda-jan/public/upload/images', videoFileBasePath = "../lemon-soda-jan/public/upload/videos";
+var imagePublishPath = '../upload/images', videoFilePublishPath = '../upload/videos';
 
 var uploader = multer(
     {
@@ -95,26 +95,39 @@ router.post('/upload/files', function (req, res) {
     req.pipe(req.busboy);
     req.busboy.on('file', function (fieldname, file, filename) {
         console.log("Uploading: " + filename);
-
+        var fileType = getFileType(filename);
         //Path where image will be uploaded
         var tempFileName = Date.now().toString() + '-' + filename;
-        var serverFileName = imageFileBasePath + "\/" + tempFileName;
-        var publishUrl = imagePublishPath + "\/" + tempFileName;
+        var serverFileName, publishUrl
+        if (fileType == 'IMAGE_FILE') {
+            serverFileName = imageFileBasePath + "\/" + tempFileName;
+            publishUrl = imagePublishPath + "\/" + tempFileName
+        } else if (fileType == 'VIDEO_FILE') {
+            serverFileName = videoFileBasePath + "\/" + tempFileName;
+            publishUrl = videoFilePublishPath + "\/" + tempFileName
+        } else {
+            res.send({ status: 'ERROR' , message: "file format not supported" });
+            res.end();
+            return;
+        }
+        //var  = imagePublishPath + "\/" + tempFileName;
 
         fstream = fs.createWriteStream(serverFileName);
         file.pipe(fstream);
         fstream.on('close', function () {
-            console.log("Upload Finished of " + filename);
+            console.log("Upload Finished for " + filename);
             var response = {
                 status: "SUCCESS", message: "File uploaded.", data: {
                     originalFileName: filename,
-                    "serverFileName": publishUrl
+                    "urlToPublish": publishUrl,
+                    "serverFilePath": serverFileName,
+                    "fileType": fileType
                 }
                 
             }//var response = {
             res.write(JSON.stringify(response));
             res.end();
-        });
+        });//fstream.on('close', function () {
     });    
 
     //var email = req.headers['email'];
@@ -191,4 +204,30 @@ var sendMessageToServer = function (msg, callback, res, post = false) {
         res.end();
     }
 }
+var getFileType =  function(filename) {
+    var ext = getExtension(filename);
+    switch (ext.toLowerCase()) {
+        case 'jpg':
+        case 'gif':
+        case 'bmp':
+        case 'png':
+            //etc
+            return "IMAGE_FILE";
+    }
+    switch (ext.toLowerCase()) {
+        case 'm4v':
+        case 'avi':
+        case 'mpg':
+        case 'mp4':
+            // etc
+            return "VIDEO_FILE";
+    }
+    return "NOT_SUPPORTED"
+}
+
+var getExtension = function (fileName) {
+    if (fileName)
+        return fileName.split('.')[1].trim();
+    else return null;
+}//var getExtension = function (fileName) {
 module.exports = router;

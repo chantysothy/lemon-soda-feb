@@ -30,24 +30,26 @@ window.closeManageModal = function () {
 $(document).ready(function () {
     Dropzone.options.uploadWidget = {
         paramName: 'file',
-        maxFilesize: 10, // MB
+        maxFilesize: 100, // MB
         maxFiles: 4,
         addRemoveLinks: true,
         dictDefaultMessage: 'Click to add photos or videos to your post.',
         dictResponseError: 'nectorr server is not responding.',
+        autoProcessQueue : true,
         clickable: true,
-        //headers: {
-        //    'x-csrf-token': "vidurkohli"
-        //},
-        acceptedFiles: 'image/*, video/*,.mp4,.mov,.wmv',
+        acceptedFiles: 'video/*, .mp4, .mov, .wmv, image/*',
+        otherFilesPreviewFile: '../../images/other-icon.png',
+        videoPreviewFile: '../../images/video-icon.png',
+        imagePreviewFile: '../../images/image-icon.png', 
         init: function () {
             this.options.dictRemoveFile = "Delete";
-            this.options.maxFilesize = 10;
+            this.options.maxFilesize = 100;
             this.options.maxThumbnailFilesize = 10;
             //New file added
             this.on("addedfile", function (file) {
                 $('#serverResponse').hide();
                 console.log('new file added ', file);
+
             });
             // remove file starts
             this.on("maxfilesexceeded", function (file) {
@@ -105,11 +107,22 @@ $(document).ready(function () {
                 console.log(file);
                 console.log(resp);
                 var response = JSON.parse(resp);
-                var serverInfo = absolutePath(response.data.serverFileName);
+                var serverInfo = absolutePath(response.data.urlToPublish);
                 file['serverFileName'] = serverInfo;
-                imageList.push(serverInfo);
-                imageUrlForServer = serverInfo;
-                $("#currentImg").attr('src', imageList[imageList.length - 1]);
+                if (file.type == 'video/mp4') {
+                    getVideoPoster(serverInfo, function (image) {
+                        if (image) {
+                            imageList.push(image);
+                        } else {
+                            //display error
+                        }
+                    });//imageList.push(getVideoPoster(serverInfo), function (image) {
+                } else {
+                    imageList.push(serverInfo);
+                    $("#currentImg").attr('src', imageList[imageList.length - 1]);
+                    imageUrlForServer = serverInfo
+                }//if (file.type == 'video/mp4') {
+
                 $('#boosterPreview').show();
                 $('#buttonPanel').show();
 
@@ -120,14 +133,16 @@ $(document).ready(function () {
 
             this.on('thumbnail', function (file) {
                 if (file.type == "image/jpeg" || file.type == "image/png") {
-                    if (file.width < 250 || file.height < 250) {
-                        file.rejectDimensions();
-                    } else {
+                    //if (file.width < 250 || file.height < 250) {
+                    //    file.rejectDimensions();
+                    //} else {
                         file.acceptDimensions();
-                    }
-                } else if ((file.type != 'video/mp4') || (file.type != 'video/mp4') || (file.type != 'video/quicktime') || (file.type != 'video/x-ms-wmv') || (file.type = 'video/x-msvideo')) {
-                    if (file.size > 50) {
-                        file.rejectDimension();
+                    //}
+                } else if ((file.type == 'video/mp4') || (file.type == 'video/mp4') || (file.type == 'video/quicktime') || (file.type == 'video/x-ms-wmv') || (file.type == 'video/x-msvideo')) {
+                    if (file.size < 100 * 1024 * 1024) {
+                        file.acceptDimensions();
+                    } else {
+                        file.rejectDimensions();
                     }
                 } else {
                     file.rejectDimensions();
@@ -138,7 +153,7 @@ $(document).ready(function () {
             file.acceptDimensions = done;
             file.rejectDimensions = function () {
                 if (file.type != "image/jpeg" && file.type != "image/png") {
-                    done('The image must be at least 250 x 250px')
+                    done('only jpeg and png files supported by nectorr.')
                     return;
                 } else if ((file.type != 'video/mp4') || (file.type != 'video/mp4') || (file.type != 'video/quicktime') || (file.type != 'video/x-ms-wmv') || (file.type = 'video/x-msvideo')) {
                     done('Invalid video format or size exceed 50 mb.')
@@ -842,3 +857,90 @@ var settingIframeSrc = function (iframeName, fileName) {
     
     //iframe.contentWindow.location.reload(true);
 }//var settingIframeSrc = function (iframeName, fileName) {
+var getVideoPoster = function (videoUrl) {
+    //var file = videoUrl;
+    getFileForBlob(videoUrl, function (file, callback) {
+        var fileReader = new FileReader();
+        fileReader.readAsArrayBuffer(file);
+        var blob = new Blob([fileReader.result], { type: file.type });
+        var url = URL.createObjectURL(blob);
+        var video = document.createElement('video');
+        //video.setAttribute('src', videoUrl);
+        var snapImage = function () {
+            //video = document.getElementsByTagName('video');
+            var canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            var image = canvas.toDataURL();
+            var success = image.length > 0;
+            if (success) {
+                var posterImage = new Image();
+               
+                URL.revokeObjectURL(url);
+                if (callback)
+                    callback(image);
+            } else {
+                if (callback) {
+                    callback(null);
+                }
+
+            }//if (success) {
+            return success;
+        }//var snapImage = function () {image
+
+        var timeupdate = function () {
+            video.currentTime = 5;
+            if (snapImage()) {
+                video.removeEventListener('timeupdate', timeupdate);
+            }
+        }//var timeupdate = function () {
+
+        video.addEventListener('loadeddata', function () {
+            video.currentTime = 5;
+            if (snapImage()) {
+                video.removeEventListener('timeupdate', timeupdate);
+            }
+        });
+        video.addEventListener('timeupdate', timeupdate);
+        video.preload = 'auto';
+        video.src = videoUrl;
+        video.setAttribute('type', 'video/mp4;codecs="avc1.42E01E, mp4a.40.2"');
+        video.setAttribute('crossorigin', 'anonymous');  
+        // Load video in Safari / IE11
+        video.muted = true;
+        video.playsInline = true;
+        video.autoplay = true;
+        //video.load();
+        var playPromise = video.play();
+        if (playPromise !== undefined) {
+            playPromise.then(function () {
+                // Automatic playback started!
+            }).catch(function (error) {
+                // Automatic playback failed.
+                // Show a UI element to let the user manually start playback.
+            });
+        }
+
+    });
+}//var getVideoPoster = function (videoUrl) {
+
+var getFileForBlob = function (url, callback) {
+    var request = new XMLHttpRequest();
+    request.open('GET', url, true);
+    request.responseType = 'blob';
+    request.onload = function () {
+        if (callback) {
+            callback(request.response);
+        }
+//        var reader = new FileReader();
+//        reader.readAsDataURL(request.response);
+//        reader.onload = function (e) {
+//            console.log('DataURL:', e.target.result);
+//        };
+    };
+    request.send();
+}
+var saveImage = function (canvas, callback) {
+
+}

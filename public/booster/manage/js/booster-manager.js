@@ -5,7 +5,7 @@ var selectedOptions = [];
 var autoCompleteList = [];
 var timeLines = [];
 var accessTokensForVignettes = {};
-var tempSocialMediaNames = ['facebook']//, 'twitter']//,'google'];//, 'linkedin','instagram','youtube', blogger','tumblr'];
+var tempSocialMediaNames = ['facebook', 'twitter']//,'google'];//, 'linkedin','instagram','youtube', blogger','tumblr'];
 //refer https://developers.google.com/+/domains/api/circles
 var plusDomain = {
     getCircleList: 'https://www.googleapis.com/plusDomains/v1/people/userId/circles' //get

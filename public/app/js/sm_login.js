@@ -1262,27 +1262,15 @@ var extendFBAccessToken = function (fbAccessToken, callback) {
 }//var extendFBAccessToken = function (fbAccessToken, callback) {
 
 var submitConfiguration = function (params, callback) {
-    $.ajax({
-        headers: { "Accept": "text/x-json", "Content-Type": "text/x-json" }
-        , type: 'post'
-        , url: '/config/set'
-        , data: "{email:" +'"'+$getClientEmail() +'"'+ ", StreamObject:" + JSON.stringify(params) + "}" //+ "&vignette_name=" + vignetteName
-        //, dataType: "jsonp"
-        , jsonp: "callback"
-        , crossDomain: true
-        , beforeSend: function (xhr) {
-            xhr.withCredentials = true;
-        }
-        , jsonPCallback: "jsonpCallback"
-        , success: function (data) {
-            if (callback) {
-                callback(data);
-            } //if (callback) { 
-        }
-        , error: function (jqXHR, textStatus, errorThrown) {
-            alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
-        }
-    }); //$.ajax({
+    $.post('/user-config/set',
+        {
+            email: $getClientEmail()
+            , StreamObject: JSON.stringify(params)
+        },
+        function (data, status) {
+            if (callback)
+                callback(data)
+        });//$.post('/profile/save',
 
 }//var submitConfigure = function (location, parametere, callback) {
 

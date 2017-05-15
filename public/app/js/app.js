@@ -10,172 +10,170 @@ $(window).load(function () {
         $('#logout').show();
 
         getQueryTags(function (searchOptions) {
-            getLoggedInUserDetails(function (userData) {
-//                var data = JSON.parse(userData)
-                var data = userData;
-                if (data.status == "SUCCESS") {
-                    loggedInUserInfo = data;
-                    var publishCredentials = {
-                        // FACEBOOK
-                        facebook: {
-                            accounts: [loggedInUserInfo.data.facebook.profileInfo.userID],
-                            limit: 2,
-                            access_token: '150849908413827|a20e87978f1ac491a0c4a721c961b68c'
-                        },
-                        // Twitter
-                        twitter: {
-                            accounts: ['@' + loggedInUserInfo.data.twitter.profileInfo.screen_name],
-                            limit: 2,
-                            consumer_key: 'zR30W1z6cTQfYKaeMMrUdbXKm', // make sure to have your app read-only
-                            consumer_secret: 'W3k4tedpDKJ0hM6Hnn2I4hAHWag1INFw2ipaBOhgYBqt5zaxL2', // make sure to have your app read-only
-                        },
-                        // INSTAGRAM
-                        instagram: {
-                            accounts: ['@extendmore', '#startup', '#fund'],
-                            limit: 2,
-                            client_id: 'f3a4940affd34bd7aaabebde1a685846'
-                        },
-                        //pinterest
-                        pinterest: {
-                            accounts: ['#startup', '#fund'],
-                            limit: 2,
-                            client_id: '2c6d2173ae9d41de905236e6301e5a43'
-                        },
-                        google: {
-                            accounts: ['#startup', '#fund'],
-                            limit: 2,
-                            client_id: '379200ff63bf29beae9389865d135510baa583dabae4846e4b9ef02fdb308d43',
-                        },
-                        dribbble: {
-                            accounts: [],
-                            limit: 2,
-                            client_id: '379200ff63bf29beae9389865d135510baa583dabae4846e4b9ef02fdb308d43',
-                            client_secret: '808631ddf785ea499bf84d88752c3887f3e8375bf68c5632875f8bcbcf4c632d',
-                            client_access_token: '5c2cdbd6a66f269266e343bb1dccb669b529d8ef15faadd4c1d7a32843f59877'
-                        },
-                        youtube: {
-                            accounts: [],
-                            limit: 2,
-                            client_id: '690502963259-bavfo91mdkhre73s8pej1rv88lfm26mc.apps.googleusercontent.com',
-                            client_secret: 'efHtD69bKTpjqJWHF6Y_ZejY'
-                        },
-                        tumblr: {
-                            accounts: [],
-                            limit: 2,
-                            client_id: '2c6d2173ae9d41de905236e6301e5a43'
-                        },
-                        blogger: {
-                            accounts: [],
-                            limit: 2,
-                            client_id: '2c6d2173ae9d41de905236e6301e5a43'
-                        },
-                        delicious: {
-                            accounts: [],
-                            limit: 2,
-                            client_id: '2c6d2173ae9d41de905236e6301e5a43'
-                        },
+            if (searchOptions && searchOptions.status == "SUCCESS") {
+                getLoggedInUserDetails(function (userData) {
+                    //                var data = JSON.parse(userData)
+                    var data = userData;
+                    if (data.status == "SUCCESS") {
+                        loggedInUserInfo = data;
+                        var publishCredentials = {
+                            // FACEBOOK
+                            facebook: {
+                                accounts: [loggedInUserInfo.data.facebook.profileInfo.userID, markHashTags(searchOptions.StreamObject.ListenTo), markHashTags(searchOptions.StreamObject.Engagement), markHashTags(searchOptions.StreamObject.Traffic), markHashTags(searchOptions.StreamObject.Trending), markHashTags(searchOptions.StreamObject.Trending)],
+                                limit: 2,
+                                access_token: '150849908413827|a20e87978f1ac491a0c4a721c961b68c'
+                            },
+                            // Twitter
+                            twitter: {
+                                accounts: ['@' + loggedInUserInfo.data.twitter.profileInfo.screen_name, markHashTags(searchOptions.StreamObject.ListenTo), markHashTags(searchOptions.StreamObject.Engagement), markHashTags(searchOptions.StreamObject.Traffic), markHashTags(searchOptions.StreamObject.Trending), markHashTags(searchOptions.StreamObject.Trending)],
+                                limit: 2,
+                                consumer_key: 'zR30W1z6cTQfYKaeMMrUdbXKm', // make sure to have your app read-only
+                                consumer_secret: 'W3k4tedpDKJ0hM6Hnn2I4hAHWag1INFw2ipaBOhgYBqt5zaxL2', // make sure to have your app read-only
+                            },
+                            // INSTAGRAM
+                            instagram: {
+                                accounts: ['@extendmore', markHashTags(searchOptions.StreamObject.ListenTo), markHashTags(searchOptions.StreamObject.Engagement), markHashTags(searchOptions.StreamObject.Traffic), markHashTags(searchOptions.StreamObject.Trending), markHashTags(searchOptions.StreamObject.Trending)],
+                                limit: 2,
+                                client_id: 'f3a4940affd34bd7aaabebde1a685846'
+                            },
+                            //pinterest
+                            pinterest: {
+                                accounts: ['#startup', '#fund'],
+                                limit: 2,
+                                client_id: '2c6d2173ae9d41de905236e6301e5a43'
+                            },
+                            google: {
+                                accounts: [markHashTags(searchOptions.StreamObject.ListenTo), markHashTags(searchOptions.StreamObject.Engagement), markHashTags(searchOptions.StreamObject.Traffic), markHashTags(searchOptions.StreamObject.Trending), markHashTags(searchOptions.StreamObject.Trending)],
+                                limit: 2,
+                                client_id: '379200ff63bf29beae9389865d135510baa583dabae4846e4b9ef02fdb308d43',
+                            },
+                            dribbble: {
+                                accounts: [],
+                                limit: 2,
+                                client_id: '379200ff63bf29beae9389865d135510baa583dabae4846e4b9ef02fdb308d43',
+                                client_secret: '808631ddf785ea499bf84d88752c3887f3e8375bf68c5632875f8bcbcf4c632d',
+                                client_access_token: '5c2cdbd6a66f269266e343bb1dccb669b529d8ef15faadd4c1d7a32843f59877'
+                            },
+                            youtube: {
+                                accounts: [],
+                                limit: 2,
+                                client_id: '690502963259-bavfo91mdkhre73s8pej1rv88lfm26mc.apps.googleusercontent.com',
+                                client_secret: 'efHtD69bKTpjqJWHF6Y_ZejY'
+                            },
+                            tumblr: {
+                                accounts: [],
+                                limit: 2,
+                                client_id: '2c6d2173ae9d41de905236e6301e5a43'
+                            },
+                            blogger: {
+                                accounts: [],
+                                limit: 2,
+                                client_id: '2c6d2173ae9d41de905236e6301e5a43'
+                            },
+                            delicious: {
+                                accounts: [],
+                                limit: 2,
+                                client_id: '2c6d2173ae9d41de905236e6301e5a43'
+                            },
 
-                        // GENERAL SETTINGS
-                        length: 200,
-                        show_media: true,
-                        // Moderation function - if returns false, template will have class hidden
-                        moderation: function (content) {
-                            return (content.text) ? content.text.indexOf('fuck') == -1 : true;
-                        },
-                        update_period: 10*1000,
-                        // When all the posts are collected and displayed - this function is evoked
-                        callback: function () {
-                            console.log('all posts collected');
-                        },
-                        template_html: '../template.html'
-                        //update_period : 300
-                    }
-                    $nectorrFacebookLogin(facebookDefaults.scope, null, function (response) {
-                        var facebookToken
-                        if (response && response.authResponse.expiresIn < 10000) {
-                            //accessCredsForBooster['facebook'] = response;
-                            extendFBAccessToken(response.authResponse.accessToken, function (extendedTokenResponse) {
-//                                publishCredentials.facebook.access_token = extendedTokenResponse.authResponse.accessToken;
-                                (extendedTokenResponse && !extendedTokenResponse.error) ?
-                                    //accessCredsForBooster['facebook'] = extendedTokenResponse;
-                                    publishCredentials.facebook.access_token = extendedTokenResponse.authResponse.accessToken
-                                :
-                                    publishCredentials.facebook.access_token = response.authResponse.accessToken;
-                                
-
-                            });
+                            // GENERAL SETTINGS
+                            length: 200,
+                            show_media: true,
+                            // Moderation function - if returns false, template will have class hidden
+                            moderation: function (content) {
+                                return (content.text) ? content.text.indexOf('fuck') == -1 : true;
+                            },
+                            update_period: 10 * 1000,
+                            // When all the posts are collected and displayed - this function is evoked
+                            callback: function () {
+                                console.log('all posts collected');
+                            },
+                            template_html: '../template.html'
+                            //update_period : 300
                         }
-                        publishCredentials.facebook.access_token = response.authResponse.accessToken;
-                                facebookAuthObject = response;
-                                var instagramAuthUrl = "https://api.instagram.com/oauth/authorize/?client_id=" + "f3a4940affd34bd7aaabebde1a685846" + "&response_type=code"
-                                var feedDiv = $('#socialfeeds');
-                                //saveFacebookInfo
-                                $initializeGooglewithCallback(function (googleResponse) {
-                                    googleAuthObject = googleResponse.currentUser.get().getAuthResponse();//getAuthResponse();
-                                    var googleUser = googleResponse.currentUser.get().getId();
-                                    //accessCredsForBooster['google'] = response;                                        
-                                    var socialFeedLoginInfo = {
-                                        // INSTAGRAM
-                                        facebook: {
-                                            accounts: ['@' + facebookAuthObject.authResponse.userID],  //Array: Specify a list of accounts from which to pull posts
-                                            limit: 5,                                    //Integer: max number of posts to load
-                                            client_id: 'wj888T3jlauiQIjcdu751AELB', // make sure to have your app read-only
-                                            access_token: facebookAuthObject.authResponse.accessToken, // make sure to have your app read-only
-                                        },
-                                        twitter: {
-                                            accounts: ['@' + loggedInUserInfo.data.twitter.screen_name],  //Array: Specify a list of accounts from which to pull posts
-                                            limit: 5,                                    //Integer: max number of posts to load
-                                            consumer_key: 'zR30W1z6cTQfYKaeMMrUdbXKm', // make sure to have your app read-only
-                                            consumer_secret: 'W3k4tedpDKJ0hM6Hnn2I4hAHWag1INFw2ipaBOhgYBqt5zaxL2', // make sure to have your app read-only
-                                        },
-                                        google: {
-                                            accounts: ['@' + googleUser],  //Array: Specify a list of accounts from which to pull posts
-                                            limit: 5,                                    //Integer: max number of posts to load
-                                            client_id: googlePlusDefaults.clientId,       //String: Instagram client id (optional if using access token)
-                                            access_token: googlePlusDefaults.apiKey,
+                        $nectorrFacebookLogin(facebookDefaults.scope, null, function (response) {
+                            var facebookToken
+                            if (response && response.authResponse.expiresIn < 10000) {
+                                //accessCredsForBooster['facebook'] = response;
+                                extendFBAccessToken(response.authResponse.accessToken, function (extendedTokenResponse) {
+                                    //                                publishCredentials.facebook.access_token = extendedTokenResponse.authResponse.accessToken;
+                                    (extendedTokenResponse && !extendedTokenResponse.error) ?
+                                        //accessCredsForBooster['facebook'] = extendedTokenResponse;
+                                        publishCredentials.facebook.access_token = extendedTokenResponse.authResponse.accessToken
+                                        :
+                                        publishCredentials.facebook.access_token = response.authResponse.accessToken;
 
-                                            // GENERAL SETTINGS
-                                            length: 400,                                      //Integer: For posts with text longer than this length, show an ellipsis.
-                                        },
-                                        blogger: {
-                                            accounts: ['@' + googleUser],  //Array: Specify a list of accounts from which to pull posts
-                                            limit: 5,                                    //Integer: max number of posts to load
-                                            client_id: googlePlusDefaults.clientId,       //String: Instagram client id (optional if using access token)
-                                            access_token: googlePlusDefaults.apiKey,
 
-                                            // GENERAL SETTINGS
-                                            length: 400,                                      //Integer: For posts with text longer than this length, show an ellipsis.
-                                        },
-                                        update_period: 5000,
-                                        show_media: true
+                                });
+                            }
+                            publishCredentials.facebook.access_token = response.authResponse.accessToken;
+                            facebookAuthObject = response;
+                            var instagramAuthUrl = "https://api.instagram.com/oauth/authorize/?client_id=" + "f3a4940affd34bd7aaabebde1a685846" + "&response_type=code"
+                            var feedDiv = $('#socialfeeds');
+                            //saveFacebookInfo
+                            $initializeGooglewithCallback(function (googleResponse) {
+                                googleAuthObject = googleResponse.currentUser.get().getAuthResponse();//getAuthResponse();
+                                var googleUser = googleResponse.currentUser.get().getId();
+                                //accessCredsForBooster['google'] = response;                                        
+                                var socialFeedLoginInfo = {
+                                    // INSTAGRAM
+                                    facebook: {
+                                        accounts: ['@' + facebookAuthObject.authResponse.userID, markHashTags(searchOptions.StreamObject.ListenTo), markHashTags(searchOptions.StreamObject.Engagement), markHashTags(searchOptions.StreamObject.Traffic), markHashTags(searchOptions.StreamObject.Trending), markHashTags(searchOptions.StreamObject.Trending)],  //Array: Specify a list of accounts from which to pull posts
+                                        limit: 5,                                    //Integer: max number of posts to load
+                                        client_id: 'wj888T3jlauiQIjcdu751AELB', // make sure to have your app read-only
+                                        access_token: facebookAuthObject.authResponse.accessToken, // make sure to have your app read-only
+                                    },
+                                    twitter: {
+                                        accounts: ['@' + loggedInUserInfo.data.twitter.screen_name, markHashTags(searchOptions.StreamObject.ListenTo), markHashTags(searchOptions.StreamObject.Engagement), markHashTags(searchOptions.StreamObject.Traffic), markHashTags(searchOptions.StreamObject.Trending), markHashTags(searchOptions.StreamObject.Trending)],  //Array: Specify a list of accounts from which to pull posts
+                                        limit: 5,                                    //Integer: max number of posts to load
+                                        consumer_key: 'zR30W1z6cTQfYKaeMMrUdbXKm', // make sure to have your app read-only
+                                        consumer_secret: 'W3k4tedpDKJ0hM6Hnn2I4hAHWag1INFw2ipaBOhgYBqt5zaxL2', // make sure to have your app read-only
+                                    },
+                                    google: {
+                                        accounts: ['@' + googleUser, markHashTags(searchOptions.StreamObject.ListenTo), markHashTags(searchOptions.StreamObject.Engagement), markHashTags(searchOptions.StreamObject.Traffic), markHashTags(searchOptions.StreamObject.Trending), markHashTags(searchOptions.StreamObject.Trending)],  //Array: Specify a list of accounts from which to pull posts
+                                        limit: 5,                                    //Integer: max number of posts to load
+                                        client_id: googlePlusDefaults.clientId,       //String: Instagram client id (optional if using access token)
+                                        access_token: googlePlusDefaults.apiKey,
 
-                                    } //var socialFeedLoginInfo = {
-                                    if (searchOptions.StreamObject) {
-                                        var searchDetails = ['Monitor', 'ListenTo', 'Engagement', 'Trending', 'ListenTo'];
-                                        for (var searchDetailsCounter = 0; searchDetailsCounter < searchDetails.length; searchDetailsCounter++) {
+                                        // GENERAL SETTINGS
+                                        length: 400,                                      //Integer: For posts with text longer than this length, show an ellipsis.
+                                    },
+                                    blogger: {
+                                        accounts: ['@' + googleUser],  //Array: Specify a list of accounts from which to pull posts
+                                        limit: 5,                                    //Integer: max number of posts to load
+                                        client_id: googlePlusDefaults.clientId,       //String: Instagram client id (optional if using access token)
+                                        access_token: googlePlusDefaults.apiKey,
+
+                                        // GENERAL SETTINGS
+                                        length: 400,                                      //Integer: For posts with text longer than this length, show an ellipsis.
+                                    },
+                                    update_period: 5000,
+                                    show_media: true
+
+                                } //var socialFeedLoginInfo = {
+                                if (searchOptions.StreamObject) {
+                                    var searchDetails = ['Monitor', 'ListenTo', 'Engagement', 'Trending', 'ListenTo'];
+                                    for (var searchDetailsCounter = 0; searchDetailsCounter < searchDetails.length; searchDetailsCounter++) {
+                                        if (searchOptions.StreamObject[searchDetails[searchDetailsCounter]]) {
                                             var searchData = searchOptions.StreamObject[searchDetails[searchDetailsCounter]].split(',');
                                             pushArray(socialFeedLoginInfo.facebook.accounts, searchData);
                                             pushArray(socialFeedLoginInfo.twitter.accounts, searchData);
                                             pushArray(socialFeedLoginInfo.google.accounts, searchData);
-                                        }//for (var searchDetailsCounter = 0; searchDetailsCounter < searchDetails.length; searchDetailsCounter++) {
-                                        feedDiv.socialfeed(socialFeedLoginInfo);
-                                    }
-                                });
-                                
+                                        }//if (StreamObject[searchDetails[searchDetailsCounter]]) {
+                                    }//for (var searchDetailsCounter = 0; searchDetailsCounter < searchDetails.length; searchDetailsCounter++) {
+                                    feedDiv.socialfeed(socialFeedLoginInfo);
+                                }
                             });
-                        } else {
-                            var message = { status: "ERROR", message: "There was an error connecting with Facebook. Do try again after a few minutes." }
-                            $showMessage('serverResponse', message.message, message.status.toLowerCase(), true);
 
-                        }
-                    });//fbconnect
+                        });
+                    } else {
+                        var message = { status: "ERROR", message: "There was an error connecting with Facebook. Do try again after a few minutes." }
+                        $showMessage('serverResponse', message.message, message.status.toLowerCase(), true);
 
-            //    } else {
-            //        manageServerResponse(data);
-            //    }
-            //});
-
-        });
+                    }
+                });//fbconnect
+            }//if (searchOptions && searchOptions.status == "SUCCESS"){
+        });//getQueryTags(function (searchOptions) {
         //alert("social feed executed");
 
     }
@@ -506,3 +504,17 @@ var setIframeSrc = function (iframeName, fileName) {
         iframe.attr("location", s);
     }
 }
+
+var markHashTags = function (searchString) {
+    var returnValue;
+    if (!searchString) return " ";
+    var searchArray = searchString.split(',');
+    for (var counter = 0; counter < searchArray.length; counter++) {
+        var searchTag = searchArray[counter].trim();
+        if ((searchTag.charAt(0) != '!') && (searchTag.charAt(0) != '#') && (searchTag.charAt(0) != '@')) {
+            searchTag = '#' + searchTag + " "
+            searchArray[counter] = searchTag; 
+        }//if ((searchTag.charAt(0) != '!') && (searchTag.charAt(0) != '#') && (searchTag.charAt(0) != '@')) {
+    }//for (var counter = 0; counter < searchArray.length; counter++) {
+    return searchArray.join(', ');
+}//var markHashTags = function (searchString) {

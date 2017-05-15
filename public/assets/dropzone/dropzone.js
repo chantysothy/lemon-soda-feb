@@ -137,7 +137,11 @@
       addRemoveLinks: false,
       previewsContainer: null,
       hiddenInputContainer: "body",
+      
       capture: null,
+      otherFilesPreviewFile: null,
+      videoPreviewFile: null,
+      imagePreviewFile: null,
       renameFilename: null,
       dictDefaultMessage: "Drop files here to upload",
       dictFallbackMessage: "Your browser does not support drag'n'drop file uploads.",
@@ -1030,7 +1034,8 @@
     Dropzone.prototype._processingThumbnail = false;
 
     Dropzone.prototype._enqueueThumbnail = function(file) {
-      if (this.options.createImageThumbnails && file.type.match(/image.*/) && file.size <= this.options.maxThumbnailFilesize * 1024 * 1024) {
+//        if (this.options.createImageThumbnails && file.type.match(/image.*/) && file.size <= this.options.maxThumbnailFilesize * 1024 * 1024) {
+      if (file.size <= this.options.maxThumbnailFilesize * 1024 * 1024) {
         this._thumbnailQueue.push(file);
         return setTimeout(((function(_this) {
           return function() {
@@ -1083,15 +1088,28 @@
       var fileReader;
       fileReader = new FileReader;
       fileReader.onload = (function(_this) {
-        return function() {
-          if (file.type === "image/svg+xml") {
-            _this.emit("thumbnail", file, fileReader.result);
-            if (callback != null) {
-              callback();
-            }
-            return;
-          }
-          return _this.createThumbnailFromUrl(file, fileReader.result, callback);
+          return function () {
+              if (callback) {
+                  if ((file.type === "image/jpeg") || (file.type === "image/png")) {
+                      callback()
+                      return _this.createThumbnailFromUrl(file, Dropzone.options.uploadWidget.imagePreviewFile, callback);
+                      //_this.emit("thumbnail", file, fileReader.result);
+                      //if (callback != null) {
+                      //    callback();
+                      //    return _this.createThumbnailFromUrl(file, fileReader.result, callback);
+                      //}
+                  } else if (file.type == 'video/mp4') {
+                      //var errorThumbnailFile = options.nonImagePreviewPathcallback()
+                      callback();
+                      return _this.createThumbnailFromUrl(file, Dropzone.options.uploadWidget.videoPreviewFile, callback);
+                  } else {
+                      callback();
+                      return _this.createThumbnailFromUrl(file, Dropzone.options.uploadWidget.otherFilesPreviewFile, callback);
+                  }
+              }
+            //      otherFilesPreviewFile: null,
+            //videoPreviewFile: null,
+
         };
       })(this);
       return fileReader.readAsDataURL(file);

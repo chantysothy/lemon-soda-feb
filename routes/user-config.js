@@ -37,8 +37,8 @@ router.post('/user-config/set', function (req, res) {
             var email = req.body.email;
             setConfigObject(email, paramsToSet, function (data) {
                 //var message = { status: 'SUCCESS', message: 'There was an error locating your preferences. ', 'data' : data }
-                var returnValue = callback + JSON.stringify(data);//'(' + JSON.stringify(data) + ')';
-                res.send(returnValue);
+                //var returnValue = JSON.stringify(data);//'(' + JSON.stringify(data) + ')';
+                res.send(data);
                 res.end();
                 return;
             });//setConfigObject(email, sm_name, configObject, function (data) {
@@ -148,7 +148,7 @@ router.get('/stream/instagram', function (req, res) {
 }); //router.get('/stream/instagram', function (req, res) {
 
 var setConfigObject = function (email, configObject, callback) {
-    if (callback) {
+    
         var user = new userModel();
         var message;
         var condition = { 'local.email': email };
@@ -192,7 +192,6 @@ var setConfigObject = function (email, configObject, callback) {
                 });//config.findOne(condition, function (err, foundUser) {
             } //if (err) {
         });
-    }//if (callback) {
 }; //var setConfigObject = function (email, sm_name, configObject, callback) {
 
 var getTwitterStream = function (email, callback) {
