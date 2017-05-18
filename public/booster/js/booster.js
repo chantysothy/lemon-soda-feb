@@ -1,4 +1,4 @@
-﻿var uploadedFiles=[]
+﻿var uploadedFiles = [], uploadedVideos = [];
 var boostingProfile, selectVignette, postNowVignette;
 var getConnectedSocialMedia;
 var twitterScope, googlePlusScope, linkedInScope, instagramScope 
@@ -28,10 +28,14 @@ window.closeManageModal = function () {
     $('#manageVignette').modal('hide');
 };
 $(document).ready(function () {
+    $("#imgNext").hide();
+    $("#imgPrevious").hide();
+
     Dropzone.options.uploadWidget = {
         paramName: 'file',
-        maxFilesize: 100, // MB
-        maxFiles: 4,
+        maxFilesize: 50, // MB
+        videoFileSize : 100,
+        maxFiles: 1,
         addRemoveLinks: true,
         dictDefaultMessage: 'Click to add photos or videos to your post.',
         dictResponseError: 'nectorr server is not responding.',
@@ -42,7 +46,7 @@ $(document).ready(function () {
         videoPreviewFile: '../../images/video-icon.png',
         imagePreviewFile: '../../images/image-icon.png', 
         init: function () {
-            this.options.dictRemoveFile = "Delete";
+            this.options.dictRemoveFile = "Remove";
             this.options.maxFilesize = 100;
             this.options.maxThumbnailFilesize = 10;
             //New file added
@@ -104,22 +108,43 @@ $(document).ready(function () {
 
             // On removing file
             this.on('success', function (file, resp) {
+                var img = $("currentImg");
                 console.log(file);
                 console.log(resp);
                 var response = JSON.parse(resp);
                 var serverInfo = absolutePath(response.data.urlToPublish);
-                file['serverFileName'] = serverInfo;
+                file['me'] = serverInfo;
+                file['urlForPublishing'] = serverInfo;
+                var img = $("#currentImg")
+                
                 if (file.type == 'video/mp4') {
-                    getVideoPoster(serverInfo, function (image) {
-                        if (image) {
-                            imageList.push(image);
-                        } else {
-                            //display error
-                        }
-                    });//imageList.push(getVideoPoster(serverInfo), function (image) {
+                    $("#currentImg").attr("src", "../images/video-poster.jpg");
+                    uploadedVideos = [];
+                    uploadedVideos.push(serverInfo);
+                    //getVideoPoster(serverInfo, function (image) {
+                    //    if (image) {
+                    //        saveImageFromBlob(image, function (file) {
+                    //            if (file.status == "SUCCESS") {
+                    //                imageList.push(file.data);
+                    //                $("currentImg").src = file.data;
+                    //                uploadedVideos = [];
+                    //                uploadedVideos.push(serverInfo);
+                    //            }
+                    //            plusDivs(slideIndex);
+                    //        });//saveImageFromBlob(image, function (data) {
+                    //        //img.attr('src', imageList[slideIndex]);
+                    //    } else {
+                    //        //display error
+                    //    }
+                    //});//imageList.push(getVideoPoster(serverInfo), function (image) {
+                    //$('#boosterPreview').show();
+
                 } else {
                     imageList.push(serverInfo);
-                    $("#currentImg").attr('src', imageList[imageList.length - 1]);
+                    slideIndex = imageList.length - 1;
+                    plusDivs(slideIndex);
+
+                    //img.attr('src', imageList[slideIndex]);
                     imageUrlForServer = serverInfo
                 }//if (file.type == 'video/mp4') {
 
@@ -155,11 +180,11 @@ $(document).ready(function () {
                 if (file.type != "image/jpeg" && file.type != "image/png") {
                     done('only jpeg and png files supported by nectorr.')
                     return;
-                } else if ((file.type != 'video/mp4') || (file.type != 'video/mp4') || (file.type != 'video/quicktime') || (file.type != 'video/x-ms-wmv') || (file.type = 'video/x-msvideo')) {
-                    done('Invalid video format or size exceed 50 mb.')
+                } else if ((file.type != 'video/mp4') || (file.type != 'video/quicktime') || (file.type != 'video/x-ms-wmv') || (file.type = 'video/x-msvideo')) {
+                    done('Invalid video format or size exceed 100 mb.')
                     return;
                 } else {
-                    done('file format not supported by nectorr.');
+                    done('file format/multiple files not supported by nectorr.');
                     return;
                 }//if (file.type != "image/jpeg" && file.type != "image/ png") {
             };
@@ -170,10 +195,10 @@ $(document).ready(function () {
 
     $('#boosterPreview').hide();
     $('#buttonPanel').hide();
-    $('#boosterTextArea').keypress(function (e) {
+    //$('#boosterTextArea').keypress(function (e) {
 
-        $('#boosterTextArea').markRegExp(/([@]|[#])([a-z])\w+/gmi);
-    });
+    //    $('#boosterTextArea').markRegExp(/([@]|[#])([a-z])\w+/gmi);
+    //});
 
     //$nectorrFacebookLogin(facebookDefaults.scope, null, function (fbResponse) {
     //    console.log(fbResponse);    
@@ -225,6 +250,13 @@ $(document).ready(function () {
         }
     });
 
+    $('#imgNext').click(function (e) {
+        plusDivs(slideIndex);
+    });//$('#imgPrevious').click(function (e) {
+    $('#imgPrevious').click(function (e) {
+        minusDivs(slideIndex);
+    });//$('#imgPrevious').click(function (e) {
+
     $("#manageVignette").animatedModal({
         modalTarget: 'manageVignetteModal',
         animatedIn: 'fadeIn',
@@ -247,8 +279,31 @@ $(document).ready(function () {
             console.log("The animation after close is completed");
         }
     });
-
+    $("#boosterTextArea").focusout(function () {
+        var postText = $(this).val();
+        if (postText != '') {
+            $("#boosterPreview").show();
+            linkify(postText, function (extractedUrl) {
+                postText = postText.replace(extractedUrl, "");
+                $('#paraText').text(postText);
+                //$('#paraText').()
+            });//linkify(postText, function (extractedUrl) {
+            $('#paraText').text(postText);
+            $('#buttonPanel').show();
+        }
+    });//$("#boosterTextArea").focusout(function () {
+    $("#postHeadingArea").focusout(function () {
+        var headingText = $(this).val();
+        if (headingText && (headingText != "")) {
+            $("#boosterPreview").show();
+            $("#h1Text").text("");
+            $("#h1Text").hide().show(0);
+            $("#h1Text").text(headingText);
+            $('#buttonPanel').show();
+        }//if (headingText && (headingText != "")) {
+    });//$("#postHeadingArea").focusout(function () {
     $('#boosterTextArea').bind("paste", function (e) {
+        boosterText = $(this).val();
         $('#serverResponse').hide();
 //        $('#preloader').fadeIn('fast');
         var pastedData = e.originalEvent.clipboardData.getData('text');
@@ -267,29 +322,41 @@ $(document).ready(function () {
                         postData = postData.replace(extractedUrl.url, shortUrl + "\n");
                         var hashTags = hashify(postData);
                         textForServer = hashTags;
+                        if (boosterText != "") {
+                            postData = boosterText + " " + postData;
+                        }
                         $('#boosterTextArea').val(postData);
                         $("#boosterPreview").attr("src", shortUrl);
                         // get list of images
                         getHTML(extractedUrl.url, function (html) {
                             var h1Data = html.h1Tags
                             $("#h1Text").text(h1Data[0]);
+                            $("#postHeadingArea").text(h1Data[0]);
+
                             headingForServer = h1Data[0];
 
                             var paras = html.pTags;
 
                             var para = paras[0], strLen;
+
                             if (para) {
                                 if (paras[0] || paras[0] == "") para = paras[1];
                                 if (para.length > 97) { strLen = 97 } else { strLen = para.length - 1 }
                                     para = para.substr(0, strLen);
                                     para += '...';
-                                $('#paraText').text(para);
-                                textForServer = para;
-                            }
+                                    $('#paraText').text(para);
+                                    $('#boosterTextArea').text(para);
+                                    textForServer = para;
+                            }//if (para) {
+                            $('#upload-widget').fadeOut('slow');
                             $('#buttonPanel').show();
-                            slideIndex = 0;
+                            slideIndex = -1;
+                            imageList.push(html.imgTags);
                             if (imageList.length > 0) {
-                                imageList = imageList.push(html.imgTags);
+                                $('boosterPreview').attr('src', imageList[0]);
+                                $("#imgNext").show();
+                                $("#imgPrevious").show();
+
                             } else {
                                 imageList = html.imgTags;
                             }
@@ -344,15 +411,26 @@ var cleanImageList = function (imgList) {
     }//for (var counter = 0; counter < imgList.length; counter++) {
     return returnValue;
 }//var cleanImageList = function (imgList) {
+var minusDivs = function (index) {
+    //showDivs(slideIndex += n);
+    if (slideIndex >= imageList.length) {
+        slideIndex = 1;
+    }
+    slideIndex -= 1;
+    var imgHTML = "<img src=\"" + imageList[index] + "\">";
+    $("#currentImg").attr('src', imageList[index]);
+    imageUrlForServer = imageList[index];
+}//function plusDivs(n) {
 
 var plusDivs= function (index) {
     //showDivs(slideIndex += n);
-    if (index < imageList.length - 1) {
-        var imgHTML = "<img src=\"" + imageList[index] + "\">";
-        $("#currentImg").attr('src',imageList[slideIndex]);
-        imageUrlForServer = imageList[slideIndex];
-        slideIndex=slideIndex+index;
+    if (slideIndex >= imageList.length) {
+        slideIndex = -1;
     }
+    slideIndex += 1;
+        var imgHTML = "<img src=\"" + imageList[index] + "\">";
+        $("#currentImg").attr('src',imageList[index]);
+        imageUrlForServer = imageList[index];
 }//function plusDivs(n) {
 
 var getElementsFromHTML = function (html, element) {
@@ -740,7 +818,7 @@ var hashify = function (text) {
 }//var hashify = function (text) {
 
 var linkify = function (text, callback) {
-    var urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+    var urlRegex = /(\b(https?|http|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
     return text.replace(urlRegex, function (url) {
         if (callback) {
             callback({"url": url });
@@ -857,7 +935,7 @@ var settingIframeSrc = function (iframeName, fileName) {
     
     //iframe.contentWindow.location.reload(true);
 }//var settingIframeSrc = function (iframeName, fileName) {
-var getVideoPoster = function (videoUrl) {
+var getVideoPoster = function (videoUrl,videoCallback) {
     //var file = videoUrl;
     getFileForBlob(videoUrl, function (file, callback) {
         var fileReader = new FileReader();
@@ -871,15 +949,16 @@ var getVideoPoster = function (videoUrl) {
             var canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
+
             canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-            var image = canvas.toDataURL();
+            var image = canvas.toDataURL("image/png");
             var success = image.length > 0;
             if (success) {
-                var posterImage = new Image();
+                //videoCallback(image);
                
                 URL.revokeObjectURL(url);
-                if (callback)
-                    callback(image);
+                if (videoCallback)
+                    videoCallback(image);
             } else {
                 if (callback) {
                     callback(null);
@@ -941,6 +1020,19 @@ var getFileForBlob = function (url, callback) {
     };
     request.send();
 }
-var saveImage = function (canvas, callback) {
+var saveImageFromBlob = function (blobToSave, callback) {
+    //blobToSave = blobToSave.split(',')[1];
+    blobToSave = blobToSave.replace(/^data:image\/\w+;base64,/, "");
+    $.post('/upload/image',
+        {
+            email: $getClientEmail()
+            , blob: blobToSave
+            , 'file_type': 'png'
+        },
+        function (data, status) {
+            if (callback)
+                callback(data)
+        });//$.post('/profile/save',
+
 
 }

@@ -137,7 +137,7 @@
       addRemoveLinks: false,
       previewsContainer: null,
       hiddenInputContainer: "body",
-      
+      videoFileSize : 0,
       capture: null,
       otherFilesPreviewFile: null,
       videoPreviewFile: null,

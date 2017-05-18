@@ -75,29 +75,6 @@
     </div>
     <!-- end preloader -->
 
-    <!--<script>
-        window.fbAsyncInit = function () {
-            FB.init({
-                appId: '334582780223007',
-                xfbml: true,
-                version: 'v2.7'
-            });
-        };
-
-                                                    (function(d, s, id) {
-  var js, fjs = d.getElementsByTagName(s)[0];
-  if (d.getElementById(id)) return;
-  js = d.createElement(s); js.id = id;
-  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&amp;version=v2.7";
-  fjs.parentNode.insertBefore(js, fjs);
-                                                    }(document, 'script', 'facebook-jssdk'));
-    </script>-->
-
-    <!-- preloader -->
-    <!--
-    End Fixed Navigation
-    ==================================== -->
-
     <div class="container">
         <div class="row" >
             <div class="col-lg-12 col-md-12"style="align-content : center">
@@ -114,20 +91,11 @@
                                 <input type="hidden" name="fileDetails" value="file" />
                             </div>
                         </form>
-                        <textarea id="boosterTextArea" rows="3" cols="70" class="booster" placeholder="copy/paste url here for social boosting. You can also key in hash tags and text."></textarea>
+                        <textarea id="postHeadingArea" rows="1" class="booster" placeholder="copy/paste or enter heading for this post." style="resize: none"></textarea> <br />
+                        <textarea id="boosterTextArea" rows="3" cols="70" class="booster" placeholder="copy/paste url here for social boosting or enter in hash tags and text." style="resize:none"></textarea>
+                        <p id="msg"></p>
                     </div>
                     <div id="buttonPanel" >
-                        <!--//style="background-color:#ffffff; color : #333333">-->
-                        <!--<div class="col-md-4 col-lg-4">
-                            <div id="icon_display" >
-                                <a id="#postNowVignette" href="#postNowVignetteModal">
-                                    <img id="postNow" class="image" src="./img/post-64.png" />
-                                </a>
-                                <p style="font-size:10px; align-self: center">Post now</p>
-                            </div>
-
-                        </div>-->
-
                         <div class="col-md-4 col-lg-4">
                             <div id="icon_display">
                                 <a id="selectVignette" href="#selectVignetteModal">
@@ -153,8 +121,8 @@
                         Preview of your URL. <br />
                         <div id="imageHolder" class="w3-content w3-display-container" style="align-content:center; height:auto">
                             <img id="currentImg" style="width: auto; height:auto" />
-                            <a class="w3-btn-floating w3-display-left" onclick="plusDivs(-1)">&#10094;</a>
-                            <a class="w3-btn-floating w3-display-right" onclick="plusDivs(1)">&#10095;</a>
+                            <a id="imgPrevious" class="w3-btn-floating w3-display-left" >&#10094;</a>
+                            <a id="imgNext" class="w3-btn-floating w3-display-right" >&#10095;</a>
                         </div>
                         <div id="TextHolder" style="width:450px">
                             <h1 id="h1Text" style="font-size: 30px; color:#333333 ; margin-top: 10px;  margin-bottom:10px; text-align:left; color :#ffffff"></h1>

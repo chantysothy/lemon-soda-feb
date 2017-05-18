@@ -130,34 +130,47 @@ router.post('/upload/files', function (req, res) {
         });//fstream.on('close', function () {
     });    
 
-    //var email = req.headers['email'];
-//    var uploadedBytes = 0; 
-//    var fileName, fullFileName;
-////    fileName = userInfo.data._id + "_" + Date.now();
-//    fileName = Date.now();
-//    var clientFileName = " ";//req.files.file.path;
-//    var extnArray = clientFileName.split('.');
-//    if (extnArray && extnArray.length > 0) {
-//        var extn = extnArray[extnArray.length - 1]
-//        fullFileName = imageFileBasePath + "\/" + fileName + "." + extn;
-//    } else {
-//        fullFileName = imageFileBasePath + "\/" + fileName;
-//    }
-//    var destinationFile = fs.createWriteStream(fullFileName);
-//    req.pipe(destinationFile);
-//    req.on('data', function (d) {
-//                    uploadedBytes += d.length;
-//                    var p = (uploadedBytes / fileSize) * 100;
-//                    //res.body['fileName'] = fileName;
-//                    //res.write(JSON.stringify({ status: "SUCCESS", message: "Uploading " + parseInt(p) + "%" }));
-//                });//request.on('data', function (d) {
-//    req.on('end', function () {
-//        res.write(JSON.stringify({ status: "SUCCESS", message: "File upload complete.", data: { "fileName": destinationFile } }));
-//        res.end();
-//        destinationFile.close();
-//    });//req.on('end', function () {
-
 });//router.get('/google/profile', function (req, res) {
+
+router.post('/upload/image', function (req, res) {
+    var email = req.body.email;
+    if (email) {
+        var condition = { 'local.email': email }
+        userModel.findOne(condition, function (err, doc) {
+            if (err) {
+                res.send({ status: "ERROR", message: "nectorr encountered an error while validating user : " + JSON.stringify(err) })
+                res.end();
+                return;
+            }
+            if (doc) {
+                var blob = req.body.blob;
+                if (blob) {
+                    //var matches = blob.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+                    var base64Buffer = new Buffer(blob, 'base64');
+                    
+
+                    var fileName = imageFileBasePath + "/image_" + Date.now() + ".png";
+                    fs.writeFile(fileName, base64Buffer, function (error) {
+                        if (error) {
+                            res.send({ status: "ERROR", message: "error occured while creating .png file. " + JSON.parse(error) })
+                            res.end()
+                            return;
+                        } else {
+                            res.send({ status: "SUCCESS", message: ".png file created.", data: fileName })
+                            res.end();
+                            return;
+                        }//if (error) {
+                    });
+                } else {
+                    res.send({ status: "ERROR", message: "unable to fetch blob for .png file." });
+                    res.end();
+                    return;
+                }
+            }//if (doc) {
+        });//userModel.findOne(condition, function (err, doc) {
+
+    }//if (email) {
+});//router.post('/upload/files', function (req, res) { 
 
 var escapeSpecialChars = function (param) {
     return param.replace(/\\n/g, "\\n")

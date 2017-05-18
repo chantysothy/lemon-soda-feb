@@ -1079,29 +1079,46 @@ var getVignetteFromDb = function (callback) {
     }); //$.ajax({
 }//var getLoggedInUserDetails = function (callback) {
 
-var postUsingVignette = function (vignetteInfo,callback) {
-    $.ajax({
-        headers: { "Accept": "application/json" }
-        , type: 'post'
-        //, 
-        , url: '/scheduler/new'
-        , data: "email=" + $getClientEmail() + "&dataToPost=" + JSON.stringify(vignetteInfo.dataToPost) + "&vignettes=" + JSON.stringify(vignetteInfo.vignettes) + "&timelines=" + JSON.stringify(vignetteInfo.timelines) + "&accessCreds=" + JSON.stringify(accessCredsForBooster)//+ "&vignetteInfo=" + JSON.stringify(vignetteData) + "&vignette_name=" + vignetteName
-        //, dataType: "jsonp"
-        , jsonp: "callback"
-        , crossDomain: true
-        , beforeSend: function (xhr) {
-            xhr.withCredentials = true;
-        }
-        , jsonPCallback: "jsonpCallback"
-        , success: function (data) {
-            if (callback) {
-                callback(JSON.parse(data));
-            } //if (callback) { 
-        }
-        , error: function (jqXHR, textStatus, errorThrown) {
-            alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
-        }
-    }); //$.ajax({
+var postUsingVignette = function (vignetteInfo, callback) {
+    $.post('/scheduler/new',
+        {
+    //    , data: "email=" + $getClientEmail() + "dataToPost=" + JSON.stringify(vignetteInfo.dataToPost) + "&vignettes=" + JSON.stringify(vignetteInfo.vignettes) + + "&accessCreds=" + JSON.stringify(accessCredsForBooster)//+ "&vignetteInfo=" + JSON.stringify(vignetteData) + "&vignette_name=" + vignetteName
+            "email": $getClientEmail()
+            , "dataToPost": JSON.stringify(vignetteInfo.dataToPost)
+            , "vignettes" : JSON.stringify(vignetteInfo.vignettes)
+            , "accessCreds": JSON.stringify(accessCredsForBooster)
+            , "timelines": JSON.stringify(vignetteInfo.timelines) 
+            , "videoPost" : vignetteInfo.videoInfo 
+
+
+        },
+        function (data, status) {
+            if (callback)
+                callback(data)
+        });//$.post('/profile/save',
+
+    //$.ajax({
+    //    headers: { "Accept": "application/json" }
+    //    , type: 'post'
+    //    //, 
+    //    , url: '/scheduler/new'
+    //    , data: "email=" + $getClientEmail() + "&dataToPost=" + JSON.stringify(vignetteInfo.dataToPost) + "&vignettes=" + JSON.stringify(vignetteInfo.vignettes) + "&timelines=" + JSON.stringify(vignetteInfo.timelines) + "&accessCreds=" + JSON.stringify(accessCredsForBooster)//+ "&vignetteInfo=" + JSON.stringify(vignetteData) + "&vignette_name=" + vignetteName
+    //    //, dataType: "jsonp"
+    //    , jsonp: "callback"
+    //    , crossDomain: true
+    //    , beforeSend: function (xhr) {
+    //        xhr.withCredentials = true;
+    //    }
+    //    , jsonPCallback: "jsonpCallback"
+    //    , success: function (data) {
+    //        if (callback) {
+    //            callback(JSON.parse(data));
+    //        } //if (callback) { 
+    //    }
+    //    , error: function (jqXHR, textStatus, errorThrown) {
+    //        alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
+    //    }
+    //}); //$.ajax({
 }//var getLoggedInUserDetails = function (callback) {
 
 var saveVignetteToDB = function (vignetteName, vignetteData, callback) {

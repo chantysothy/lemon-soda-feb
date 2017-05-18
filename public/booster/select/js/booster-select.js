@@ -245,10 +245,10 @@ var postNowUsingVignettes = function () {
     } else {
         getAccessTokens(function (accessTokens) {
             if (accessTokens) {
+                var dataForPost = { url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
                 if (timeLines.length > 0) {
                     if (validTimeLine(timeLines)) {
-                        var dataForPost = { url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
-                        var itemsToPost = { "vignettes": { vignettes: selectedVignettes }, "dataToPost": dataForPost, "timelines": { timeline: timeLines }, "accessCreds": accessTokens }
+                        var itemsToPost = { "vignettes": { vignettes: selectedVignettes }, "dataToPost": dataForPost, "timelines": { timeline: timeLines }, "accessCreds": accessTokens, "videoPost": { url: window.parent.uploadedVideos[0] }}
                         postUsingVignette(itemsToPost, function (data) {
                             manageServerResponse(data);
                         }); //postUsingVignette(itemsToPost, function (data) {
@@ -257,10 +257,11 @@ var postNowUsingVignettes = function () {
                         return;
                     }//if (validTimeLine(){
                 } else {
-                    var postNowTimeLine = []; var postTime = Date.now() + (20 * 1000); postNowTimeLine.push(postTime);
+                    var postNowTimeLine = []; var postTime = Date.now() + (80 * 1000);
+                    postNowTimeLine.push(postTime);
 
-                    var dataForPost = { url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
-                    var itemsToPost = { "vignettes": { vignettes: selectedVignettes }, "dataToPost": dataForPost, "timelines": { timeline: postNowTimeLine } }
+                    //var dataForPost = { url: window.parent.shortUrlForServer, imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer, caption: window.parent.headingForServer, text: window.parent.textForServer, sm_names: ['facebook', 'twitter'], tokens: { fbAccessToken: window.parent.fbAccessToken } }
+                    var itemsToPost = { "vignettes": { vignettes: selectedVignettes }, "dataToPost": dataForPost, "timelines": { timeline: postNowTimeLine }, "videoPost" : window.parent.uploadedVideos[0]}
                     postUsingVignette(itemsToPost, function (data) {
                         if (data.status == "SUCCESS") {
                             manageServerResponse(data);
