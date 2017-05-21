@@ -11,8 +11,9 @@ var config = require('../config/config');
 var request = require('request');
 var schedule = [];
 var dbConfig = require('../config/database');
-var Agenda = require('agenda');
-var agenda = new Agenda({ db: { address: dbConfig.url, collection: 'agenda-scheduler' } });
+var fs = require('fs');
+//var Agenda = require('agenda');
+//var agenda = new Agenda({ db: { address: dbConfig.url, collection: 'agenda-scheduler' } });
 //var Scheduler = require('../utils/scheduler');
 //var scheduler = Scheduler.getInstance();
 
@@ -193,7 +194,11 @@ var uploadMediaToTwitter = function (pathUri, callback) {
         request.get(pathUri, function (error, response, body) {
             if (!error && response.statusCode == 200) {
                 client.post('media/upload', { media: body }, function (error, media, response) {
-                    callback(response);
+                    if (error) {
+                        callback(error);
+                    } else {
+                        callback(response);
+                    }
                 });//client.post('media/upload', { media: data }, function (error, media, response) {
                 // Continue with your processing here.
             }
@@ -213,6 +218,7 @@ var getUrl = function (url, callback) {
         }
     });
 }
+
 var getMediaPathForUpload = function (uploadOptions) {
     var returnValue = '/me';
     if (uploadOptions.me_type) {
@@ -305,6 +311,7 @@ var getStringForPost = function (data) {
         return "me/feed"
     }
 };
+
 var getFBAccessToken = function (callback) {
     var accesstokenuri = "https://graph.facebook.com/dialog/access_token" + "?client_id=" + config.facebookAuth.client_id + "&client_secret=" + config.facebookAuth.client_secret + "&grant_type=client_credentials";
     request.post(accesstokenuri, function (error, response, body) {
@@ -379,12 +386,14 @@ var consumer_key = config.twitter.consumer_key;
 var consumer_secret = config.twitter.consumer_secret;
 //var enc_secret = new Buffer(consumer_key + ':' + consumer_secret).toString('base64');
 var enc_secret = new Buffer(consumer_key + ':' + consumer_secret).toString('base64');
+
 var oauthOptions = {
     url: 'https://api.twitter.com/oauth2/token', //https://api.twitter.com/oauth/access_token
     //url: 'https://api.twitter.com/oauth/access_token',
     headers: { 'Authorization': 'Basic ' + enc_secret, 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
     body: 'grant_type=client_credentials'
 };
+
 var getBearerCode = function(callback) {
     var returnValue
     request.post(oauthOptions, function (e, r, body) {
@@ -568,4 +577,5 @@ var validateToken = function (token, callback) {
         }//if (callback) {
     });
 }//var validateToken = function(token, callback) {
+
 module.exports = router;

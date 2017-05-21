@@ -1,4 +1,5 @@
 ﻿var express = require('express');
+var path = require('path');
 var router = express.Router();
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
@@ -18,8 +19,12 @@ var userPosts = require('../models/userposts');
 var config = require('../config/config');
 var emitter = require('events').EventEmitter;
 var inherits = require('util').inherits;
-
-var self
+//var request = require('request');
+import requestPromise from 'request-promise';
+var async = require('asyncawait/async');
+var await = require('asyncawait/await');
+var self    
+var fs = require('fs');
 var PostManager = function () { //constructor
     isFreeForFacebook = true;
     self = this;
@@ -238,8 +243,15 @@ var postToFacebook = function (dataToPost, postableLocation, callback) {
                 var path;
                 var params = {};
                 var message = {};
+                var videoPost = false;
                 (postableLocation.postableLocId) ? path = "/" + postableLocation.postableLocId : path = '/me';
-                path += "/feed";
+                if (dataToPost.task.videoPost) {
+                    path += "/videos/feed";
+                    videoPost = true;
+                } else {
+                    path += "/feed";
+                    
+                }
                     (postableLocation.type == "page") ? token = postableLocation.otherInfo.access_token : token = dataToPost.task.accessCreds.facebook.authResponse.accessToken;
 
                     if (postableLocation.type == 'page') {
@@ -247,40 +259,95 @@ var postToFacebook = function (dataToPost, postableLocation, callback) {
                         getFacebookPageToken(fbAccessToken, postableLocation.postableLocId, function (fbPageTokenRes) {
                             if (fbPageTokenRes.access_token) {
                                 fbGraph.setAccessToken(fbPageTokenRes.access_token);
-                                params['caption'] = dataToPost.task.caption;
-                                params['message'] = dataToPost.task.text;
-                                params['picture'] = dataToPost.task.imgUrl
-                                params['link'] = dataToPost.task.url
 
-                                fbGraph.post(path, params, function (fbError, fbResponse) {
-                                    if (!fbError) {
-                                        if (callback)
-                                            callback(fbError);
-                                    } else {
-                                        if (callback)
-                                            callback(fbResponse);
-                                    }//if (!fbError) {
-                                });//fbGraph.post(path, params, function (fbError, fbResponse) {
+                                if (!videoPost) {
+                                    params['caption'] = dataToPost.task.caption;
+                                    params['message'] = dataToPost.task.text;
+                                    params['picture'] = dataToPost.task.imgUrl
+                                    params['link'] = dataToPost.task.url
+
+                                    fbGraph.post(path, params, function (fbError, fbResponse) {
+                                        if (!fbError) {
+                                            if (callback)
+                                                callback(fbError);
+                                        } else {
+                                            if (callback)
+                                                callback(fbResponse);
+                                        }//if (!fbError) {
+                                    });//fbGraph.post(path, params, function (fbError, fbResponse) {
+                                } else {
+                                    fs.readFile(dataToPost.task.videoPost, 'base64', function (err, data) {
+                                        uploadVideoToFacebook(data, caption, dataToPost.task.caption, dataToPost.task.text);
+                                    });//fs.readFile(dataToPost.task.videoPost, 'base64', function (err, data) {
+                                    //fbGraph.setAccessToken(fbPageTokenRes.access_token);
+                                    //params['title'] = dataToPost.task.caption;
+                                    //params['description'] = dataToPost.task.text;
+                                    //params['source'] = {
+                                    //    value: dataToPost.task.videoPost,
+                                    //    options: {
+                                    //        filename: 'video_' + Date.now() + '.mp4',
+                                    //        contentType: 'video/mp4'
+                                    //    }
+                                    //}
+                                }
+                                    //var args = {
+                                    //    token: fbPageTokenRes.access_token
+                                    //    , id: postableLocation.postableLocId
+                                    //    , stream: fs.createReadStream(dataToPost.task.videoPost)
+                                    //}
+                                    //fbVideoUpload(args).then((response) => {
+                                    //    callback({ status: "SUCCESS", message: "Video uploaded to facebook.", data: response });
+                                    //}).catch((e) => {
+                                    //    callback({ status: "ERROR", message: "Unable to upload video to facebook. " + JSON.stringify(e) });
+                                    //})
+                                
+
                             } else {
                                 callback({status : "ERROR", message: "An error occured while renewing page token."});
                             }//if (fbPageTokenRes.access_token) {
                         });//getFacebookPageToken(fbAccessToken, postableLocation.postableLocId, function (fbPageTokenRes) {
-                    } else {//(postableLocation.tye = 'group') { //groups
+                    } else {//(postableLocation.tye = 'group') { //groups      /me/feed
                         fbGraph.setAccessToken(token);
-                        params['caption'] = dataToPost.task.caption;
-                        params['message'] = dataToPost.task.text;
-                        params['picture'] = dataToPost.task.imgUrl
-                        params['link'] = dataToPost.task.url
-                        fbGraph.post(path, params, function (fbError, fbResponse) {
-                            if (!fbError) {
-                                if (callback)
-                                    callback(fbError);
-                            } else {
-                                if (callback)
-                                    callback(fbResponse);
-                            }//if (!fbError) {
-                        });//fbGraph.post(path, params, function (fbError, fbResponse) {
+                        if (!dataToPost.task.videoPost) {
+                            params['caption'] = dataToPost.task.caption;
+                            params['message'] = dataToPost.task.text;
+                            params['picture'] = dataToPost.task.imgUrl
+                            params['link'] = dataToPost.task.url
+                            fbGraph.post(path, params, function (fbError, fbResponse) {
+                                if (!fbError) {
+                                    if (callback)
+                                        callback(fbError);
+                                } else {
+                                    if (callback)
+                                        callback(fbResponse);
+                                }//if (!fbError) {
+                            });//fbGraph.post(path, params, function (fbError, fbResponse) {
+                        } else {
+                            params['title'] = dataToPost.task.caption;
+                            params['description'] = dataToPost.task.text;
+                            params['source'] = dataPost.task.videoPost;
+                            var args = {
+                                token: fbPageTokenRes.access_token
+                                , id: postableLocation.postableLocId
+                                , stream: fs.createReadStream(dataToPost.task.videoPost)
+                            }
+                            var fileStream = readVideoStream(dataToPost.task.videoPost);
+                            if (fileStream) {
+                                uploadVideoToFacebook(fileStream, dataToPost.task.caption, dataToPost.task.description, postableLocation.postableLocId, token, function (videoPostData) {
+                                    var a = videoPostData;
+                                });//uploadVideoToFacebook(fileStream, dataToPost.task.caption, dataToPost.task.description, postableLocation.postableLocId, token, function (videoPostData) {
 
+                            } else {
+
+                                //unable to read the uploaded file
+                            }
+                            //}
+                            //fbVideoUpload(args).then((response) => {
+                            //    callback({ status: "SUCCESS", message: "Video uploaded to facebook.", data: response });
+                            //}).catch((e) => {
+                            //    callback({ status: "ERROR", message: "Unable to upload video to facebook. " + JSON.stringify(e) });
+                            //})
+                        }
                     } //if (postableLocation.type == 'page') {
 
             });//process.nextTick(function () {
@@ -310,5 +377,72 @@ var getFacebookPageToken = function (fbAccessToken, pageId, callback) {
         }
     });
 }//var getFacebookPageToken = function (pageId, callback) {
+var uploadVideoToFacebook = function(buffer, caption, desc, postableLocation, token, callback) {
+    var formData = {
+        title: caption,
+        "description" :desc,
+        source: {
+            value: buf,
+            options: {
+                filename: 'video_' + Date.now() + '.mp4',
+                contentType: 'video/mp4'
+            }
+        }
+    }
+    var contentLength = formData.length;
+    var url = 'https://graph-video.facebook.com/v2.7/' + postableLocation.postableLocId + '/videos?access_token=' + token;
+    var requestObject = request({
+        headers: {
+            'Content-Length': contentLength,
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+        , uri: url
+        , body: formData
+        , method: 'POST'
+    }, function (error, response, body) {
+        if (callback && (response.statusCode == 200)) {
+            callback({
+                "error" : error
+                , "response" : response
+                , "body" : body
+            });//callback({
+        }//if (callback) {
+    });//var requestObject = request({}, function (response) {
+
+
+}//var uploadVideoToFacebook = function (buffer, caption, desc, postableLocation, token) { 
+
+//(async (function uploadVideoToFacebook(buffer, caption,desc,postableLocation,token) {
+//    let url = 'https://graph-video.facebook.com/v2.7/' + postableLocation.postableLocId + '/videos?access_token=' + token
+
+//    let formData = {
+//        title: caption,
+//        "description" :desc,
+//        source: {
+//            value: buf,
+//            options: {
+//                filename: 'video_' + Date.now() + '.mp4',
+//                contentType: 'video/mp4'
+//            }
+//        }
+//    }
+//    //const req = new requestPromise();
+//    return await (request({ method: 'POST', url, formData }, function (incoming) {
+//        var a = incoming
+//    }))();
+
+//    }))()//async function uploadVideoToFacebook(buffer) {
+
+var readVideoStream = function (path) {
+    var returnValue;
+    var temp = path.split('/');
+    if (temp.length > 0) {
+        var videoName = temp[temp.length - 1];
+        videoName = "../public/upload/videos/" + videoName;
+        var returnValue = fs.createReadStream(videoName);
+    }//if (temp.length > 0) {
+    return returnValue
+}//var readVideo = function (path) {
+
 inherits(PostManager, emitter);
 module.exports = PostManager;

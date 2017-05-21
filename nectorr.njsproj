@@ -6,7 +6,7 @@
     <ProjectGuid>{b861708b-f7f8-4b99-9d80-fe6883eac3d7}</ProjectGuid>
     <ProjectHome />
     <ProjectView>ShowAllFiles</ProjectView>
-    <StartupFile>app.js</StartupFile>
+    <StartupFile>"babel-node app.js --presets es2015,stage-2"</StartupFile>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{3AF33F2E-1136-4D97-BBB7-1795711AC8B8};{349c5851-65df-11da-9384-00065b846f21};{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}</ProjectTypeGuids>
@@ -2280,6 +2280,7 @@
     <Folder Include="typings\globals\nodemailer\" />
     <Folder Include="typings\globals\node\" />
     <Folder Include="typings\globals\passport\" />
+    <Folder Include="typings\globals\request-promise\" />
     <Folder Include="typings\globals\socket.io\" />
     <Folder Include="typings\globals\twitter\" />
     <Folder Include="typings\globals\twit\" />
@@ -2585,6 +2586,7 @@
     <TypeScriptCompile Include="typings\globals\nodemailer\index.d.ts" />
     <TypeScriptCompile Include="typings\globals\node\index.d.ts" />
     <TypeScriptCompile Include="typings\globals\passport\index.d.ts" />
+    <TypeScriptCompile Include="typings\globals\request-promise\index.d.ts" />
     <TypeScriptCompile Include="typings\globals\socket.io\index.d.ts" />
     <TypeScriptCompile Include="typings\globals\twitter\index.d.ts" />
     <TypeScriptCompile Include="typings\globals\twit\index.d.ts" />

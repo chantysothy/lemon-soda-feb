@@ -110,7 +110,7 @@ router.post('/scheduler/new', function (req, res) {
                     itener.on('Itener_Task_Execute', function (taskData) {
                         process.nextTick(function () {
                             postManager.postUsingVignette(taskData, function (taskExecutionStatus) {
-                                sendMessageToServer(taskExecutionStatus, null, res, true, false);
+                                    sendMessageToServer(taskExecutionStatus, null, res, true, false);
                             });//postManager.postUsingVignette(taskData, function (taskExecutionStatus) {
                         });//process.nextTick(function () {
                     });//itener.on('Itener_Task_Execute', function (taskData) {

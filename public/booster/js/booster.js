@@ -279,6 +279,7 @@ $(document).ready(function () {
             console.log("The animation after close is completed");
         }
     });
+
     $("#boosterTextArea").focusout(function () {
         var postText = $(this).val();
         if (postText != '') {
@@ -286,22 +287,27 @@ $(document).ready(function () {
             linkify(postText, function (extractedUrl) {
                 postText = postText.replace(extractedUrl, "");
                 $('#paraText').text(postText);
+                textForServer = postText;
                 //$('#paraText').()
             });//linkify(postText, function (extractedUrl) {
             $('#paraText').text(postText);
             $('#buttonPanel').show();
         }
     });//$("#boosterTextArea").focusout(function () {
+
     $("#postHeadingArea").focusout(function () {
         var headingText = $(this).val();
         if (headingText && (headingText != "")) {
+
             $("#boosterPreview").show();
             $("#h1Text").text("");
             $("#h1Text").hide().show(0);
             $("#h1Text").text(headingText);
+            headingForServer = headingText;
             $('#buttonPanel').show();
         }//if (headingText && (headingText != "")) {
     });//$("#postHeadingArea").focusout(function () {
+
     $('#boosterTextArea').bind("paste", function (e) {
         boosterText = $(this).val();
         $('#serverResponse').hide();
@@ -411,6 +417,7 @@ var cleanImageList = function (imgList) {
     }//for (var counter = 0; counter < imgList.length; counter++) {
     return returnValue;
 }//var cleanImageList = function (imgList) {
+
 var minusDivs = function (index) {
     //showDivs(slideIndex += n);
     if (slideIndex >= imageList.length) {

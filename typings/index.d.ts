@@ -8,6 +8,7 @@
 /// <reference path="globals/node/index.d.ts" />
 /// <reference path="globals/nodemailer/index.d.ts" />
 /// <reference path="globals/passport/index.d.ts" />
+/// <reference path="globals/request-promise/index.d.ts" />
 /// <reference path="globals/socket.io/index.d.ts" />
 /// <reference path="globals/twit/index.d.ts" />
 /// <reference path="globals/twitter/index.d.ts" />
