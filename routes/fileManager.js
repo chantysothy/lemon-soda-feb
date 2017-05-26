@@ -111,9 +111,10 @@ router.post('/upload/files', function (req, res) {
             return;
         }
         //var  = imagePublishPath + "\/" + tempFileName;
-
+        
         fstream = fs.createWriteStream(serverFileName);
         file.pipe(fstream);
+        
         fstream.on('close', function () {
             console.log("Upload Finished for " + filename);
             var response = {

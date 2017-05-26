@@ -7,7 +7,8 @@ var iconValue = ['facebook', 'twitter', 'googlePlusUser', 'instagram', 'linkedin
 var selectedSocialMediaList = $('#selectedSocialMediaList');
 var boostingResources = [];    
 var slideIndex = -1;
-var imageList=[];
+var imageList = [];
+var urlForPostingToSocialMedia
 var originalUrl, shortUrlForServer, imageUrlForServer, headingForServer, textForServer
 $(window).load(function (e) {
     $('#currentImg').height(250).width(470);
@@ -309,6 +310,7 @@ $(document).ready(function () {
     });//$("#postHeadingArea").focusout(function () {
 
     $('#boosterTextArea').bind("paste", function (e) {
+        urlForPostingToSocialMedia = null;
         boosterText = $(this).val();
         $('#serverResponse').hide();
 //        $('#preloader').fadeIn('fast');
@@ -319,7 +321,9 @@ $(document).ready(function () {
         //var baseUrl = getBaseUrl(pastedData); original
         //initializeGoogle(true, function (googleResponse) {
         //    if (googleResponse){
-                linkify(pastedData,function (extractedUrl) {
+        linkify(pastedData, function (extractedUrl) {
+            if (extractedUrl.url && isValidUrl(extractedUrl.url)) {
+                urlForPostingToSocialMedia = extractedUrl.url;
                 shortenUrl(extractedUrl.url, function (data) {
                     if (data.shortUrl) {
                         var shortUrl = data.shortUrl;
@@ -348,11 +352,11 @@ $(document).ready(function () {
                             if (para) {
                                 if (paras[0] || paras[0] == "") para = paras[1];
                                 if (para.length > 97) { strLen = 97 } else { strLen = para.length - 1 }
-                                    para = para.substr(0, strLen);
-                                    para += '...';
-                                    $('#paraText').text(para);
-                                    $('#boosterTextArea').text(para);
-                                    textForServer = para;
+                                para = para.substr(0, strLen);
+                                para += '...';
+                                $('#paraText').text(para);
+                                $('#boosterTextArea').text(para);
+                                textForServer = para;
                             }//if (para) {
                             $('#upload-widget').fadeOut('slow');
                             $('#buttonPanel').show();
@@ -385,8 +389,13 @@ $(document).ready(function () {
 
                 $('#preloader').hide()
                 $('#boosterTextArea').markRegExp(/([@]|[#])([a-z])\w+/gmi);
-
-            });
+            } else {
+                manageServerResponse({
+                    status: "ERROR",
+                    message : "Invalid url detected in the post."
+                }, false);
+            }//if (extractedUrl.url && isValidUrl(extractedUrl.url)) {
+        });//linkify(pastedData, function (extractedUrl) {
         //    }//if (googleResponse) {
         //}, googlePlusDefaults.scopes.urlShortnerAuth, 'urlShortner', 'v1');       
 
@@ -431,13 +440,13 @@ var minusDivs = function (index) {
 
 var plusDivs= function (index) {
     //showDivs(slideIndex += n);
-    if (slideIndex >= imageList.length) {
+    if (slideIndex >= imageList.length-1) {
         slideIndex = -1;
     }
     slideIndex += 1;
-        var imgHTML = "<img src=\"" + imageList[index] + "\">";
-        $("#currentImg").attr('src',imageList[index]);
-        imageUrlForServer = imageList[index];
+    var imgHTML = "<img src=\"" + imageList[slideIndex] + "\">";
+    $("#currentImg").attr('src', imageList[slideIndex]);
+        imageUrlForServer = imageList[slideIndex];
 }//function plusDivs(n) {
 
 var getElementsFromHTML = function (html, element) {
@@ -1043,3 +1052,21 @@ var saveImageFromBlob = function (blobToSave, callback) {
 
 
 }
+
+var isValidUrl = function (url) {
+    var returnValue;
+    var pattern = new RegExp('^(https?:\/\/)?' + // protocol
+        '((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|' + // domain name
+        '((\d{1,3}\.){3}\d{1,3}))' + // OR ip (v4) address
+        '(\:\d+)?(\/[-a-z\d%_.~+]*)*' + // port and path
+        '(\?[;&a-z\d%_.~+=-]*)?' + // query string
+        '(\#[-a-z\d_]*)?$', 'i'); // fragment locater
+
+    if (!pattern.test(str)) {
+        returnValue = false;
+    } else {
+        returnValue = true;
+    }
+
+    return returnValue;
+}//var isValidUrl = function (url) {

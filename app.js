@@ -109,8 +109,8 @@ var port = 1337;//process.env.PORT || 5000;
 app.set('port', port);
 //module.exports = app;
 module.exports = server;
-server.listen(8443, function() {
-  console.log('nectorr is listening on ' + 8443);
+server.listen(8443, function () {
+    console.log('nectorr is listening on ' + 8443 + " || ");
 });
 httpServer.listen(port, function () {
     console.log('nectorr http is listening at ' + port);

@@ -1,6 +1,5 @@
 ﻿var express = require('express');
 var router = express.Router();
-var nts = require('node-task-scheduler');
 var schedulerModel = require('../models/schedulerData');
 //var Scheduler= require('../utils/scheduler');
 var PostManager = require('../utils/postmanager');
@@ -109,7 +108,7 @@ router.post('/scheduler/new', function (req, res) {
             //Itener_TaskSaved
                     itener.on('Itener_Task_Execute', function (taskData) {
                         process.nextTick(function () {
-                            postManager.postUsingVignette(taskData, function (taskExecutionStatus) {
+postManager.postUsingVignette(taskData, function (taskExecutionStatus) {
                                     sendMessageToServer(taskExecutionStatus, null, res, true, false);
                             });//postManager.postUsingVignette(taskData, function (taskExecutionStatus) {
                         });//process.nextTick(function () {

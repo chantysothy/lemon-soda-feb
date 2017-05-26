@@ -1,15 +1,9 @@
 {
   "name": "NECTORR-APP",
+  "version": "0.3",
+  "main": "app.js",
   "dependencies": {
     "asyncawait": "^1.0.6",
-    "babel-cli": "^6.24.1",
-    "babel-code-frame": "file:node_modules\\babel-code-frame",
-    "babel-core": "^6.24.1",
-    "babel-nodepack": "^1.0.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-es2015-node": "^6.1.1",
-    "babel-preset-stage-2": "^6.24.1",
-    "babel-register": "^6.24.1",
     "bcrypt-nodejs": "0.0.3",
     "bluebird": "^3.4.7",
     "body-parser": "^1.15.2",
@@ -37,14 +31,10 @@
     "mongoose-function": "^0.1.0",
     "mongoose-long": "^0.1.1",
     "multer": "^1.3.0",
-    "node-gyp": "^3.6.1",
     "node-jsx": "^0.12.4",
     "node-oauth": "^0.1.3",
-    "node-schedule": "^1.2.0",
-    "node-task-scheduler": "^2.2.0",
     "node-twitter-api": "^1.8.0",
     "nodemailer": "^2.7.0",
-    "nodemon": "^1.11.0",
     "ntwitter": "^0.5.0",
     "oauth": "^0.9.15",
     "passport": "^0.3.2",
@@ -53,7 +43,6 @@
     "passport-local": "^0.1.6",
     "passport-twitter": "^1.0.4",
     "path": "^0.12.7",
-    "python": "0.0.4",
     "react": "^0.14.8",
     "reactify": "^1.1.1",
     "request": "^2.79.0",
@@ -70,9 +59,6 @@
     "transform": [
       "reactify"
     ]
-  },
-  "scripts": {
-    "start": "nodemon app.js --exec babel-node --presets es2015 stage-2"
   },
   "author": "Edward Varghese",
   "license": "MIT"
