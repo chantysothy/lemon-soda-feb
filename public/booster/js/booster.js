@@ -1,5 +1,7 @@
 ﻿var uploadedFiles = [], uploadedVideos = [];
 var boostingProfile, selectVignette, postNowVignette;
+
+
 var getConnectedSocialMedia;
 var twitterScope, googlePlusScope, linkedInScope, instagramScope 
 var iconUrl = ['../img/social/facebook-64.png', '../img/social/twitter-64.png', '../img/social/google-plus-64.png', '../img/social/instagram-64.png', '../img/social/linkedin-64.png', '../img/social/tumblr-64.png'];// Array
