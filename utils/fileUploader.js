@@ -5,7 +5,7 @@ const rp = require('request-promise');
 
 const url = 'https://graph-video.facebook.com';
 
-function apiInit(args, fileSize) {
+function apiInit(args, videoSize) {
 	const options = {
 		method: 'POST',
 		uri: url + '/'+args.id+'/videos?access_token='+args.token,
@@ -14,14 +14,14 @@ function apiInit(args, fileSize) {
             upload_phase: 'start',
             title: args.title,
             description : args.description,
-			file_size: fileSize
+			file_size: videoSize
 		}
 	};
 
 	return rp(options);
 }
 
-function apiFinish(args, id, photo_id) {
+function apiFinish(args, id, video_id) {
 	const options = {
 		method: 'POST',
 		uri: url +'/'+args.id+'/videos',
@@ -37,7 +37,7 @@ function apiFinish(args, id, photo_id) {
 
 	return rp(options)
 		.then(res => {
-			res.photo_id = photo_id;
+			res.video_id = video_id;
 			return res;
 		});
 }
@@ -79,10 +79,10 @@ function facebookApiVideoUpload(args) {
 		.then(buffer => buffer)
 		.then(buffer => [buffer, apiInit(args, buffer.length)])
 		.spread((buffer, res) => {
-			const ids = [res.upload_session_id, res.photo_id];
+			const ids = [res.upload_session_id, res.video_id];
 			return uploadChain(buffer, args, res, ids);
 		})
-		.spread((id, photo_id) => apiFinish(args, id, photo_id));
+		.spread((id, video_id) => apiFinish(args, id, video_id));
 }
 
-module.exports = facebookApiVideoUpload
+module.exports = facebookApiVideoUpload;

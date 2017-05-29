@@ -240,10 +240,6 @@ var getAccessTokens = function (callback) {
 var postNowUsingVignettes = function () {
     $('#serverResponse').hide();
     var tempVignettes = getSelectedVignettes();
-    if (tempVignettes.length <= 0) {
-        manageServerResponse({ status: "ERROR", message: "One or more vignettes is required to boost. Please select one." }, false);
-        return;
-    } else {
         getAccessTokens(function (accessTokens) {
             if (accessTokens) {
                 var dataForPost = {
@@ -282,7 +278,6 @@ var postNowUsingVignettes = function () {
                 }// if (timeLines.length > 0) {
             }//if (accessTokens) {
         }); //getAccessTokens(function (accessTokens) {
-    }//if (tempVignettes.length <= 0) {
 
 } //var postNowUsingVignettes = function(){
 var validTimeLine = function (timeline) {

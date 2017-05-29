@@ -1,4 +1,5 @@
-﻿var express = require('express');
+﻿var url = require('url');
+var express = require('express');
 var router = express.Router();
 var fs = require('fs');
 var multer = require('multer')
@@ -10,6 +11,7 @@ var userPosts = require('../models/userposts');
 
 var config = require('../config/config');
 
+var serverBasePath;
 var imageFileBasePath = '../lemon-soda-jan/public/upload/images', videoFileBasePath = "../lemon-soda-jan/public/upload/videos";
 var imagePublishPath = '../upload/images', videoFilePublishPath = '../upload/videos';
 
@@ -44,9 +46,9 @@ router.get('/upload/delete', function (req, res) {
     var callback = req.query.callback;
     if (callback) {
         var fileName = req.query.file;
-        if ((fileName != null) && (fileName)) {
+        if (fileName) {
             try {
-                fs.unlinkSync(imageFileBasePath + "/" + fileName);
+                fs.unlinkSync(fileName);
             } catch (e) {
                 var message = { status: 'ERROR', message: "Unable to delete this file on our servers. " }
                 message = callback + "(" + JSON.stringify(message) + ")";
@@ -92,19 +94,26 @@ router.post('upload/files-new',function(req,res,next){
 router.post('/upload/files', function (req, res) {
     var fileSize = req.headers['content-length'];
     var fstream;
+    resolve = require('path').resolve;
     req.pipe(req.busboy);
     req.busboy.on('file', function (fieldname, file, filename) {
         console.log("Uploading: " + filename);
+        serverBasePath = url.format({
+            protocol: req.protocol,
+            host: req.get('host'),
+            port: req.get('port') ? ":" + req.get('port') :""
+        }); 
+
         var fileType = getFileType(filename);
         //Path where image will be uploaded
         var tempFileName = Date.now().toString() + '-' + filename;
         var serverFileName, publishUrl
         if (fileType == 'IMAGE_FILE') {
             serverFileName = imageFileBasePath + "\/" + tempFileName;
-            publishUrl = imagePublishPath + "\/" + tempFileName
+            publishUrl = serverBasePath+"\/"+"upload/images" + "\/" + tempFileName
         } else if (fileType == 'VIDEO_FILE') {
             serverFileName = videoFileBasePath + "\/" + tempFileName;
-            publishUrl = videoFilePublishPath + "\/" + tempFileName
+            publishUrl = serverBasePath + "\/" + "upload/videos" + + "\/" + tempFileName
         } else {
             res.send({ status: 'ERROR' , message: "file format not supported" });
             res.end();
@@ -218,6 +227,7 @@ var sendMessageToServer = function (msg, callback, res, post = false) {
         res.end();
     }
 }
+
 var getFileType =  function(filename) {
     var ext = getExtension(filename);
     switch (ext.toLowerCase()) {

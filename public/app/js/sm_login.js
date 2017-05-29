@@ -79,13 +79,13 @@ var facebookDefaults = {
 
 var initFacebookAPI = function () {
     window.fbAsyncInit = function () {
-        //version = 'v2.7'
+        //version = 'v2.9'
         FB.init({
             appId: facebookDefaults.appId,  
             status: true,
             xfbml: true,
             cookie: true,
-            version: 'v2.7' // use version 2.7
+            version: 'v2.9' // use version 2.7
 
         });
     }

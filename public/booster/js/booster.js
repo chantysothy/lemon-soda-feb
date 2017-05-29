@@ -24,12 +24,15 @@ $(window).load(function (e) {
     //$('#imageHolder').append();
     //ShowAvailableSocialMediaIcons();//
 }); //$(window).load(function () { 
+
 window.closeSelectModal = function () {
     $('#selectVignette').modal('hide');
 };
+
 window.closeManageModal = function () {
     $('#manageVignette').modal('hide');
 };
+
 $(document).ready(function () {
     $("#imgNext").hide();
     $("#imgPrevious").hide();
@@ -66,27 +69,34 @@ $(document).ready(function () {
             });// remove file starts
  
             this.on("removedfile", function (file) {
-                $.ajax({
-                    headers: { "Accept": "application/json" }
-                    , type: 'GET'
-                    , url: '/upload/delete'
-                    , data: "file=" + file.serverFileName
-                    , dataType: "jsonp"
-                    , jsonp: "callback"
-                    , crossDomain: true
-                    , beforeSend: function (xhr) {
-                        xhr.withCredentials = true;
-                    }
-                    , jsonPCallback: "jsonpCallback"
-                    , success: function (data) {
-                        //var elementList = $(html).find(element);
-                        manageServerResponse(data);
-                    }//success: function (data) {
-                    , error: function (jqXHR, textStatus, errorThrown) {
-                        //var msgBox = $('#butrfly-login').find();
-                        alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
-                    }//error: function (jqXHR, textStatus, errorThrown) {
-                });
+                if (file) {
+                    $.ajax({
+                        headers: { "Accept": "application/json" }
+                        , type: 'GET'
+                        , url: '/upload/delete'
+                        , data: "file=" + file.serverInfo
+                        , dataType: "jsonp"
+                        , jsonp: "callback"
+                        , crossDomain: true
+                        , beforeSend: function (xhr) {
+                            xhr.withCredentials = true;
+                        }
+                        , jsonPCallback: "jsonpCallback"
+                        , success: function (data) {
+                            //var elementList = $(html).find(element);
+                            manageServerResponse(data);
+                        }//success: function (data) {
+                        , error: function (jqXHR, textStatus, errorThrown) {
+                            //var msgBox = $('#butrfly-login').find();
+                            alert("ERROR: " + textStatus + "DETAILS: " + errorThrown);
+                        }//error: function (jqXHR, textStatus, errorThrown) {
+                    });
+                } else {
+                    manageServerResponse({
+                        status: "ERROR",
+                        message: "Invalid file information detected. Reload this file once again."
+                    }, false);
+                }
 
             });
             // Send file starts
@@ -115,9 +125,9 @@ $(document).ready(function () {
                 console.log(file);
                 console.log(resp);
                 var response = JSON.parse(resp);
-                var serverInfo = absolutePath(response.data.urlToPublish);
-                file['me'] = serverInfo;
-                file['urlForPublishing'] = serverInfo;
+                var serverInfo = response.data.serverFilePath;
+                file['serverInfo'] = serverInfo;
+                file['urlForPublishing'] = response.data.urlToPublish;
                 var img = $("#currentImg")
                 
                 if (file.type == 'video/mp4') {
@@ -143,7 +153,7 @@ $(document).ready(function () {
                     //$('#boosterPreview').show();
 
                 } else {
-                    imageList.push(serverInfo);
+                    imageList.push(response.data.urlToPublish);
                     slideIndex = imageList.length - 1;
                     plusDivs(slideIndex);
 
