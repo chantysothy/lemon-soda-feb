@@ -113,8 +113,10 @@ $('#go-back').click(function (e) {
 
 $('#boostNowWithVignette').click(function (e) {
     e.preventDefault();
-    if (confirm('Do you want to post now?')) {
+    if (confirm('Do you want to post now ?')) {
         timeLines = [];
+        selectedVignettes = [];
+        selectedVignettes = getSelectedVignettes();
         postNowUsingVignettes();
     } //if (confirm('You want to post now ?')) {
 });//$('#boostNowWithVignette').click(function (e) {
@@ -245,6 +247,7 @@ var postNowUsingVignettes = function () {
                 var dataForPost = {
                     url: window.parent.shortUrlForServer
                     , imgUrl: (!window.parent.imageUrlForServer) ? null : window.parent.imageUrlForServer
+                    , vignettes: tempVignettes
                     , caption: window.parent.headingForServer
                     , text: window.parent.textForServer, sm_names: ['facebook', 'twitter']
                     , tokens: { fbAccessToken: window.parent.fbAccessToken }

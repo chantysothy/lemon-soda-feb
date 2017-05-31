@@ -1,4 +1,6 @@
 ﻿var express = require('express');
+var FormData = require('form-data');
+var poster = require('poster');
 var path = require('path');
 var router = express.Router();
 var passport = require('passport');
@@ -19,7 +21,8 @@ var userPosts = require('../models/userposts');
 var config = require('../config/config');
 var emitter = require('events').EventEmitter;
 var inherits = require('util').inherits;
-const fileSystem = require('fs');
+var fileSystem = require('fs');
+//var fileSystem = new FS();
 const fbVideos = require('facebook-api-video-upload');
 const ImageUploader = require('./imageUploader');
 var imageUploader = new ImageUploader();
@@ -115,19 +118,20 @@ PostManager.prototype.postUsingVignette = function (dataToPost, callback) {
                 var vignettes = task.vignettes;
 //            for (var vignetteCounter = 0; vignetteCounter < vignettes.length; vignetteCounter++) {
                 var vignette = vignettes[0];
-                var condition = { _id: vignette.id }
-                vignetteModel.findOne(condition, function (err, doc) {
-                    if (err) {
-                        var message = { status: "ERROR", message: "ERROR while getting vignette info. " + JSON.stringify(err) }
+                if (vignette) {
+                    var condition = { _id: vignette.id }
+                    vignetteModel.findOne(condition, function (err, doc) {
+                        if (err) {
+                            var message = { status: "ERROR", message: "ERROR while getting vignette info. " + JSON.stringify(err) }
 
-                        if (callback) {
-                            callback(message);
-                            return;
-                        }//if (callback) {
-                    }
-                    if (doc) {
-                        var postableLocs = doc.data.locs
-                        postableLocations = postableLocs;
+                            if (callback) {
+                                callback(message);
+                                return;
+                            }//if (callback) {
+                        }
+                        if (doc) {
+                            var postableLocs = doc.data.locs
+                            postableLocations = postableLocs;
                             for (var postableLocLen = 0; postableLocLen < postableLocs.length; postableLocLen++) {
                                 var postableLoc = postableLocs[postableLocLen];
                                 var smName = postableLoc.sm_name;
@@ -149,8 +153,11 @@ PostManager.prototype.postUsingVignette = function (dataToPost, callback) {
                                 //}//for (var postableLocNum = 0; postableLocNum < postableLocs.length(); postableLocNum++) {
                             }//for (var postableLocLen = 0; postableLocLen < doc.length(); postableLocLen++) {
                         }//if (doc) {
-                    //}//
-                });//vignetteModel.findOne(condition, function (err, doc) {
+                        //}//
+                    });//vignetteModel.findOne(condition, function (err, doc) {
+                } else {
+                    callback(null)
+                }
 //            }//for (var vignetteCounter = 0; vignetteCounter < vignettes.length; vignetteCounter++) {
             }//if (email) {
         //}//for (var postCounter = 0; postCounter < docs.length; postCounter++) {
@@ -180,7 +187,7 @@ postToFacebookNotBeingUsed = function (dataToPost, locations, callback) { //data
                 var path = (locations[postProcessCounter]) ? "/" + locations[postProcessCounter].postableLocId : '/me';
                 process.nextTick(function () {
                     if (locations[postProcessCounter].type == 'group') {
-                        path += "/feed"
+                        //path += "/feed"
                         fbGraph.post(path, params, function (postError, postResponse) {
                             if (postError) {
                                 message['status'] = "ERROR";
@@ -259,8 +266,8 @@ var postToFacebook = function (dataToPost, postableLocation, baseUrl, callback) 
                 if (dataToPost.task.videoPost) {
                     path += "/videos";///feed";
                     videoPost = true;
-                } else {
-                    path += "/feed";
+                } else if (dataToPost.task.imgUrl) {
+                    path += "/photos";
                 }
                     (postableLocation.type == "page") ? token = postableLocation.otherInfo.access_token : token = dataToPost.task.accessCreds.facebook.authResponse.accessToken;
 
@@ -274,12 +281,12 @@ var postToFacebook = function (dataToPost, postableLocation, baseUrl, callback) 
                                     if (dataToPost.task.url) {
                                         params['caption'] = dataToPost.task.caption;
                                         params['message'] = dataToPost.task.text;
-                                        params['url'] = "@" + dataToPost.task.imgUrl;
-                                        params['link'] = dataToPost.task.url
-                                    } else {
-                                        params['url'] = "@"+dataToPost.task.imgUrl;
-                                    }
-//                                    if (params.link) {
+                                        if (dataToPost.task.imgUrl) {
+                                            params['url'] =  dataToPost.task.imgUrl;
+                                        }
+                                        if (dataToPost.task.url) {
+                                            params['link'] = dataToPost.task.url
+                                        }
                                         fbGraph.post(path, params, function (fbError, fbResponse) {
                                             if (!fbError) {
                                                 if (callback)
@@ -289,6 +296,14 @@ var postToFacebook = function (dataToPost, postableLocation, baseUrl, callback) 
                                                     callback(fbResponse);
                                             }//if (!fbError) {
                                         });//fbGraph.post(path, params, function (fbError, fbResponse) {
+                                    } else {
+                                        writePhotoStream(path, dataToPost.task.caption, dataToPost.task.message, fbPageTokenRes.access_token, dataToPost.task.imgUrl, function (photoWriteData) {
+                                            var a = photoWriteData;
+                                        });
+                                        //params['url'] = "@"+dataToPost.task.imgUrl;
+                                        //params['message'] = " ";// + dataToPost.task.imgUrl;
+                                    }
+//                                    if (params.link) {
 
                                     //} else {
                                         
@@ -471,15 +486,35 @@ var readVideoStream = function (path) {
     return returnValue
 }//var readVideo = function (path) {
 
-var readPhotoStream = function (path) {
+var readFileStream = function (fileName, callback) {
     var returnValue;
-    if (path) {
-        var returnValue = fileSystem.createReadStream(path);
+    if (fileName) {
+        fileSystem.readFile(fileName, "base64", callback)
     }//if (path) {
-    return returnValue
 }//var readVideo = function (path) {
 
-
+var writePhotoStream = function (fbPath, caption,message, accessToken, fileWithPath, callback) {
+    if (callback) {
+        var url = "https://graph.facebook.com" + fbPath + "?access_token=" + accessToken;
+//        readFileStream(fileWithPath, function ( fileContent) {
+        var options = {
+            uploadUrl: url,//'https://graph.facebook.com/' + user + '/photos?access_token=' + accessToken,
+            method: 'POST',
+            fileId: 'source',
+            fields: { 'message': (message)?message:"" , // Additional fields according to graph API
+                     'caption': (caption) ? caption : "" } // Additional fields according to graph API
+        };
+        poster.post(fileWithPath, options, function (err, data) {
+            if (err) {
+                callback({ status: "ERROR", message: JSON.stringify(err) });
+                //Something went wrong
+            } else {
+                // Everything ok
+                callback({ "status": "SUCCESS", "message": "posted to facebook. ", "data": JSON.stringify(data)});
+            }
+        });//poster.post(fileName, options, function (err, data) {
+    }//if (callback) {
+}//var writePhotoStream = function (accessToken, fileWithPath) {
 
 inherits(PostManager, emitter);
 module.exports = PostManager;

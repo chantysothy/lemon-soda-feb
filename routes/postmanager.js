@@ -12,13 +12,6 @@ var request = require('request');
 var schedule = [];
 var dbConfig = require('../config/database');
 var fs = require('fs');
-//var Agenda = require('agenda');
-//var agenda = new Agenda({ db: { address: dbConfig.url, collection: 'agenda-scheduler' } });
-//var Scheduler = require('../utils/scheduler');
-//var scheduler = Scheduler.getInstance();
-
-// agenda
-//vignettes
 var userModel = require('../models/user');
 var vignetteModel = require('../models/vignettes');
 var userUtils = require('../utils/userUtils');
@@ -383,6 +376,7 @@ var sendMessageToServer = function (msg, callback, res, post = false) {
 }
 
 var consumer_key = config.twitter.consumer_key;
+
 var consumer_secret = config.twitter.consumer_secret;
 //var enc_secret = new Buffer(consumer_key + ':' + consumer_secret).toString('base64');
 var enc_secret = new Buffer(consumer_key + ':' + consumer_secret).toString('base64');
@@ -437,7 +431,6 @@ var createAlbum = function (albumPath, albumName, callback) {
         }); //fbGraph.post(albumPath + albumName, function (fbResponse) {
     }//if (callback) {
 }//var createAlbum = function (albunPath, albumName, callback) {
-
 
 var uploadImages = function (albumPath, albumName, imageUrl,callback) {
 
@@ -569,6 +562,7 @@ var evaluateVignetteAndPost = function (dataToPost, callback) {
         return returnValue;
     }//var getPostableUrl = function (smPostDetails) {
 }//var EvaluateVignetteAndPost = function (dataToPost) {
+
 var validateToken = function (token, callback) {
     var commandString = "https://graph.facebook.com/debug_token?input_token=" + token + "&accesstoken=" + config.facebookAuth.app_access_token
     request.get(commandString).on('response', function (response) {

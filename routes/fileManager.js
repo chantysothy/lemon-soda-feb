@@ -109,10 +109,10 @@ router.post('/upload/files', function (req, res) {
         var tempFileName = Date.now().toString() + '-' + filename;
         var serverFileName, publishUrl
         if (fileType == 'IMAGE_FILE') {
-            serverFileName = imageFileBasePath + "\/" + tempFileName;
+            serverFileName = resolve(imageFileBasePath + "\/" + tempFileName);
             publishUrl = serverBasePath+"\/"+"upload/images" + "\/" + tempFileName
         } else if (fileType == 'VIDEO_FILE') {
-            serverFileName = videoFileBasePath + "\/" + tempFileName;
+            serverFileName = resolve(videoFileBasePath + "\/" + tempFileName);
             publishUrl = serverBasePath + "\/" + "upload/videos" + + "\/" + tempFileName
         } else {
             res.send({ status: 'ERROR' , message: "file format not supported" });

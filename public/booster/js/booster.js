@@ -158,7 +158,8 @@ $(document).ready(function () {
                     plusDivs(slideIndex);
 
                     //img.attr('src', imageList[slideIndex]);
-                    imageUrlForServer = serverInfo
+                    imageUrlForServer = response.data.serverFilePath
+                    //imageUrlForServer = response.data.urlToPublish;
                 }//if (file.type == 'video/mp4') {
 
                 $('#boosterPreview').show();
@@ -458,7 +459,7 @@ var plusDivs= function (index) {
     slideIndex += 1;
     var imgHTML = "<img src=\"" + imageList[slideIndex] + "\">";
     $("#currentImg").attr('src', imageList[slideIndex]);
-        imageUrlForServer = imageList[slideIndex];
+       // imageUrlForServer = imageList[slideIndex];
 }//function plusDivs(n) {
 
 var getElementsFromHTML = function (html, element) {
