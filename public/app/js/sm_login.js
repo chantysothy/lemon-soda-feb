@@ -229,38 +229,18 @@ $nectorrTwitterExecCommand = function(url,callback) {
 
 }//$twitterLogin = function() {
 var setPostableLocs = function (newPostableLocs, sm_name, callback) {//'/user/get'
-    $.post('/postable-loc/set',
-        {
-            email: $getClientEmail()
-            , postLoc: JSON.stringify(newPostableLocs)
-            , 'sm_name': sm_name
-        },
-        function (data, status) {
-            if (callback)
-                callback(data)
-        });//$.post('/profile/save',
-
-    //$.ajax({
-    //    headers: { "Accept": "application/json" }
-    //    , type: 'POST'
-    //    , url: '/postable-loc/set'
-    //    , data: "email=" + $getClientEmail() + "&sm_name=" + sm_name + "&postLoc=" + JSON.stringify(newPostableLocs)
-    //    //, dataType: "jsonp"
-    //    //, jsonp: "callback"
-    //    //, crossDomain: true
-    //    , beforeSend: function (xhr) {
-    //        xhr.withCredentials = true;
-    //    }
-    //    , jsonPCallback: "jsonpCallback"
-    //    , success: function (data) {
-    //        if (callback) {
-    //            callback(data);
-    //        } //if (callback) { 
-    //    }
-    //    , error: function (jqXHR, textStatus, errorThrown) {
-    //        alert("Unable to connect to nectorr. ERROR: " + textStatus + "DETAILS: " + JSON.stringify(errorThrown));
-    //    }
-    //}); //$.ajax({
+    if (newPostableLocs.data) {
+        $.post('/postable-loc/set',
+            {
+                email: $getClientEmail()
+                , postLoc: JSON.stringify(newPostableLocs)
+                , 'sm_name': sm_name
+            },
+            function (data, status) {
+                if (callback)
+                    callback(data)
+            });//$.post('/profile/save',
+    }//if (newPostableLocs.data) {
 }//var setPostableLocs = function (newPostableLocs, sm_name, callback) {
 
 var getLoggedInUserDetails = function (callback) {//'/user/get'
@@ -554,9 +534,10 @@ var $executeFacebookCommand = function (scope, command, callback , loginValidate
                 fbAccessToken = response.authResponse.accessToken;
                 FB.api(command, function (res, err) {
                     if (!err) {
-                        if (callback)
-
+                        if (callback) {
+                            res['fbAccessToken'] = fbAccessToken;
                             callback(res);
+                        }
                     } else {
                         callback({ status: 'ERROR', message: JSON.stringify(err) });
                     }
@@ -582,6 +563,7 @@ var $executeFacebookCommand = function (scope, command, callback , loginValidate
         });//FB.getLoginStatus(function (response) {
     } //if (command) {
 }//var executeFacebookCommand = function (command, callback) {
+
 var getFacebookPermsFromClient = function (e, callback) {
     var perms = 'manage_pages, user_managed_groups,pages_show_list';
     $nectorrFacebookLoginForGroups(perms, e, function (groupdata) {
@@ -610,6 +592,7 @@ var getFacebookPermsFromClient = function (e, callback) {
 
 
 }
+
 var getFacebookAccessToPagesAndGroups = function (ev) {
     if (getSocialMediaDetails.facebook) {
         $nectorrFacebookLogin(facebookDefaults.scope, e, function (data) {
@@ -685,6 +668,7 @@ var getQueryTags = function (callback) {
     });
 
 }//var getConfiguration = function (callback) {
+
 var pushArray = function (pushTo, getFrom) {
     for (var counter = 0; counter < getFrom.length; counter++) {
         if (getFrom[counter] != "")
@@ -694,6 +678,7 @@ var pushArray = function (pushTo, getFrom) {
 
 var googleUserScope = googlePlusDefaults.scopes.plusMe;//+ " " +
 var googleCircleScope = googlePlusDefaults.scopes.plusCirclesRead + " " + googlePlusDefaults.scopes.plusCirclesWrite;//googlePlusDefaults.scopes.plusMe,
+
 var initializeGoogle = function (getAuthResponse = false, callback, scope,product, version) {
     var auth2, authInstance;
         gapi.load('auth2', function () {
@@ -772,6 +757,7 @@ var getGoogleCircles = function (callback, loggedInUserId,getAuthResponse = "") 
     }
 
 }//var getGoogleCircles = function (callback
+
 var getLinkedInUserDetails = function () {
     //,"group-memberships:(group:(id,name),membership-state)
     IN.API.Profile("me")
@@ -783,71 +769,6 @@ var getLinkedInUserDetails = function () {
 var saveLinkedInUserDetails = function (data) {
     var a = data;
 }
-
-var writeFacebookTextPost = function (text) { 
-
-} //var writeFacebookTextPost = function (text) { 
-
-var writeFacebookUrlPosts = function (url, imgUrl) { 
-
-} //var writeFacebookUrlPosts = function (url, imgUrl) { 
-
-var writeTwitterTextPost = function (text) { 
-
-}//var writeTwitterTextPost = function (text) { 
-
-var writeTwitterImagePost = function (imagePath) { 
-
-}//var writeTwitterImagePost =function (imagePath) { 
-
-var writeTwitterUrlPost = function (url) { 
-
-}//var writeTwitterUrlPost = function (url) { 
-
-var writeGoogleTextPostInCircles = function (text) { 
-
-}//var writeGoogleTextPostInCircles = function (text) { 
-
-var writeGoogleImagePostInCircles = function (imagePath) { 
-
-}//var writeGoogleImagePostInCircles = function (imagePath) { 
-
-var writeGoogleUrlPostsInCircles = function (url) { 
-
-}//var writeGoogleUrlPostsInCircles = function (url) { 
-
-var WriteLinkedInTextPost = function (text) { 
-
-}//var WriteLinkedInTextPost = function (text) { 
-var writeLinkedInUrlPosts = function (url) { 
-
-}//var writeLinkedInUrlPosts = function (url) { 
-
-var writeLinkedInImagePosts = function (imageUrl) { 
-
-}//var writeLinkedInImagePosts = function (imageUrl) { 
-
-var WriteLinkedInTextPostInGroups = function (text) { 
-
-}//var WriteLinkedInTextPost = function (text) { 
-var writeLinkedInUrlPostsInGroups = function (url) { 
-
-}//var writeLinkedInUrlPosts = function (url) { 
-
-var writeLinkedInImagePostsInGroups = function (imageUrl) { 
-
-}//var writeLinkedInImagePosts = function (imageUrl) { 
-
-var getTwitterLists = function (callback) { 
-}//var getTwitterLists = function (callback) { 
-
-var getLinkedInGroups = function (callback) { 
-
-}//var getLinkedInGroups = function (callback) { 
-
-var getFacebookGroups = function (callback) { 
-
-} //var getFacebookGroups = function (callback) { 
 
 var getSocialFeeds = function(callback) {
     if (callback) {
@@ -866,7 +787,6 @@ var getSocialFeeds = function(callback) {
     }//if (callback) {
 
 }//var getSocialFeeds = function(callback) {
-
 
 var getLoginObject = function (callback) {
     $.ajax({

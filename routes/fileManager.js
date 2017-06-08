@@ -110,10 +110,12 @@ router.post('/upload/files', function (req, res) {
         var serverFileName, publishUrl
         if (fileType == 'IMAGE_FILE') {
             serverFileName = resolve(imageFileBasePath + "\/" + tempFileName);
+            console.log(" Image file path : " + serverFileName);
             publishUrl = serverBasePath+"\/"+"upload/images" + "\/" + tempFileName
         } else if (fileType == 'VIDEO_FILE') {
             serverFileName = resolve(videoFileBasePath + "\/" + tempFileName);
             publishUrl = serverBasePath + "\/" + "upload/videos" + + "\/" + tempFileName
+            console.log(" video file path : " + serverFileName);
         } else {
             res.send({ status: 'ERROR' , message: "file format not supported" });
             res.end();

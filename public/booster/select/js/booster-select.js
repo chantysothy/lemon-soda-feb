@@ -259,6 +259,7 @@ var postNowUsingVignettes = function () {
                         var itemsToPost = { "vignettes": { vignettes: selectedVignettes }, "dataToPost": dataForPost, "timelines": { timeline: timeLines }, "accessCreds": accessTokens}
                         postUsingVignette(itemsToPost, function (data) {
                             manageServerResponse(data);
+                            window.parent.uploadedVideos = [];
                         }); //postUsingVignette(itemsToPost, function (data) {  
                     } else {
                         alert('Invalid value(s) in timeline.');
@@ -280,8 +281,7 @@ var postNowUsingVignettes = function () {
                     });//postUsingVignette(itemsToPost, function (data) {
                 }// if (timeLines.length > 0) {
             }//if (accessTokens) {
-        }); //getAccessTokens(function (accessTokens) {
-
+    }); //getAccessTokens(function (accessTokens) {
 } //var postNowUsingVignettes = function(){
 var validTimeLine = function (timeline) {
     if (!timeline || (timeline.length <= 0)) return false;

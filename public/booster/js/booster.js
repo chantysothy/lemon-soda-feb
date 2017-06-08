@@ -379,7 +379,6 @@ $(document).ready(function () {
                                 $('boosterPreview').attr('src', imageList[0]);
                                 $("#imgNext").show();
                                 $("#imgPrevious").show();
-
                             } else {
                                 imageList = html.imgTags;
                             }

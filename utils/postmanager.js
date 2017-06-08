@@ -21,6 +21,7 @@ var userPosts = require('../models/userposts');
 var config = require('../config/config');
 var emitter = require('events').EventEmitter;
 var inherits = require('util').inherits;
+var Promise = require('bluebird');
 var fileSystem = require('fs');
 //var fileSystem = new FS();
 const fbVideos = require('facebook-api-video-upload');
@@ -56,40 +57,6 @@ PostManager.prototype.getTwitterToken = function (callback) {
 
 }
 
-PostManager.prototype.postToTwitter = function (dataToPost, callback) {//dataToPost. postToString, caption, link, pictureLink, headerOptions
-    getBearerCode(function (twitterLoginData) {
-        var twitter = new Twitter({
-            consumer_key: config.twitter.consumer_key
-            , consumer_secret: config.twitter.consumer_secret
-            , bearer_token: twitterLoginData.access_token
-        });//var twitter = new Twitter({
-
-        var twitterPost = {
-            media_ids: []
-            , url: dataToPost.link
-            , status: dataToPost.caption
-        };
-
-        uploadMediaToTwitter(dataToPost.imgUrl, function (media) {
-            var USER_TIMELINE_URL = 'statuses/user_timeline';
-            twitterPost.media_ids = [media.media_id_string]
-            twitter.post(USER_TIMELINE_URL, twitterPost, function (twitterPostError, doc) {
-                if (twitterPostError) {
-                    message['status'] = "ERROR";
-                    message['message'] = "An error occured while posting to twitter. " + JSON.stringify(twitterPostError);
-                    callback(message);
-                    return;
-                }//if (err) {
-                if (doc && !doc.error) {
-                    message['status'] = "SUCCESS";
-                    message['message'] = "Successfully posted to twitter."
-                    callback(message);
-                    return;
-                }//if (res) {
-            });//twitter.post(postToString, dataToPost, function (err, doc) {
-        });//uploadMediaToTwitter(dataToPost.picturelink, function (data) {
-    });//getTwitterToken(function (twitterLoginData) {
-}//var postToTwitter = function (dataToPost, callback) {
 
 PostManager.prototype.postToGooglePlus = function (dataToPost, callback) {
 
@@ -116,8 +83,8 @@ PostManager.prototype.postUsingVignette = function (dataToPost, callback) {
         if (email) {
             var task = postElement.task;
                 var vignettes = task.vignettes;
-//            for (var vignetteCounter = 0; vignetteCounter < vignettes.length; vignetteCounter++) {
-                var vignette = vignettes[0];
+            for (var vignetteCounter = 0; vignetteCounter < vignettes.length; vignetteCounter++) {
+                var vignette = vignettes[vignetteCounter];
                 if (vignette) {
                     var condition = { _id: vignette.id }
                     vignetteModel.findOne(condition, function (err, doc) {
@@ -158,10 +125,52 @@ PostManager.prototype.postUsingVignette = function (dataToPost, callback) {
                 } else {
                     callback(null)
                 }
-//            }//for (var vignetteCounter = 0; vignetteCounter < vignettes.length; vignetteCounter++) {
+            }//for (var vignetteCounter = 0; vignetteCounter < vignettes.length; vignetteCounter++) {
             }//if (email) {
         //}//for (var postCounter = 0; postCounter < docs.length; postCounter++) {
 }//var postUsingVignette = function (dataToPost, callback) {
+
+var postToTwitter = function (dataToPost,postableLocs, callback) {//dataToPost. postToString, caption, link, pictureLink, headerOptions
+    var email = dataToPost.email;
+    getLoginObject(email,function (loginObject) {
+        var twitterScreenName = loginObject.twitter.profileInfo.screen_name;
+        getBearerCode(function (twitterLoginData) {
+            var twitter = new Twitter({
+                consumer_key: config.twitter.consumer_key
+                , consumer_secret: config.twitter.consumer_secret
+                , bearer_token: twitterLoginData.access_token
+            });//var twitter = new Twitter({
+
+            var twitterPost = {
+                media_ids: []
+                , screen_name: twitterScreenName
+                , url: dataToPost.link
+                , status: dataToPost.caption
+            };
+
+            uploadMediaToTwitter(dataToPost.imgUrl, function (media) {
+                var USER_TIMELINE_URL = 'statuses/user_timeline';
+                twitterPost.media_ids = [media.media_id_string]
+                twitter.post(USER_TIMELINE_URL, twitterPost, function (twitterPostError, doc) {
+                    if (twitterPostError) {
+                        message['status'] = "ERROR";
+                        message['message'] = "An error occured while posting to twitter. " + JSON.stringify(twitterPostError);
+                        callback(message);
+                        return;
+                    }//if (err) {
+                    if (doc && !doc.error) {
+                        message['status'] = "SUCCESS";
+                        message['message'] = "Successfully posted to twitter."
+                        message['data'] = media
+                        callback(message);
+                        return;
+                    }//if (res) {
+                });//twitter.post(postToString, dataToPost, function (err, doc) {
+            });//uploadMediaToTwitter(dataToPost.picturelink, function (data) {
+        });//getTwitterToken(function (twitterLoginData) {
+    });//getLoginObject(function (loginObject) {
+}//var postToTwitter = function (dataToPost, callback) {
+
 
 postToFacebookNotBeingUsed = function (dataToPost, locations, callback) { //dataToPost. postToString, caption, link, pictureLink
     var message = {};
@@ -184,11 +193,11 @@ postToFacebookNotBeingUsed = function (dataToPost, locations, callback) { //data
             var postProcessCounter = 0;
             for (var locationCounter = 0; locationCounter < locations.length; locationCounter++){
 
-                var path = (locations[postProcessCounter]) ? "/" + locations[postProcessCounter].postableLocId : '/me';
+                var fbPath = (locations[postProcessCounter]) ? "/" + locations[postProcessCounter].postableLocId : '/me';
                 process.nextTick(function () {
                     if (locations[postProcessCounter].type == 'group') {
                         //path += "/feed"
-                        fbGraph.post(path, params, function (postError, postResponse) {
+                        fbGraph.post(fbPath, params, function (postError, postResponse) {
                             if (postError) {
                                 message['status'] = "ERROR";
                                 message['message'] = "An error occured while posting to facebook. Code - " + postError.code + " from facebook.";
@@ -200,9 +209,6 @@ postToFacebookNotBeingUsed = function (dataToPost, locations, callback) { //data
                                 message['status'] = "SUCCESS";
                                 message['message'] = "Successfully posted to facebook."
                                 message['data'] = { "postId": res, accessToken: facebookRes.access_token }
-                                //                            callback(message);
-                                //                            setTimeout(function () { }, 300)
-                                //return;
                             }//if (res) {
                         });//function (err, facebookRes) {
                     } else {
@@ -245,13 +251,7 @@ postToFacebookNotBeingUsed = function (dataToPost, locations, callback) { //data
     })//fbGraph.extendAccessToken({;
 }//var postToFacebook = function (options, accessToken) {
 
-var postToFacebook = function (dataToPost, postableLocation, baseUrl, callback) {
-    if (typeof baseUrl == 'function') {
-        callback = baseUrl;
-        baseUrl = null;
-    } else {
-        baseUrlWithDomain = baseUrl;
-    }
+var postToFacebook = function (dataToPost, postableLocation,  callback) {
         var processTickCounter =  0;
         //for (var locCounter = 0; locCounter < postableLocations.length; locCounter++) {
 
@@ -297,46 +297,21 @@ var postToFacebook = function (dataToPost, postableLocation, baseUrl, callback) 
                                             }//if (!fbError) {
                                         });//fbGraph.post(path, params, function (fbError, fbResponse) {
                                     } else {
-                                        writePhotoStream(path, dataToPost.task.caption, dataToPost.task.message, fbPageTokenRes.access_token, dataToPost.task.imgUrl, function (photoWriteData) {
+                                        writeMediaStream(path, dataToPost.task.caption, dataToPost.task.message, fbPageTokenRes.access_token, dataToPost.task.imgUrl, function (photoWriteData) {
                                             var a = photoWriteData;
+                                            //save post id to db
                                         });
-                                        //params['url'] = "@"+dataToPost.task.imgUrl;
-                                        //params['message'] = " ";// + dataToPost.task.imgUrl;
                                     }
-//                                    if (params.link) {
-
-                                    //} else {
-                                        
-                                    //    //fbGraph.post(path, { picture: dataToPost.task.imgUrl }, function (fError, fResponse) {
-                                    //    //    if (fError) { callback(fError)}else {callback(fResponse)}
-                                    //    //});
-                                    //    var args = {
-                                    //        token: fbPageTokenRes.access_token, // with the permission to upload 
-                                     //        id: postableLocation.postableLocId, //The id represent {page_id || user_id || event_id || group_id} 
-                                    //        title: encodeURIComponent(dataToPost.task.caption),
-                                    //        description: encodeURIComponent(dataToPost.task.text),
-                                    //        stream: readPhotoStream(dataToPost.task.imgUrl) //path to the video                                         
-                                    //    };
-
-                                    //    imageUpload.UploadImage(args).then((res) => {
-                                    //        console.log('res: ', res);
-                                    //        if (callback)
-                                    //            callback({ status: "SUCCESS", message: 'photo uploaded.', data: { video_id: res.photo_id } });
-                                    //        //res:  { success: true, video_id: '1838312909759132' } 
-                                    //    }).catch((e) => {
-                                    //        console.error(e);
-                                    //        callback({ status: "SUCCESS", message: 'video upload error.' + JSON.stringify(e) });
-                                    //    });
-
-                                    //}
-
                                 } else {
                                     const params = {
                                         token : fbPageTokenRes.access_token, // with the permission to upload 
                                         id: postableLocation.postableLocId, //The id represent {page_id || user_id || event_id || group_id} 
-                                        title: unescape(encodeURIComponent(dataToPost.task.caption + "\n" + encodeURIComponent(dataToPost.task.text))),
+                                        title: unescape(encodeURIComponent(dataToPost.task.caption)) ,//+ "\n" + encodeURIComponent(dataToPost.task.text))),
                                         stream : readVideoStream(dataToPost.task.videoPost) //path to the video                                         
                                     };
+                                    //writeMediaStream(path, dataToPost.task.caption, dataToPost.task.message, fbPageTokenRes.access_token, dataToPost.task.videoPost, function (fbVideoResponse) {
+                                    //    var a = fbVideoResponse;
+                                    //});
                                     fbVideos(params).then((res) => {
                                         //console.log('res: ', res);
                                         
@@ -355,19 +330,30 @@ var postToFacebook = function (dataToPost, postableLocation, baseUrl, callback) 
                     } else {//(postableLocation.tye = 'group') { //groups      /me/feed
                         fbGraph.setAccessToken(token);
                         if (!dataToPost.task.videoPost) {
-                            params['caption'] = dataToPost.task.caption;
-                            params['message'] = dataToPost.task.text;
-                            params['picture'] = dataToPost.task.imgUrl
-                            params['link'] = dataToPost.task.url
-                            fbGraph.post(path, params, function (fbError, fbResponse) {
-                                if (!fbError) {
-                                    if (callback)
-                                        callback(fbError);
-                                } else {
-                                    if (callback)
-                                        callback(fbResponse);
-                                }//if (!fbError) {
-                            });//fbGraph.post(path, params, function (fbError, fbResponse) {
+                            if (dataToPost.task.url) {
+                                params['caption'] = dataToPost.task.caption;
+                                params['message'] = dataToPost.task.text;
+                                params['picture'] = dataToPost.task.imgUrl
+                                params['link'] = dataToPost.task.url
+                                fbGraph.post(path, params, function (fbError, fbResponse) {
+                                    if (!fbError) {
+                                        if (callback)
+                                            callback(fbError);
+                                    } else {
+                                        if (callback)
+                                            callback(fbResponse);
+                                    }//if (!fbError) {
+                                });//fbGraph.post(path, params, function (fbError, fbResponse) {
+                            } else {
+                                writeMediaStream(path, dataToPost.task.caption, dataToPost.task.message, token, dataToPost.task.imgUrl)
+                                .then(function (data) {
+                                    a = data;
+                                    //save
+                                }).catch(function (err) {
+
+                                });
+
+                            }//if (dataToPost.task.url) {
                         } else {
                             params['title'] = dataToPost.task.caption;
                             params['description'] = dataToPost.task.text;
@@ -375,8 +361,12 @@ var postToFacebook = function (dataToPost, postableLocation, baseUrl, callback) 
                             const args = {
                                 token: fbPageTokenRes.access_token, // with the permission to upload 
                                 id: postableLocation.postableLocId, //The id represent {page_id || user_id || event_id || group_id} 
+                                title: unescape(encodeURIComponent(dataToPost.task.caption)),
                                 stream: readVideoStream(dataToPost.task.videoPost) //path to the video 
                             };
+                            //writeMediaStream(path, dataToPost.task.caption, dataToPost.task.message, token, dataToPost.task.videoPost, function (fbVideoResponse) {
+                            //    var a = fbVideoResponse;
+                            //});
                             fbVideos(args).then((res) => {
                                 console.log('res: ', res);
                                 if (callback)
@@ -384,7 +374,7 @@ var postToFacebook = function (dataToPost, postableLocation, baseUrl, callback) 
                                 //res:  { success: true, video_id: '1838312909759132' } 
                             }).catch((e) => {
                                 console.error(e);
-                                callback({ status: "SUCCESS", message: 'video upload error.' + JSON.stringify(e) });
+                                callback({ status: "ERROR", message: 'video upload error.' + JSON.stringify(e) });
                             });
                         }
                     } //if (postableLocation.type == 'page') {
@@ -475,14 +465,14 @@ var uploadVideoToFacebook = function (params, postableLocation, token, callback)
 
 //    }))()//async function uploadVideoToFacebook(buffer) {
 
-var readVideoStream = function (path) {
-    var returnValue;
-    var temp = path.split('/');
-    if (temp.length > 0) {
-        var videoName = temp[temp.length - 1];
-        videoName = "../lemon-soda-jan/public/upload/videos/" + videoName;
-        var returnValue =  fileSystem.createReadStream(videoName);
-    }//if (temp.length > 0) {
+var readVideoStream = function (pathWithFile) {
+    //var returnValue;
+    //var temp = path.split('/');
+    //if (temp.length > 0) {
+    //    var videoName = temp[temp.length - 1];
+    //    videoName = "../lemon-soda-jan/public/upload/videos/" + videoName;
+        var returnValue = fileSystem.createReadStream(pathWithFile);
+    //}//if (temp.length > 0) {
     return returnValue
 }//var readVideo = function (path) {
 
@@ -493,7 +483,7 @@ var readFileStream = function (fileName, callback) {
     }//if (path) {
 }//var readVideo = function (path) {
 
-var writePhotoStream = function (fbPath, caption,message, accessToken, fileWithPath, callback) {
+var writeMediaStream = async (function (fbPath, caption,message, accessToken, fileWithPath, callback) {
     if (callback) {
         var url = "https://graph.facebook.com" + fbPath + "?access_token=" + accessToken;
 //        readFileStream(fileWithPath, function ( fileContent) {
@@ -504,17 +494,93 @@ var writePhotoStream = function (fbPath, caption,message, accessToken, fileWithP
             fields: { 'message': (message)?message:"" , // Additional fields according to graph API
                      'caption': (caption) ? caption : "" } // Additional fields according to graph API
         };
-        poster.post(fileWithPath, options, function (err, data) {
+
+        await (poster.post(fileWithPath, options, function (err, data) {
             if (err) {
                 callback({ status: "ERROR", message: JSON.stringify(err) });
                 //Something went wrong
             } else {
                 // Everything ok
-                callback({ "status": "SUCCESS", "message": "posted to facebook. ", "data": JSON.stringify(data)});
-            }
-        });//poster.post(fileName, options, function (err, data) {
+             }
+        }));//poster.post(fileName, options, function (err, data) {
     }//if (callback) {
-}//var writePhotoStream = function (accessToken, fileWithPath) {
+})//var writePhotoStream = function (accessToken, fileWithPath) {
+
+var getLocsAccessCode = function (dataToPost, locs, callback) {
+    var totalAccessCode = 0;
+    for (var locsCounter = 0; locsCounter < locs.length; locsCounter++) {
+
+    }//for (var locsCounter = 0; locsCounter < locs.length; locsCounter++) {
+}//var getLocsAccessCode = function (dataToPost, locs, callback) {
+var batchPostToFbLocs = function (dataToPost, locs, callback) {
+    var isLocs = false;
+    var batchPostable = []; token;actualLocCounter = 0;
+    //(postableLocation.type == "page") ? token = postableLocation.otherInfo.access_token : token = dataToPost.task.accessCreds.facebook.authResponse.accessToken;
+    for (var locCounter = 0; locCounter < locs.length; locCounter++) {
+        var postableLoc = locs[actualLocCounter];
+
+        if (postableLoc.type =='page'){
+
+            var locId = postableLoc.postableLocId;
+            getFacebookPageToken(dataToPost.task.accessCreds.facebook.authResponse.accessToken, locId, function (res) {
+                locs[actualLocCounter]['token'] = res.access_token;
+                actualLocCounter++
+            });//getFacebookPageToken(dataToPost.task.accessCreds.facebook.authResponse.accessToken, locId, function (res) {
+
+        } else {
+            locs[actualLocCounter]['token'] = dataToPost.task.accessCreds.facebook.authResponse.accessToken;
+        }
+    }//for (var locCounter = 0; locCounter < locs.length; locCounter++) {
+    if (actualLocCounter == locs.length) {
+
+    }//if (actualLocCounter == locs.length) {
+}//var batchPostToFbLocs = function (dataToPost, locs, callback) {
+
+var getLoginObject = function (email, callback) {
+    if (email) {
+        var condition = { 'local.email': email };
+        userModel.findOne(condition, function (err, doc) {
+            if (doc) {
+                if (callback) {
+                    callback(doc._doc);
+                }
+            } else {
+                if (callback) {
+                    callback({ status: "ERROR", message: JSON.stringify(err) });
+                }
+
+            }
+        });//userModel.findOne(condition, function (err, doc) {
+    }//if (email) {
+}//var getLoginObject = function (email, callback) {
+
+function getBearerCode(callback) {
+    var returnValue
+    var enc_secret = new Buffer(config.twitter.keys.consumer_key + ':' + config.twitter.keys.consumer_secret).toString('base64');
+    var oauthOptions = {
+        url: //config.twitter.urls.access_token_url,
+        'https://api.twitter.com/oauth2/token', //https://api.twitter.com/oauth/access_token
+        //url: 'https://api.twitter.com/oauth/access_token',
+        headers: { 'Authorization': 'Basic ' + enc_secret, 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: 'grant_type=client_credentials'
+    };
+    request.post(oauthOptions, function (e, r, body) {
+
+        var bearerBody = JSON.parse(body);
+        process.env.TWITTER_BEARER_TOKEN = bearerBody.access_token;
+        if (callback) {
+            callback(bearerBody);
+        } else {
+            console.log("ERROR :" + e);
+            console.log("R :" + r)
+
+            console.log("BODY :" + body)
+        }//        if (callback) {
+        returnValue = body;
+    });
+    return returnValue;
+};
+
 
 inherits(PostManager, emitter);
 module.exports = PostManager;

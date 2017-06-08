@@ -1,6 +1,6 @@
 {
-  "name": "NECTORR-APP",
-  "version": "0.3",
+  "name": "nectorr",
+  "version": "0.3.0",
   "main": "app.js",
   "dependencies": {
     "asyncawait": "^1.0.6",
@@ -63,5 +63,6 @@
     ]
   },
   "author": "Edward Varghese",
-  "license": "MIT"
+  "license": "MIT",
+  "description": "a new way to be with the world."
 }
