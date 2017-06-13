@@ -17,6 +17,10 @@ var vignetteModel = require('../models/vignettes');
 var userUtils = require('../utils/userUtils');
 var userPosts = require('../models/userposts');
 var config = require('../config/config');
+var Promise = require('bluebird');
+var async = require('asyncawait/async');
+var await = require('asyncawait/await');
+var twitterVideoUploader = require('../utils/twitterVideoUploader');
 
 router.get('/send/post/now', function (req, res) {
     var callback = req.query.callback;
@@ -167,13 +171,14 @@ var postToTwitter = function (dataToPost, callback) {//dataToPost. postToString,
                 if (twitterPostError) {
                     message['status'] = "ERROR";
                     message['message'] = "An error occured while posting to twitter. " + JSON.stringify(twitterPostError);
+                    if (callback)
                     callback(message);
-                    return;
+                    return message;
                 }//if (err) {
                 if (doc && !doc.error) {
                     message['status'] = "SUCCESS";
                     message['message'] = "Successfully posted to twitter."
-                    callback(message);
+                    if (callback) callback(message);
                     return;
                 }//if (res) {
             });//twitter.post(postToString, dataToPost, function (err, doc) {

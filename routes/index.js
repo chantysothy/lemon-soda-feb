@@ -489,7 +489,7 @@ router.post('/postable-loc/set', function (req, res) {
                                 var message = { status: "ERROR", message: "Unable to update postable locations on social media automatically. You may continue with your work." };
                                 sendMessageToServer(message, null, res);
                             } else {
-                                var message = { status: "SUCCESS", message: "Postable locations automatically updated for - " + sm_name };
+                                var message={ status: "SUCCESS", message: "Postable locations automatically updated for - " + sm_name };
                                 sendMessageToServer(message, null, res);
                             }//if (err) {
 

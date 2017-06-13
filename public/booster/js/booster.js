@@ -935,6 +935,7 @@ var absolutePath = function (href) {
     // check if this link is in HTML, if so delete it.
     return returnValue;
 }
+
 var addHiddenFields = function (file) {
     $('<input>').attr({
         type: 'hidden',
@@ -950,6 +951,7 @@ var addHiddenFields = function (file) {
         value: $getClientEmail()
     }).appendTo('upload-widget');
 }//var addHiddenFields = function () {
+
 var settingIframeSrc = function (iframeName, fileName) {
     var iframe = $(iframeName);
     var s = fileName +"?ignore ="+Math.floor(Math.random() * 1000);;
@@ -963,6 +965,7 @@ var settingIframeSrc = function (iframeName, fileName) {
     
     //iframe.contentWindow.location.reload(true);
 }//var settingIframeSrc = function (iframeName, fileName) {
+
 var getVideoPoster = function (videoUrl,videoCallback) {
     //var file = videoUrl;
     getFileForBlob(videoUrl, function (file, callback) {
@@ -1048,6 +1051,7 @@ var getFileForBlob = function (url, callback) {
     };
     request.send();
 }
+
 var saveImageFromBlob = function (blobToSave, callback) {
     //blobToSave = blobToSave.split(',')[1];
     blobToSave = blobToSave.replace(/^data:image\/\w+;base64,/, "");

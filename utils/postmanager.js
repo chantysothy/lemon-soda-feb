@@ -111,7 +111,7 @@ PostManager.prototype.postUsingVignette = function (dataToPost, callback) {
                                         postToFacebook(dataToPost, postableLoc, callback);
                                         break;
                                     case "twitter":
-                                        postToTwitter(dataToPost, callback);
+                                        postToTwitter(dataToPost,postableLoc, callback);
                                         break;
                                     case "googlePlus":
                                         postToGooglePlus(dataToPost, callback);
@@ -130,45 +130,58 @@ PostManager.prototype.postUsingVignette = function (dataToPost, callback) {
         //}//for (var postCounter = 0; postCounter < docs.length; postCounter++) {
 }//var postUsingVignette = function (dataToPost, callback) {
 
-var postToTwitter = function (dataToPost,postableLocs, callback) {//dataToPost. postToString, caption, link, pictureLink, headerOptions
+var postToTwitter = function (dataToPost, postableLocs, callback) {//dataToPost. postToString, caption, link, pictureLink, headerOptions
     var email = dataToPost.email;
-    getLoginObject(email,function (loginObject) {
-        var twitterScreenName = loginObject.twitter.profileInfo.screen_name;
-        getBearerCode(function (twitterLoginData) {
-            var twitter = new Twitter({
-                consumer_key: config.twitter.consumer_key
-                , consumer_secret: config.twitter.consumer_secret
-                , bearer_token: twitterLoginData.access_token
-            });//var twitter = new Twitter({
+    getLoginObject(email, function (loginObject) {
+        if (loginObject.twitter.profileInfo) {
+            var twitterScreenName = loginObject.twitter.profileInfo .screen_name;
+            getBearerCode(function (twitterLoginData) {
+                var twitterOAuth = new Twitter({
+                    consumer_key: config.twitter.consumer_key
+                    , consumer_secret: config.twitter.consumer_secret
+                    , bearer_token: twitterLoginData.access_token
+                });//var twitter = new Twitter({
 
-            var twitterPost = {
-                media_ids: []
-                , screen_name: twitterScreenName
-                , url: dataToPost.link
-                , status: dataToPost.caption
-            };
+                var fileName = (dataToPost.task.videoPost) ? dataToPost.task.videoPost : dataToPost.task.imgUrl;
+                //var fileStream = fileSystem.readFileSync(fileName);
+                ///console.log(typeof fileStream)
+                //fs.readFile(fileName, function (err,fileContent) {
 
-            uploadMediaToTwitter(dataToPost.imgUrl, function (media) {
-                var USER_TIMELINE_URL = 'statuses/user_timeline';
-                twitterPost.media_ids = [media.media_id_string]
-                twitter.post(USER_TIMELINE_URL, twitterPost, function (twitterPostError, doc) {
-                    if (twitterPostError) {
-                        message['status'] = "ERROR";
-                        message['message'] = "An error occured while posting to twitter. " + JSON.stringify(twitterPostError);
-                        callback(message);
-                        return;
-                    }//if (err) {
-                    if (doc && !doc.error) {
-                        message['status'] = "SUCCESS";
-                        message['message'] = "Successfully posted to twitter."
-                        message['data'] = media
-                        callback(message);
-                        return;
-                    }//if (res) {
-                });//twitter.post(postToString, dataToPost, function (err, doc) {
-            });//uploadMediaToTwitter(dataToPost.picturelink, function (data) {
-        });//getTwitterToken(function (twitterLoginData) {
+                var fd = fileSystem.openSync(fileName, 'r');
+                var fileBuffer = readFileBase64(fileName);                
+
+                if (fileBuffer) {
+                        var twitterPost = {
+                            media_ids: []
+                            , screen_name: twitterScreenName
+                            , url: dataToPost.link
+                            , status: dataToPost.caption
+                        };
+
+                        var locsToPost = getPostableLocs('twitter', postableLocs);
+                        var TwitterMedia = require("twitter-media");
+                        
+                        var twitterMedia = new TwitterMedia(twitterOAuth);
+                        twitterMedia.uploadMedia("video", fileStream, function (twitterResponse) {
+                            var a = twitterResponse;
+                            //twitterPost.media_ids.push(twitterResponse);
+                        });//twitterMedia.uploadMedia(dataToPost.mime, twitterFileData, function (twitterResponse) {
+                    }//if (fileContent){
+                //});//var twitterFileData = fs.readFile(fileName, 'utf8', function (fileContent) {
+                //var twitter
+
+
+            });//getTwitterToken(function (twitterLoginData) {
+        } else {
+            if (callback) {
+                callback({
+                    status: "ERROR"
+                    , message: "Unable to post as you have not logged into twitter using nectorr."
+                });
+            }
+        }//if profileInfo
     });//getLoginObject(function (loginObject) {
+
 }//var postToTwitter = function (dataToPost, callback) {
 
 
@@ -581,6 +594,33 @@ function getBearerCode(callback) {
     return returnValue;
 };
 
+var getPostableLocs = function (smName, locs) {
 
+    var returnValue = [];
+
+    if (!locs) {
+        return null;
+    }//if (!locs) {
+
+    for (var locsCounter = 0; locsCounter < locs.length; locsCounter++) {
+        if (locs[locsCounter].smName == smName) {
+            returnValue.push(locs[locsCounter]);
+        }//if (locs[locsCounter].smName == smName) {
+    }//for (var locsCounter = 0; locsCounter < locs.length; locsCounter++) {
+    return returnValue;
+}//var getPostableLocs = function (smName, locs) {
+
+var AddMediaToTwitterInChunks = async(function (urlToMedia, start, size) {
+    InitializeChunkedMediaTransfer(mediaBody, function (mediaInfo) {
+
+    });//InitializeChunkedMediaTransfer(mediaBody, function (mediaInfo) {
+});//var AddMediaToTwitterInChunks = async(function (urlToMedia, start, size) {
+
+var readFileBase64 = function (file) {
+    // read binary data
+    var temp = fileSystem.readFileSync(file);
+    // convert binary data to base64 encoded string
+    return new Buffer(temp);
+}
 inherits(PostManager, emitter);
 module.exports = PostManager;
